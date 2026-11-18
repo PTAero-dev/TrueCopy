@@ -381,6 +381,7 @@
     }
 
     .thumb-item {
+      position: relative;
       border: 2px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 4px;
@@ -388,6 +389,24 @@
       cursor: pointer;
       text-align: center;
       transition: all 0.12s ease;
+    }
+
+    .thumb-pin {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      line-height: 1;
+      padding: 3px 5px;
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+      display: none;
+    }
+
+    .thumb-item.has-override .thumb-pin {
+      display: inline-block;
     }
 
     .thumb-item:hover {
@@ -528,6 +547,63 @@
       display: block;
       max-width: 100%;
       height: auto;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #previewCanvas.dragging {
+      cursor: grabbing;
+    }
+
+    .seg-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--surface-muted);
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 9px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .seg-btn:hover:not(.active) {
+      background: #e2e8f0;
+    }
+
+    .seg-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .page-pos-status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .page-pos-status.is-override {
+      background: var(--primary-soft);
+      border-color: #c7d2fe;
+      color: var(--primary);
     }
 
     /* Right Panel: Settings */
@@ -935,6 +1011,13 @@
           <button id="btnNextPage" class="btn btn-sm" type="button" disabled>ถัดไป ▶</button>
         </div>
         <div class="toolbar-group">
+          <div class="seg-toggle" role="group" aria-label="โหมดปรับตำแหน่งตราประทับ">
+            <button id="btnModeAllPages" class="seg-btn active" type="button">📑 ปรับทุกหน้าพร้อมกัน</button>
+            <button id="btnModeThisPage" class="seg-btn" type="button">📌 ปรับเฉพาะหน้านี้</button>
+          </div>
+          <button id="btnToolbarResetPage" class="btn btn-xs" type="button" style="display:none;">รีเซ็ตหน้านี้</button>
+        </div>
+        <div class="toolbar-group">
           <span id="pageInfoBadge" class="badge" style="display:none;"></span>
           <button id="btnZoomOut" class="btn btn-sm" type="button" title="ย่อมุมมอง">－</button>
           <span id="zoomLabel" style="font-size:12.5px;font-weight:700;min-width:44px;text-align:center;">100%</span>
@@ -1129,6 +1212,21 @@
           <div class="setting-title">5. ตำแหน่ง ขนาด และองศา</div>
 
           <div class="field">
+            <div class="seg-toggle" style="width:100%;" role="group" aria-label="โหมดตำแหน่ง">
+              <button id="btnPanelAllPages" class="seg-btn active" style="flex:1;" type="button">📑 ปรับทุกหน้าพร้อมกัน</button>
+              <button id="btnPanelThisPage" class="seg-btn" style="flex:1;" type="button">📌 ปรับเฉพาะหน้านี้</button>
+            </div>
+          </div>
+
+          <div id="pagePosStatusNote" class="page-pos-status">
+            <span id="pagePosStatusText">กำลังใช้ตำแหน่งหลักร่วมกันทุกหน้า</span>
+            <span style="display:flex;gap:4px;flex-wrap:wrap;">
+              <button id="btnResetThisPage" class="btn btn-xs" type="button" style="display:none;">รีเซ็ตหน้านี้ตามค่าหลัก</button>
+              <button id="btnApplyPageToAll" class="btn btn-xs btn-soft" type="button" style="display:none;">นำตำแหน่งหน้านี้ไปใช้ทุกหน้า</button>
+            </span>
+          </div>
+
+          <div class="field">
             <div class="field-label">
               <span>ความกว้างตราประทับเทียบหน้ากระดาษ</span>
               <span id="valStampScale" class="field-val">93%</span>
@@ -1162,16 +1260,17 @@
                 <span>แนวนอน (X)</span>
                 <span id="valPosX" class="field-val">50%</span>
               </div>
-              <input id="rangePosX" class="range" type="range" min="10" max="90" step="1" />
+              <input id="rangePosX" class="range" type="range" min="5" max="95" step="1" />
             </div>
             <div>
               <div class="field-label">
                 <span>แนวตั้ง (Y)</span>
                 <span id="valPosY" class="field-val">50%</span>
               </div>
-              <input id="rangePosY" class="range" type="range" min="10" max="90" step="1" />
+              <input id="rangePosY" class="range" type="range" min="5" max="95" step="1" />
             </div>
           </div>
+          <div class="helper-text">💡 ลากตราประทับบนตัวอย่างเอกสารด้วยเมาส์หรือนิ้วได้เลย</div>
         </div>
 
         <!-- 6. Output Security (Flatten) -->
@@ -1331,11 +1430,32 @@
       let activeFileId = null;
       let activePageNum = 1;
       let viewZoom = 1.0;
+      let editThisPageOnly = false;
 
       // Offscreen cached stamp canvas (regenerated whenever stamp settings change)
       let cachedStampCanvas = null;
       let cachedSignatureImg = null;
       let stampRenderToken = 0;
+
+      function getEffectivePlacement(fileObj, pageNum) {
+        if (fileObj && fileObj.pageOverrides && fileObj.pageOverrides.has(pageNum)) {
+          const ov = fileObj.pageOverrides.get(pageNum);
+          return {
+            posX: ov.posX,
+            posY: ov.posY,
+            angle: ov.angle,
+            stampScale: ov.stampScale,
+            isOverride: true
+          };
+        }
+        return {
+          posX: Number(settings.posX),
+          posY: Number(settings.posY),
+          angle: Number(settings.angle),
+          stampScale: Number(settings.stampScale),
+          isOverride: false
+        };
+      }
 
       // =========================================================================
       // 3. DOM References
@@ -1422,6 +1542,17 @@
         rangePosY: $('rangePosY'),
         valPosY: $('valPosY'),
         chkFlatten: $('chkFlatten'),
+
+        // Per-page placement mode controls
+        btnModeAllPages: $('btnModeAllPages'),
+        btnModeThisPage: $('btnModeThisPage'),
+        btnToolbarResetPage: $('btnToolbarResetPage'),
+        btnPanelAllPages: $('btnPanelAllPages'),
+        btnPanelThisPage: $('btnPanelThisPage'),
+        pagePosStatusNote: $('pagePosStatusNote'),
+        pagePosStatusText: $('pagePosStatusText'),
+        btnResetThisPage: $('btnResetThisPage'),
+        btnApplyPageToAll: $('btnApplyPageToAll'),
 
         // Mobile panels
         panelLeft: $('panelLeft'),
@@ -1808,14 +1939,15 @@
         return stampCanvas;
       }
 
-      function drawStampOntoCanvas(targetCtx, pageW, pageH, stampCanvas) {
+      function drawStampOntoCanvas(targetCtx, pageW, pageH, stampCanvas, placement) {
         if (!stampCanvas || stampCanvas.width === 0) return;
+        const pl = placement || getEffectivePlacement(getActiveFile(), activePageNum);
 
-        const targetStampW = pageW * (Number(settings.stampScale) || 0.93);
+        const targetStampW = pageW * (Number(pl.stampScale) || 0.93);
         const targetStampH = targetStampW * (stampCanvas.height / stampCanvas.width);
-        const cx = pageW * (Number(settings.posX) || 0.5);
-        const cy = pageH * (Number(settings.posY) || 0.5);
-        const rad = -(Number(settings.angle) || 0) * (Math.PI / 180);
+        const cx = pageW * (Number(pl.posX) || 0.5);
+        const cy = pageH * (Number(pl.posY) || 0.5);
+        const rad = -(Number(pl.angle) || 0) * (Math.PI / 180);
 
         targetCtx.save();
         targetCtx.translate(cx, cy);
@@ -1957,6 +2089,7 @@
                 imageElement: null,
                 pageCount: result.pdfProxy.numPages,
                 pageCache: new Map(),
+                pageOverrides: new Map(),
                 outputBytes: null,
                 outputName: null
               };
@@ -1982,6 +2115,7 @@
                 imageElement: imgEl,
                 pageCount: 1,
                 pageCache: new Map(),
+                pageOverrides: new Map(),
                 outputBytes: null,
                 outputName: null
               };
@@ -2107,12 +2241,14 @@
         ctx.clearRect(0, 0, outC.width, outC.height);
         ctx.drawImage(pageData.canvas, 0, 0);
 
-        drawStampOntoCanvas(ctx, outC.width, outC.height, cachedStampCanvas);
+        const placement = getEffectivePlacement(fileObj, activePageNum);
+        drawStampOntoCanvas(ctx, outC.width, outC.height, cachedStampCanvas, placement);
 
         // Apply view zoom CSS size
         const maxFitW = Math.min(760, outC.width);
         outC.style.width = `${Math.round(maxFitW * viewZoom)}px`;
 
+        syncPlacementControls();
         updateThumbnailSelection();
       }
 
@@ -2131,14 +2267,21 @@
         const renderFileId = fileObj.id;
         for (let p = 1; p <= fileObj.pageCount; p++) {
           const item = document.createElement('div');
-          item.className = `thumb-item ${p === activePageNum ? 'active' : ''}`;
+          const hasOv = fileObj.pageOverrides && fileObj.pageOverrides.has(p);
+          item.className = `thumb-item ${p === activePageNum ? 'active' : ''} ${hasOv ? 'has-override' : ''}`;
           item.dataset.page = String(p);
+
+          const pin = document.createElement('span');
+          pin.className = 'thumb-pin';
+          pin.title = 'หน้านี้ใช้ตำแหน่งตราประทับเฉพาะหน้า';
+          pin.textContent = '📌';
 
           const c = document.createElement('canvas');
           const lbl = document.createElement('div');
           lbl.className = 'thumb-label';
           lbl.textContent = `หน้า ${p}`;
 
+          item.appendChild(pin);
           item.appendChild(c);
           item.appendChild(lbl);
           item.addEventListener('click', async () => {
@@ -2176,10 +2319,13 @@
       }
 
       function updateThumbnailSelection() {
+        const fileObj = getActiveFile();
         const items = els.thumbGrid.querySelectorAll('.thumb-item');
         items.forEach((el) => {
           const p = Number(el.dataset.page);
           el.classList.toggle('active', p === activePageNum);
+          const hasOv = Boolean(fileObj && fileObj.pageOverrides && fileObj.pageOverrides.has(p));
+          el.classList.toggle('has-override', hasOv);
         });
       }
 
@@ -2357,7 +2503,7 @@
             ctx.fillRect(0, 0, cw, ch);
             ctx.drawImage(img, 0, 0, cw, ch);
 
-            drawStampOntoCanvas(ctx, cw, ch, stampCanvas);
+            drawStampOntoCanvas(ctx, cw, ch, stampCanvas, getEffectivePlacement(fileObj, 1));
 
             const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.84));
             const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
@@ -2389,7 +2535,7 @@
               ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
 
               await page.render({ canvasContext: ctx, viewport: vp }).promise;
-              drawStampOntoCanvas(ctx, pageCanvas.width, pageCanvas.height, stampCanvas);
+              drawStampOntoCanvas(ctx, pageCanvas.width, pageCanvas.height, stampCanvas, getEffectivePlacement(fileObj, p));
 
               const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.84));
               const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
@@ -2433,12 +2579,13 @@
             const rawH = box.height;
             const rot = ((pdfPage.getRotation().angle % 360) + 360) % 360;
 
+            const pl = getEffectivePlacement(fileObj, i + 1);
             const isSwapped = rot === 90 || rot === 270;
             const visW = isSwapped ? rawH : rawW;
-            const vx = Number(settings.posX) || 0.5;
-            const vy = Number(settings.posY) || 0.5;
+            const vx = Number(pl.posX) || 0.5;
+            const vy = Number(pl.posY) || 0.5;
 
-            const drawW = visW * (Number(settings.stampScale) || 0.93);
+            const drawW = visW * (Number(pl.stampScale) || 0.93);
             const drawH = drawW * aspect;
 
             // Map normalized visual coordinates (vx, vy) into raw PDF coordinates (origin bottom-left)
@@ -2446,19 +2593,19 @@
             if (rot === 90) {
               cx = box.x + vy * rawW;
               cy = box.y + vx * rawH;
-              pdfAngleDeg = (Number(settings.angle) || 0) + 90;
+              pdfAngleDeg = (Number(pl.angle) || 0) + 90;
             } else if (rot === 180) {
               cx = box.x + (1 - vx) * rawW;
               cy = box.y + vy * rawH;
-              pdfAngleDeg = (Number(settings.angle) || 0) + 180;
+              pdfAngleDeg = (Number(pl.angle) || 0) + 180;
             } else if (rot === 270) {
               cx = box.x + (1 - vy) * rawW;
               cy = box.y + (1 - vx) * rawH;
-              pdfAngleDeg = (Number(settings.angle) || 0) + 270;
+              pdfAngleDeg = (Number(pl.angle) || 0) + 270;
             } else {
               cx = box.x + vx * rawW;
               cy = box.y + (1 - vy) * rawH;
-              pdfAngleDeg = Number(settings.angle) || 0;
+              pdfAngleDeg = Number(pl.angle) || 0;
             }
 
             // Compute rotated bottom-left anchor so stamp rotates around (cx, cy)
@@ -2654,17 +2801,11 @@
         els.valOpacity.textContent = `${Math.round(settings.opacity * 100)}%`;
         els.chkMultiplyInk.checked = settings.multiplyInk;
 
-        els.rangeStampScale.value = Math.round(settings.stampScale * 100);
-        els.valStampScale.textContent = `${Math.round(settings.stampScale * 100)}%`;
         els.rangeFontSize.value = settings.fontSize;
         els.valFontSize.textContent = `${settings.fontSize} pt`;
-        els.rangeAngle.value = settings.angle;
-        els.valAngle.textContent = `${settings.angle}°`;
-        els.rangePosX.value = Math.round(settings.posX * 100);
-        els.valPosX.textContent = `${Math.round(settings.posX * 100)}%`;
-        els.rangePosY.value = Math.round(settings.posY * 100);
-        els.valPosY.textContent = `${Math.round(settings.posY * 100)}%`;
         els.chkFlatten.checked = settings.flatten;
+
+        syncPlacementControls();
 
         if (settings.cleanSigDataUrl) {
           els.sigControlsWrap.style.display = 'block';
@@ -2675,6 +2816,91 @@
           els.btnRemoveSig.style.display = 'none';
           els.sigPreviewImg.removeAttribute('src');
         }
+      }
+
+      function syncPlacementControls() {
+        const fileObj = getActiveFile();
+        const pl = getEffectivePlacement(fileObj, activePageNum);
+
+        els.rangeStampScale.value = String(Math.round(pl.stampScale * 100));
+        els.valStampScale.textContent = `${Math.round(pl.stampScale * 100)}%`;
+        els.rangeAngle.value = String(Math.round(pl.angle));
+        els.valAngle.textContent = `${Math.round(pl.angle)}°`;
+        els.rangePosX.value = String(Math.round(pl.posX * 100));
+        els.valPosX.textContent = `${Math.round(pl.posX * 100)}%`;
+        els.rangePosY.value = String(Math.round(pl.posY * 100));
+        els.valPosY.textContent = `${Math.round(pl.posY * 100)}%`;
+
+        els.btnModeAllPages.classList.toggle('active', !editThisPageOnly);
+        els.btnModeThisPage.classList.toggle('active', editThisPageOnly);
+        els.btnPanelAllPages.classList.toggle('active', !editThisPageOnly);
+        els.btnPanelThisPage.classList.toggle('active', editThisPageOnly);
+
+        const hasOverride = Boolean(fileObj && pl.isOverride);
+        els.pagePosStatusNote.classList.toggle('is-override', hasOverride);
+        els.btnToolbarResetPage.style.display = hasOverride ? 'inline-flex' : 'none';
+        els.btnResetThisPage.style.display = hasOverride ? 'inline-flex' : 'none';
+        els.btnApplyPageToAll.style.display = hasOverride ? 'inline-flex' : 'none';
+
+        if (hasOverride) {
+          els.pagePosStatusText.textContent = `📌 หน้า ${activePageNum} กำลังใช้ตำแหน่งเฉพาะหน้า`;
+        } else if (editThisPageOnly && fileObj) {
+          els.pagePosStatusText.textContent = `📌 โหมดปรับเฉพาะหน้า ${activePageNum} (ลากหรือเลื่อนสไลเดอร์เพื่อแยกตำแหน่ง)`;
+        } else {
+          els.pagePosStatusText.textContent = '📑 กำลังใช้ตำแหน่งหลักร่วมกันทุกหน้า';
+        }
+      }
+
+      function setEditThisPageOnly(flag) {
+        editThisPageOnly = Boolean(flag);
+        syncPlacementControls();
+      }
+
+      async function updatePlacementField(patch) {
+        invalidateOutputs();
+        const fileObj = getActiveFile();
+        if (editThisPageOnly && fileObj) {
+          const cur = getEffectivePlacement(fileObj, activePageNum);
+          fileObj.pageOverrides.set(activePageNum, {
+            posX: cur.posX,
+            posY: cur.posY,
+            angle: cur.angle,
+            stampScale: cur.stampScale,
+            ...patch
+          });
+        } else {
+          if (fileObj && fileObj.pageOverrides && fileObj.pageOverrides.has(activePageNum)) {
+            fileObj.pageOverrides.delete(activePageNum);
+          }
+          Object.assign(settings, patch);
+          saveSettings();
+        }
+        await renderActivePagePreview();
+      }
+
+      async function resetThisPagePlacement() {
+        const fileObj = getActiveFile();
+        if (!fileObj || !fileObj.pageOverrides.has(activePageNum)) return;
+        fileObj.pageOverrides.delete(activePageNum);
+        invalidateOutputs();
+        await renderActivePagePreview();
+        showToast(`คืนค่าตำแหน่งหน้า ${activePageNum} ตามค่าหลักแล้ว`);
+      }
+
+      async function applyPagePlacementToAll() {
+        const fileObj = getActiveFile();
+        if (!fileObj) return;
+        const pl = getEffectivePlacement(fileObj, activePageNum);
+        settings.posX = pl.posX;
+        settings.posY = pl.posY;
+        settings.angle = pl.angle;
+        settings.stampScale = pl.stampScale;
+        fileObj.pageOverrides.clear();
+        editThisPageOnly = false;
+        invalidateOutputs();
+        saveSettings();
+        await renderActivePagePreview();
+        showToast('นำตำแหน่งหน้านี้ไปใช้กับทุกหน้าเรียบร้อย');
       }
 
       function invalidateOutputs() {
@@ -2935,11 +3161,58 @@
           onSettingChanged();
         });
 
+        // Per-page placement mode & quick actions
+        els.btnModeAllPages.addEventListener('click', () => setEditThisPageOnly(false));
+        els.btnModeThisPage.addEventListener('click', () => setEditThisPageOnly(true));
+        els.btnPanelAllPages.addEventListener('click', () => setEditThisPageOnly(false));
+        els.btnPanelThisPage.addEventListener('click', () => setEditThisPageOnly(true));
+        els.btnToolbarResetPage.addEventListener('click', resetThisPagePlacement);
+        els.btnResetThisPage.addEventListener('click', resetThisPagePlacement);
+        els.btnApplyPageToAll.addEventListener('click', applyPagePlacementToAll);
+
+        // Direct drag-on-preview (mouse & touch)
+        let dragState = null;
+        els.previewCanvas.addEventListener('pointerdown', (e) => {
+          const fileObj = getActiveFile();
+          if (!fileObj || e.button > 0) return;
+          const rect = els.previewCanvas.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return;
+          const pl = getEffectivePlacement(fileObj, activePageNum);
+          dragState = {
+            pointerId: e.pointerId,
+            startPx: (e.clientX - rect.left) / rect.width,
+            startPy: (e.clientY - rect.top) / rect.height,
+            initX: pl.posX,
+            initY: pl.posY
+          };
+          els.previewCanvas.classList.add('dragging');
+          try { els.previewCanvas.setPointerCapture(e.pointerId); } catch (err) {}
+        });
+
+        els.previewCanvas.addEventListener('pointermove', (e) => {
+          if (!dragState || e.pointerId !== dragState.pointerId) return;
+          const rect = els.previewCanvas.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return;
+          const curPx = (e.clientX - rect.left) / rect.width;
+          const curPy = (e.clientY - rect.top) / rect.height;
+          const newX = Math.min(0.95, Math.max(0.05, Math.round((dragState.initX + (curPx - dragState.startPx)) * 100) / 100));
+          const newY = Math.min(0.95, Math.max(0.05, Math.round((dragState.initY + (curPy - dragState.startPy)) * 100) / 100));
+          updatePlacementField({ posX: newX, posY: newY });
+        });
+
+        const endDrag = (e) => {
+          if (!dragState || e.pointerId !== dragState.pointerId) return;
+          dragState = null;
+          els.previewCanvas.classList.remove('dragging');
+          try { els.previewCanvas.releasePointerCapture(e.pointerId); } catch (err) {}
+        };
+        els.previewCanvas.addEventListener('pointerup', endDrag);
+        els.previewCanvas.addEventListener('pointercancel', endDrag);
+
         // Position & Size sliders
         els.rangeStampScale.addEventListener('input', () => {
-          settings.stampScale = Number(els.rangeStampScale.value) / 100;
-          els.valStampScale.textContent = `${els.rangeStampScale.value}%`;
-          onSettingChanged();
+          const val = Number(els.rangeStampScale.value) / 100;
+          updatePlacementField({ stampScale: val });
         });
         els.rangeFontSize.addEventListener('input', () => {
           settings.fontSize = Number(els.rangeFontSize.value);
@@ -2947,31 +3220,19 @@
           onSettingChanged();
         });
         els.rangeAngle.addEventListener('input', () => {
-          settings.angle = Number(els.rangeAngle.value);
-          els.valAngle.textContent = `${settings.angle}°`;
-          onSettingChanged();
+          updatePlacementField({ angle: Number(els.rangeAngle.value) });
         });
         els.btnAngle0.addEventListener('click', () => {
-          settings.angle = 0;
-          els.rangeAngle.value = '0';
-          els.valAngle.textContent = '0°';
-          onSettingChanged();
+          updatePlacementField({ angle: 0 });
         });
         els.btnAngle35.addEventListener('click', () => {
-          settings.angle = 35;
-          els.rangeAngle.value = '35';
-          els.valAngle.textContent = '35°';
-          onSettingChanged();
+          updatePlacementField({ angle: 35 });
         });
         els.rangePosX.addEventListener('input', () => {
-          settings.posX = Number(els.rangePosX.value) / 100;
-          els.valPosX.textContent = `${els.rangePosX.value}%`;
-          onSettingChanged();
+          updatePlacementField({ posX: Number(els.rangePosX.value) / 100 });
         });
         els.rangePosY.addEventListener('input', () => {
-          settings.posY = Number(els.rangePosY.value) / 100;
-          els.valPosY.textContent = `${els.rangePosY.value}%`;
-          onSettingChanged();
+          updatePlacementField({ posY: Number(els.rangePosY.value) / 100 });
         });
         els.chkFlatten.addEventListener('change', () => {
           settings.flatten = els.chkFlatten.checked;

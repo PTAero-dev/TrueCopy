@@ -42,7 +42,7 @@
 | Encrypt files before upload | **No** (security rules protect the data) |
 | Flatten pages to images | **On by default**; the user can turn it off |
 | Hosting | **Cloudflare Pages/Workers** on a free subdomain such as `truecopy.pages.dev`. The user has no custom domain yet |
-| Accounts | Google / Firebase / Cloudflare: `taxicashflow@gmail.com` (Cloudflare Account ID: `6cf13c91bf3d927563c99ece990518ee`) · GitHub: `PTAero-dev` (`PTAero-dev/TrueCopy`) |
+| Accounts | Google / Firebase / Cloudflare: `taxicashflow@gmail.com` (Cloudflare Account ID: `6cf13c91bf3d927563c99ece990518ea`) · GitHub: `PTAero-dev` (`PTAero-dev/TrueCopy`) |
 | Fonts the user likes | **Thai Niramit (Niramit)** or **Thai Sarabun (Sarabun)** — see section 5 |
 
 ---
