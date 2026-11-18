@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TrueCopy — รับรองสำเนาถูกต้อง</title>
+
+  <!-- Google Fonts: Sarabun & Niramit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Niramit:wght@400;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Libraries via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface-muted: #f8fafc;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-soft: #64748b;
+      --primary: #0d33bf;
+      --primary-hover: #092696;
+      --primary-soft: #eef2ff;
+      --success: #059669;
+      --success-soft: #ecfdf5;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --warning: #d97706;
+      --warning-soft: #fffbeb;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.08);
+      --header-h: 64px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Sarabun', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+    }
+
+    /* Header */
+    .app-header {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 13px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-muted);
+      border-color: #94a3b8;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #047857;
+      border-color: #047857;
+    }
+
+    .btn-soft {
+      background: var(--primary-soft);
+      border-color: #c7d2fe;
+      color: var(--primary);
+    }
+
+    .btn-soft:hover:not(:disabled) {
+      background: #e0e7ff;
+    }
+
+    .btn-danger-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text-soft);
+      padding: 4px 8px;
+    }
+
+    .btn-danger-ghost:hover:not(:disabled) {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .btn-sm {
+      font-size: 12.5px;
+      padding: 5px 10px;
+    }
+
+    .btn-xs {
+      font-size: 12px;
+      padding: 3px 8px;
+    }
+
+    /* Workspace Layout */
+    .workspace {
+      display: grid;
+      grid-template-columns: 280px 1fr 350px;
+      height: calc(100vh - var(--header-h));
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-left {
+      border-right: 1px solid var(--border);
+    }
+
+    .panel-right {
+      border-left: 1px solid var(--border);
+    }
+
+    .panel-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .panel-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+    }
+
+    /* Left Panel: Upload & Files */
+    .dropzone {
+      border: 2px dashed #94a3b8;
+      border-radius: var(--radius);
+      background: var(--surface-muted);
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-bottom: 12px;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .dropzone-icon {
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+
+    .dropzone-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .dropzone-hint {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin: 12px 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 10px;
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .file-card:hover {
+      border-color: #94a3b8;
+    }
+
+    .file-card.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: inset 0 0 0 1px var(--primary);
+    }
+
+    .file-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .file-name {
+      font-size: 13px;
+      font-weight: 700;
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .file-meta {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-top: 3px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: var(--text-muted);
+    }
+
+    .badge-success {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .badge-lock {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .file-card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .thumb-item {
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      background: var(--surface-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.12s ease;
+    }
+
+    .thumb-item:hover {
+      border-color: #94a3b8;
+    }
+
+    .thumb-item.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .thumb-item canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .thumb-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-top: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Center Panel: Live Preview */
+    .preview-stage {
+      background: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-indicator {
+      font-size: 13px;
+      font-weight: 700;
+      min-width: 92px;
+      text-align: center;
+    }
+
+    .ready-banner {
+      background: var(--success-soft);
+      border-bottom: 1px solid #a7f3d0;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .ready-banner-info {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #065f46;
+    }
+
+    .ready-banner-sub {
+      font-size: 12px;
+      font-weight: 400;
+      color: #047857;
+    }
+
+    .ready-banner-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .preview-viewport {
+      flex: 1;
+      overflow: auto;
+      padding: 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .preview-empty {
+      margin: auto;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .preview-empty-icon {
+      font-size: 42px;
+      margin-bottom: 8px;
+    }
+
+    .preview-empty h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .preview-empty p {
+      margin: 0 0 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .canvas-paper-wrap {
+      position: relative;
+      background: #fff;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+      border-radius: 2px;
+      line-height: 0;
+      transform-origin: top center;
+    }
+
+    #previewCanvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Right Panel: Settings */
+    .setting-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 12px;
+      margin-bottom: 10px;
+      background: var(--surface);
+    }
+
+    .setting-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text);
+    }
+
+    .field {
+      margin-bottom: 10px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .field-val {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .input, .select {
+      width: 100%;
+      padding: 7px 10px;
+      font-size: 13.5px;
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input:focus, .select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 51, 191, 0.12);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .range {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+      user-select: none;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      margin-top: 2px;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .helper-text {
+      font-size: 11.5px;
+      color: var(--text-soft);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px var(--border-strong);
+      cursor: pointer;
+      transition: transform 0.12s;
+    }
+
+    .color-swatch.active {
+      box-shadow: 0 0 0 2px var(--primary);
+      transform: scale(1.1);
+    }
+
+    .sig-preview-box {
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px;
+      background-image:
+        linear-gradient(45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f1f5f9 75%),
+        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 68px;
+    }
+
+    .sig-preview-box img {
+      max-width: 100%;
+      max-height: 64px;
+      object-fit: contain;
+    }
+
+    .resolved-preview {
+      margin-top: 4px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12.5px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      max-width: 420px;
+      width: 100%;
+      padding: 20px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+
+    .modal-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin: 0 0 14px;
+      line-height: 1.5;
+    }
+
+    .modal-error {
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 10px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      transition: width 0.15s ease;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 120;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Mobile Navigation Bar & Slide-up Sheet */
+    .mobile-bottom-bar {
+      display: none;
+    }
+
+    .mobile-sheet-close {
+      display: none;
+    }
+
+    @media (max-width: 1024px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        height: calc(100vh - var(--header-h) - 58px);
+        position: relative;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+
+      .header-actions .btn-hide-sm {
+        display: none;
+      }
+
+      .panel-left,
+      .panel-right {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 58px;
+        top: var(--header-h);
+        z-index: 40;
+        transform: translateY(105%);
+        transition: transform 0.24s ease;
+        border: none;
+      }
+
+      .panel-left.mobile-open,
+      .panel-right.mobile-open {
+        transform: translateY(0);
+      }
+
+      .panel-right {
+        top: 14%;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.2);
+      }
+
+      .mobile-sheet-close {
+        display: inline-flex;
+      }
+
+      .mobile-bottom-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        height: 58px;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 45;
+      }
+
+      .mobile-tab-btn {
+        border: none;
+        background: transparent;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        cursor: pointer;
+      }
+
+      .mobile-tab-btn.active {
+        color: var(--primary);
+        background: var(--primary-soft);
+      }
+
+      .preview-viewport {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hidden file inputs -->
+  <input id="fileInput" type="file" accept=".pdf,image/jpeg,image/png,image/webp" multiple hidden />
+  <input id="sigInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+  <input id="fontInput" type="file" accept=".ttf,.otf,.woff,.woff2" hidden />
+
+  <!-- Top Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-badge">TC</div>
+      <div class="brand-text">
+        <div class="brand-title">TrueCopy — รับรองสำเนาถูกต้อง</div>
+        <div class="brand-sub">ประมวลผลในเบราว์เซอร์ 100% · เอกสารต้นฉบับไม่ถูกส่งขึ้นเซิร์ฟเวอร์</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="btnAddFilesHeader" class="btn btn-hide-sm" type="button">+ เพิ่มไฟล์</button>
+      <button id="btnResetDefaults" class="btn btn-hide-sm" type="button" title="คืนค่าตราประทับเริ่มต้น">รีเซ็ตค่าเริ่มต้น</button>
+      <button id="btnGenerate" class="btn btn-primary" type="button" disabled>ประมวลผลและสร้างไฟล์ PDF</button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="workspace">
+
+    <!-- Left Panel: Files & Thumbnails -->
+    <aside id="panelLeft" class="panel panel-left">
+      <div class="panel-header">
+        <span>รายการเอกสาร (<span id="fileCountLabel">0</span>)</span>
+        <button id="btnCloseLeft" class="btn btn-xs mobile-sheet-close" type="button">ปิด</button>
+      </div>
+      <div class="panel-scroll">
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="อัปโหลดไฟล์เอกสาร">
+          <div class="dropzone-icon">📄</div>
+          <div class="dropzone-title">ลากไฟล์ PDF, JPG, PNG มาวางที่นี่</div>
+          <div class="dropzone-hint">หรือคลิกเพื่อเลือกหลายไฟล์พร้อมกัน</div>
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+
+        <div id="thumbSection" style="display:none;">
+          <div class="section-label">
+            <span>หน้าทั้งหมดของไฟล์ที่เลือก</span>
+            <span id="thumbCountBadge"></span>
+          </div>
+          <div id="thumbGrid" class="thumb-grid"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Panel: Live Preview -->
+    <section class="preview-stage">
+      <div class="preview-toolbar">
+        <div class="toolbar-group">
+          <button id="btnPrevPage" class="btn btn-sm" type="button" disabled>◀ ก่อนหน้า</button>
+          <span id="pageIndicator" class="page-indicator">หน้า 0 / 0</span>
+          <button id="btnNextPage" class="btn btn-sm" type="button" disabled>ถัดไป ▶</button>
+        </div>
+        <div class="toolbar-group">
+          <span id="pageInfoBadge" class="badge" style="display:none;"></span>
+          <button id="btnZoomOut" class="btn btn-sm" type="button" title="ย่อมุมมอง">－</button>
+          <span id="zoomLabel" style="font-size:12.5px;font-weight:700;min-width:44px;text-align:center;">100%</span>
+          <button id="btnZoomIn" class="btn btn-sm" type="button" title="ขยายมุมมอง">＋</button>
+        </div>
+      </div>
+
+      <!-- Download & Share Banner (visible after generating) -->
+      <div id="readyBanner" class="ready-banner" style="display:none;">
+        <div>
+          <div class="ready-banner-info">✅ ไฟล์ที่รับรองสำเนาแล้วพร้อมใช้งาน</div>
+          <div id="readyBannerSub" class="ready-banner-sub"></div>
+        </div>
+        <div class="ready-banner-actions">
+          <button id="btnDownloadCurrent" class="btn btn-success btn-sm" type="button">⬇ ดาวน์โหลดไฟล์นี้</button>
+          <button id="btnShareCurrent" class="btn btn-primary btn-sm" type="button">📤 แชร์ไฟล์ (LINE / WhatsApp / Email)</button>
+          <button id="btnDownloadZip" class="btn btn-soft btn-sm" type="button" style="display:none;">📦 ดาวน์โหลดทั้งหมด (.ZIP)</button>
+          <button id="btnShareAll" class="btn btn-soft btn-sm" type="button" style="display:none;">📤 แชร์ทุกไฟล์</button>
+        </div>
+      </div>
+
+      <div class="preview-viewport">
+        <div id="previewEmpty" class="preview-empty">
+          <div class="preview-empty-icon">🔏</div>
+          <h2>ยินดีต้อนรับสู่ TrueCopy</h2>
+          <p>
+            อัปโหลดเอกสาร PDF (รวมถึงไฟล์ที่มีรหัสผ่าน) หรือรูปถ่ายเอกสาร JPG/PNG
+            เพื่อประทับตรา <strong>“รับรองสำเนาถูกต้อง”</strong> และลายเซ็นลงบนทุกหน้าอัตโนมัติ
+          </p>
+          <button id="btnUploadEmpty" class="btn btn-primary" type="button">เลือกไฟล์เอกสารเริ่มต้น</button>
+        </div>
+
+        <div id="canvasPaperWrap" class="canvas-paper-wrap" style="display:none;">
+          <canvas id="previewCanvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Panel: Stamp Settings -->
+    <aside id="panelRight" class="panel panel-right">
+      <div class="panel-header">
+        <span>ตั้งค่าตราประทับ</span>
+        <button id="btnCloseRight" class="btn btn-xs mobile-sheet-close" type="button">เสร็จสิ้น</button>
+      </div>
+      <div class="panel-scroll">
+
+        <!-- 1. Restricted-Use Line -->
+        <div class="setting-card">
+          <div class="setting-title">1. ข้อความจำกัดวัตถุประสงค์</div>
+          <div class="grid-2 field">
+            <div>
+              <label class="field-label" for="inputPurpose">ธุรกรรม / เรื่อง <code>{purpose}</code></label>
+              <input id="inputPurpose" class="input" type="text" placeholder="เช่น Refinance" />
+            </div>
+            <div>
+              <label class="field-label" for="inputOrg">หน่วยงาน / ธนาคาร <code>{org}</code></label>
+              <input id="inputOrg" class="input" type="text" placeholder="เช่น ธนาคาร CIMB THAI" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="inputTemplateLine">รูปแบบข้อความ</label>
+            <input id="inputTemplateLine" class="input" type="text" />
+            <div id="resolvedLinePreview" class="resolved-preview"></div>
+          </div>
+          <div class="grid-2 field" style="align-items:center;">
+            <label class="checkbox-row">
+              <input id="chkShowLines" type="checkbox" />
+              <span>เส้นขีดคร่อมบน-ล่าง</span>
+            </label>
+            <select id="selectLineStyle" class="select">
+              <option value="dashed">เส้นประ (- - -)</option>
+              <option value="solid">เส้นทึบ (───)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2. Certification Text -->
+        <div class="setting-card">
+          <div class="setting-title">2. ข้อความรับรอง</div>
+          <div class="field">
+            <input id="inputCertifyText" class="input" type="text" />
+          </div>
+        </div>
+
+        <!-- 3. Signature & Optional Printed Name -->
+        <div class="setting-card">
+          <div class="setting-title">
+            <span>3. ลายเซ็นและชื่อตัวบรรจง</span>
+            <button id="btnRemoveSig" class="btn btn-danger-ghost btn-xs" type="button" style="display:none;">ลบลายเซ็น</button>
+          </div>
+
+          <div class="field">
+            <button id="btnUploadSig" class="btn btn-soft" style="width:100%;" type="button">✍️ อัปโหลดรูปลายเซ็น (PNG / JPG)</button>
+            <div class="helper-text">ถ่ายรูปเซ็นชื่อบนกระดาษขาวได้ ระบบจะตัดพื้นหลังสีขาวให้แบบขอบเนียนอัตโนมัติ</div>
+          </div>
+
+          <div id="sigControlsWrap" style="display:none;">
+            <div class="sig-preview-box">
+              <img id="sigPreviewImg" alt="ตัวอย่างลายเซ็น" />
+            </div>
+
+            <div class="field" style="margin-top:10px;">
+              <div class="field-label">
+                <span>ลบพื้นหลังสีขาว</span>
+                <span id="valSigThreshold" class="field-val">200</span>
+              </div>
+              <input id="rangeSigThreshold" class="range" type="range" min="100" max="245" step="1" />
+            </div>
+
+            <div class="field">
+              <label class="checkbox-row">
+                <input id="chkTintSignature" type="checkbox" />
+                <span>ปรับสีลายเซ็นให้ตรงกับสีหมึกตราประทับ</span>
+              </label>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <span>ขนาดลายเซ็น</span>
+                <span id="valSigScale" class="field-val">100%</span>
+              </div>
+              <input id="rangeSigScale" class="range" type="range" min="40" max="180" step="5" />
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
+            <label class="checkbox-row">
+              <input id="chkShowSignerName" type="checkbox" />
+              <span>แสดงชื่อ-นามสกุลในวงเล็บใต้ลายเซ็น</span>
+            </label>
+            <input id="inputSignerName" class="input" type="text" placeholder="เช่น นายสมชาย ใจดี" style="margin-top:6px;display:none;" />
+          </div>
+        </div>
+
+        <!-- 4. Font, Color & Real Ink -->
+        <div class="setting-card">
+          <div class="setting-title">4. ฟอนต์ สี และความเข้มหมึก</div>
+          <div class="grid-2 field">
+            <div>
+              <label class="field-label" for="selectFont">ฟอนต์ภาษาไทย</label>
+              <select id="selectFont" class="select">
+                <option value="Sarabun">Sarabun (สารบรรณ)</option>
+                <option value="Niramit">Niramit (นิรมิต)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="selectWeight">ความหนา</label>
+              <select id="selectWeight" class="select">
+                <option value="700">ตัวหนา (Bold)</option>
+                <option value="600">กึ่งหนา (SemiBold)</option>
+                <option value="400">ปกติ (Regular)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <button id="btnUploadFont" class="btn btn-sm" style="width:100%;" type="button">🔤 อัปโหลดฟอนต์ .ttf / .otf เพิ่มเติม (เช่น TH Sarabun)</button>
+            <div id="customFontStatus" class="helper-text" style="display:none;color:var(--success);font-weight:600;"></div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">สีหมึกตราประทับ</label>
+            <div class="color-row">
+              <button class="color-swatch" data-color="#0D33BF" style="background:#0D33BF;" type="button" title="น้ำเงินปากกา (#0D33BF)"></button>
+              <button class="color-swatch" data-color="#1D4ED8" style="background:#1D4ED8;" type="button" title="น้ำเงินสว่าง (#1D4ED8)"></button>
+              <button class="color-swatch" data-color="#0F172A" style="background:#0F172A;" type="button" title="ดำเข้ม (#0F172A)"></button>
+              <button class="color-swatch" data-color="#B91C1C" style="background:#B91C1C;" type="button" title="แดงประทับตรา (#B91C1C)"></button>
+              <input id="inputColorPicker" type="color" style="width:34px;height:28px;border:1px solid var(--border-strong);border-radius:6px;padding:1px;cursor:pointer;" title="เลือกสีเอง" />
+              <span id="valColorHex" style="font-size:12px;font-weight:700;color:var(--text-muted);">#0D33BF</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span>ความเข้มหมึก (Opacity)</span>
+              <span id="valOpacity" class="field-val">85%</span>
+            </div>
+            <input id="rangeOpacity" class="range" type="range" min="20" max="100" step="1" />
+          </div>
+
+          <div class="field">
+            <label class="checkbox-row">
+              <input id="chkMultiplyInk" type="checkbox" />
+              <span>โหมดหมึกซึมกระดาษ (Real Ink)</span>
+            </label>
+            <div class="helper-text">ช่วยให้ตัวเลขและข้อความด้านล่างตราประทับยังอ่านได้ชัดเจน ไม่ถูกหมึกบัง</div>
+          </div>
+        </div>
+
+        <!-- 5. Position, Size & Angle -->
+        <div class="setting-card">
+          <div class="setting-title">5. ตำแหน่ง ขนาด และองศา</div>
+
+          <div class="field">
+            <div class="field-label">
+              <span>ความกว้างตราประทับเทียบหน้ากระดาษ</span>
+              <span id="valStampScale" class="field-val">93%</span>
+            </div>
+            <input id="rangeStampScale" class="range" type="range" min="30" max="115" step="1" />
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span>ขนาดตัวอักษร</span>
+              <span id="valFontSize" class="field-val">26 pt</span>
+            </div>
+            <input id="rangeFontSize" class="range" type="range" min="16" max="42" step="1" />
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span>องศาการเอียง</span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <button id="btnAngle0" class="btn btn-xs" type="button">0°</button>
+                <button id="btnAngle35" class="btn btn-xs" type="button">35°</button>
+                <span id="valAngle" class="field-val">35°</span>
+              </span>
+            </div>
+            <input id="rangeAngle" class="range" type="range" min="-90" max="90" step="1" />
+          </div>
+
+          <div class="grid-2 field">
+            <div>
+              <div class="field-label">
+                <span>แนวนอน (X)</span>
+                <span id="valPosX" class="field-val">50%</span>
+              </div>
+              <input id="rangePosX" class="range" type="range" min="10" max="90" step="1" />
+            </div>
+            <div>
+              <div class="field-label">
+                <span>แนวตั้ง (Y)</span>
+                <span id="valPosY" class="field-val">50%</span>
+              </div>
+              <input id="rangePosY" class="range" type="range" min="10" max="90" step="1" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Output Security (Flatten) -->
+        <div class="setting-card">
+          <div class="setting-title">6. ความปลอดภัยของไฟล์ผลลัพธ์</div>
+          <label class="checkbox-row">
+            <input id="chkFlatten" type="checkbox" />
+            <span>รวมตราประทับเป็นเนื้อเดียวกับหน้ากระดาษ (Flatten — แนะนำ)</span>
+          </label>
+          <div class="helper-text">
+            ป้องกันการลบตราประทับหรือดึงรูปลายเซ็นออกไปใช้ต่อในโปรแกรมแก้ PDF (ไฟล์ที่มีรหัสผ่านหรือรูปภาพจะถูก Flatten อัตโนมัติ)
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </main>
+
+  <!-- Mobile Bottom Bar -->
+  <nav class="mobile-bottom-bar" aria-label="เมนูมือถือ">
+    <button id="tabMobileFiles" class="mobile-tab-btn" type="button">
+      <span>📄</span>
+      <span>เอกสาร (<span id="mobileFileCount">0</span>)</span>
+    </button>
+    <button id="tabMobilePreview" class="mobile-tab-btn active" type="button">
+      <span>👁️</span>
+      <span>ตัวอย่าง</span>
+    </button>
+    <button id="tabMobileSettings" class="mobile-tab-btn" type="button">
+      <span>⚙️</span>
+      <span>ตั้งค่าตราประทับ</span>
+    </button>
+  </nav>
+
+  <!-- Password Prompt Modal -->
+  <div id="passwordModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pwModalTitle">
+    <div class="modal-card">
+      <h3 id="pwModalTitle" class="modal-title">🔒 เอกสารมีการป้องกันด้วยรหัสผ่าน</h3>
+      <p id="pwModalDesc" class="modal-desc"></p>
+      <div id="pwModalError" class="modal-error">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</div>
+      <div class="field">
+        <label class="field-label" for="pwInput">กรอกรหัสผ่านเปิดเอกสาร PDF</label>
+        <div style="display:flex;gap:6px;">
+          <input id="pwInput" class="input" type="password" autocomplete="off" placeholder="รหัสผ่าน PDF" />
+          <button id="btnTogglePw" class="btn btn-sm" type="button">แสดง</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="btnPwCancel" class="btn" type="button">ข้ามไฟล์นี้</button>
+        <button id="btnPwSubmit" class="btn btn-primary" type="button">ปลดล็อกและเปิดไฟล์</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Modal -->
+  <div id="progressModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="progTitle">
+    <div class="modal-card">
+      <h3 id="progTitle" class="modal-title">⏳ กำลังประทับตราเอกสาร...</h3>
+      <p id="progDesc" class="modal-desc">กำลังเตรียมหน้ากระดาษ</p>
+      <div class="progress-bar-track">
+        <div id="progFill" class="progress-bar-fill"></div>
+      </div>
+      <div id="progPercent" style="font-size:12.5px;font-weight:700;text-align:right;color:var(--primary);">0%</div>
+    </div>
+  </div>
+
+  <!-- Share Fallback Modal (for desktop browsers without Web Share file support) -->
+  <div id="shareFallbackModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="shareFbTitle">
+    <div class="modal-card">
+      <h3 id="shareFbTitle" class="modal-title">📤 ดาวน์โหลดไฟล์เรียบร้อยแล้ว</h3>
+      <p id="shareFbDesc" class="modal-desc">
+        เบราว์เซอร์บนคอมพิวเตอร์รุ่นนี้ยังไม่รองรับการส่งไฟล์เข้าแอปแชทโดยตรง
+        ระบบจึงดาวน์โหลดไฟล์เก็บไว้ในเครื่องให้แล้ว คุณสามารถลากไฟล์จากโฟลเดอร์ Downloads
+        ไปวางส่งใน <strong>LINE</strong>, <strong>WhatsApp Web</strong> หรือแนบในอีเมลได้ทันที
+      </p>
+      <div class="modal-actions">
+        <a id="btnOpenEmailClient" class="btn btn-soft" href="mailto:?subject=เอกสารรับรองสำเนาถูกต้อง" target="_blank" rel="noopener">✉️ เปิดโปรแกรมอีเมล</a>
+        <button id="btnCloseShareFb" class="btn btn-primary" type="button">รับทราบ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // =========================================================================
+      // 1. Configure pdf.js worker (works on both http:// and file://)
+      // =========================================================================
+      const PDFJS_WORKER_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      if (window.pdfjsLib) {
+        if (location.protocol !== 'file:') {
+          try {
+            const workerBlob = new Blob(
+              [`if (typeof importScripts === 'function') { importScripts('${PDFJS_WORKER_CDN}'); }`],
+              { type: 'application/javascript' }
+            );
+            pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(workerBlob);
+          } catch (err) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_CDN;
+          }
+        } else {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_CDN;
+        }
+      }
+
+      // =========================================================================
+      // 2. State & Default Settings
+      // =========================================================================
+      const STORAGE_KEY = 'truecopy_phase1_settings_v1';
+
+      const DEFAULT_SETTINGS = {
+        purpose: 'Refinance',
+        org: 'ธนาคาร CIMB THAI',
+        templateLine: 'ใช้เพื่อยื่น {purpose} กับ{org} เท่านั้น',
+        showLines: true,
+        lineStyle: 'dashed',
+        certifyText: 'รับรองสำเนาถูกต้อง',
+        color: '#0D33BF',
+        font: 'Sarabun',
+        fontWeight: '700',
+        fontSize: 26,
+        opacity: 0.85,
+        multiplyInk: true,
+        stampScale: 0.93,
+        angle: 35,
+        posX: 0.5,
+        posY: 0.5,
+        flatten: true,
+        showSignerName: false,
+        signerName: '',
+        rawSigDataUrl: null,
+        cleanSigDataUrl: null,
+        sigThreshold: 200,
+        tintSignature: true,
+        sigScale: 1.0
+      };
+
+      let settings = loadSettings();
+      let customFontCounter = 0;
+
+      /**
+       * Uploaded files array.
+       * Each item: {
+       *   id, name, kind ('pdf' | 'image'), mimeType, rawBytes (Uint8Array),
+       *   password (string|null), isPasswordProtected (bool),
+       *   pdfDocProxy (PDFDocumentProxy|null), imageElement (HTMLImageElement|null),
+       *   pageCount, pageCache (Map<pageNum, { canvas, widthPt, heightPt, rotation }>),
+       *   thumbRendered (Set<pageNum>),
+       *   outputBytes (Uint8Array|null), outputName (string|null)
+       * }
+       */
+      const files = [];
+      let activeFileId = null;
+      let activePageNum = 1;
+      let viewZoom = 1.0;
+
+      // Offscreen cached stamp canvas (regenerated whenever stamp settings change)
+      let cachedStampCanvas = null;
+      let cachedSignatureImg = null;
+      let stampRenderToken = 0;
+
+      // =========================================================================
+      // 3. DOM References
+      // =========================================================================
+      const $ = (id) => document.getElementById(id);
+
+      const els = {
+        fileInput: $('fileInput'),
+        sigInput: $('sigInput'),
+        fontInput: $('fontInput'),
+        dropzone: $('dropzone'),
+        fileList: $('fileList'),
+        fileCountLabel: $('fileCountLabel'),
+        mobileFileCount: $('mobileFileCount'),
+        thumbSection: $('thumbSection'),
+        thumbGrid: $('thumbGrid'),
+        thumbCountBadge: $('thumbCountBadge'),
+
+        btnAddFilesHeader: $('btnAddFilesHeader'),
+        btnResetDefaults: $('btnResetDefaults'),
+        btnGenerate: $('btnGenerate'),
+        btnUploadEmpty: $('btnUploadEmpty'),
+
+        btnPrevPage: $('btnPrevPage'),
+        btnNextPage: $('btnNextPage'),
+        pageIndicator: $('pageIndicator'),
+        pageInfoBadge: $('pageInfoBadge'),
+        btnZoomOut: $('btnZoomOut'),
+        btnZoomIn: $('btnZoomIn'),
+        zoomLabel: $('zoomLabel'),
+
+        readyBanner: $('readyBanner'),
+        readyBannerSub: $('readyBannerSub'),
+        btnDownloadCurrent: $('btnDownloadCurrent'),
+        btnShareCurrent: $('btnShareCurrent'),
+        btnDownloadZip: $('btnDownloadZip'),
+        btnShareAll: $('btnShareAll'),
+
+        previewEmpty: $('previewEmpty'),
+        canvasPaperWrap: $('canvasPaperWrap'),
+        previewCanvas: $('previewCanvas'),
+
+        // Settings controls
+        inputPurpose: $('inputPurpose'),
+        inputOrg: $('inputOrg'),
+        inputTemplateLine: $('inputTemplateLine'),
+        resolvedLinePreview: $('resolvedLinePreview'),
+        chkShowLines: $('chkShowLines'),
+        selectLineStyle: $('selectLineStyle'),
+        inputCertifyText: $('inputCertifyText'),
+
+        btnUploadSig: $('btnUploadSig'),
+        btnRemoveSig: $('btnRemoveSig'),
+        sigControlsWrap: $('sigControlsWrap'),
+        sigPreviewImg: $('sigPreviewImg'),
+        rangeSigThreshold: $('rangeSigThreshold'),
+        valSigThreshold: $('valSigThreshold'),
+        chkTintSignature: $('chkTintSignature'),
+        rangeSigScale: $('rangeSigScale'),
+        valSigScale: $('valSigScale'),
+        chkShowSignerName: $('chkShowSignerName'),
+        inputSignerName: $('inputSignerName'),
+
+        selectFont: $('selectFont'),
+        selectWeight: $('selectWeight'),
+        btnUploadFont: $('btnUploadFont'),
+        customFontStatus: $('customFontStatus'),
+        inputColorPicker: $('inputColorPicker'),
+        valColorHex: $('valColorHex'),
+        rangeOpacity: $('rangeOpacity'),
+        valOpacity: $('valOpacity'),
+        chkMultiplyInk: $('chkMultiplyInk'),
+
+        rangeStampScale: $('rangeStampScale'),
+        valStampScale: $('valStampScale'),
+        rangeFontSize: $('rangeFontSize'),
+        valFontSize: $('valFontSize'),
+        rangeAngle: $('rangeAngle'),
+        valAngle: $('valAngle'),
+        btnAngle0: $('btnAngle0'),
+        btnAngle35: $('btnAngle35'),
+        rangePosX: $('rangePosX'),
+        valPosX: $('valPosX'),
+        rangePosY: $('rangePosY'),
+        valPosY: $('valPosY'),
+        chkFlatten: $('chkFlatten'),
+
+        // Mobile panels
+        panelLeft: $('panelLeft'),
+        panelRight: $('panelRight'),
+        btnCloseLeft: $('btnCloseLeft'),
+        btnCloseRight: $('btnCloseRight'),
+        tabMobileFiles: $('tabMobileFiles'),
+        tabMobilePreview: $('tabMobilePreview'),
+        tabMobileSettings: $('tabMobileSettings'),
+
+        // Modals
+        passwordModal: $('passwordModal'),
+        pwModalDesc: $('pwModalDesc'),
+        pwModalError: $('pwModalError'),
+        pwInput: $('pwInput'),
+        btnTogglePw: $('btnTogglePw'),
+        btnPwCancel: $('btnPwCancel'),
+        btnPwSubmit: $('btnPwSubmit'),
+
+        progressModal: $('progressModal'),
+        progDesc: $('progDesc'),
+        progFill: $('progFill'),
+        progPercent: $('progPercent'),
+
+        shareFallbackModal: $('shareFallbackModal'),
+        btnOpenEmailClient: $('btnOpenEmailClient'),
+        btnCloseShareFb: $('btnCloseShareFb'),
+
+        toast: $('toast')
+      };
+
+      // =========================================================================
+      // 4. Persistence & Utilities
+      // =========================================================================
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return { ...DEFAULT_SETTINGS };
+          const parsed = JSON.parse(raw);
+          return { ...DEFAULT_SETTINGS, ...parsed };
+        } catch (err) {
+          return { ...DEFAULT_SETTINGS };
+        }
+      }
+
+      function saveSettings() {
+        try {
+          // Do not save custom uploaded FontFace name if it won't persist across page reload
+          const toSave = { ...settings };
+          if (toSave.font && toSave.font.startsWith('CustomFont_')) {
+            toSave.font = 'Sarabun';
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+        } catch (err) {
+          // Ignore storage quota or private-mode errors safely
+        }
+      }
+
+      let toastTimer = null;
+      function showToast(msg, duration = 2800) {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          els.toast.classList.remove('show');
+        }, duration);
+      }
+
+      function getResolvedLine() {
+        return (settings.templateLine || '')
+          .replace(/\{purpose\}/gi, settings.purpose || '')
+          .replace(/\{org\}/gi, settings.org || '')
+          .trim();
+      }
+
+      function getFormattedSignerName() {
+        const raw = (settings.signerName || '').trim();
+        if (!settings.showSignerName || !raw) return '';
+        if (raw.startsWith('(') && raw.endsWith(')')) return raw;
+        return `(${raw})`;
+      }
+
+      function sanitizeFileNamePart(str) {
+        return (str || '').replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim();
+      }
+
+      function buildOutputFileName(originalName) {
+        const base = originalName.replace(/\.[^.]+$/, '');
+        const orgPart = sanitizeFileNamePart(settings.org);
+        return orgPart ? `${base}_รับรองสำเนา_${orgPart}.pdf` : `${base}_รับรองสำเนา.pdf`;
+      }
+
+      function hexToRgb(hex) {
+        const clean = (hex || '#0D33BF').replace('#', '');
+        const full = clean.length === 3
+          ? clean.split('').map(c => c + c).join('')
+          : clean.padEnd(6, '0');
+        const num = parseInt(full, 16);
+        return {
+          r: (num >> 16) & 255,
+          g: (num >> 8) & 255,
+          b: num & 255
+        };
+      }
+
+      function loadImageFromSrc(src) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
+      // =========================================================================
+      // 5. Signature Cleanup (Soft-Feathered Threshold + Tint + Trim)
+      // =========================================================================
+      async function processSignatureDataUrl(rawDataUrl) {
+        if (!rawDataUrl) {
+          settings.cleanSigDataUrl = null;
+          cachedSignatureImg = null;
+          return;
+        }
+        const img = await loadImageFromSrc(rawDataUrl);
+        const maxDim = 1000;
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+        if (w > maxDim || h > maxDim) {
+          const ratio = Math.min(maxDim / w, maxDim / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+
+        const threshold = Number(settings.sigThreshold) || 200;
+        const lowLum = Math.max(0, threshold - 28);
+        const highLum = Math.min(255, threshold + 12);
+        const span = Math.max(1, highLum - lowLum);
+        const tintRgb = hexToRgb(settings.color);
+
+        let minX = w, minY = h, maxX = -1, maxY = -1;
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+            const origA = data[i + 3];
+            if (origA < 10) {
+              data[i + 3] = 0;
+              continue;
+            }
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+            let factor = 1;
+            if (lum >= highLum) {
+              factor = 0;
+            } else if (lum > lowLum) {
+              factor = 1 - (lum - lowLum) / span;
+            }
+
+            const newA = Math.round(origA * factor);
+            data[i + 3] = newA;
+
+            if (settings.tintSignature && newA > 0) {
+              data[i] = tintRgb.r;
+              data[i + 1] = tintRgb.g;
+              data[i + 2] = tintRgb.b;
+            }
+
+            if (newA > 12) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+
+        // Trim empty margins cleanly
+        const outCanvas = document.createElement('canvas');
+        if (maxX >= minX && maxY >= minY) {
+          const pad = 6;
+          const sx = Math.max(0, minX - pad);
+          const sy = Math.max(0, minY - pad);
+          const sw = Math.min(w - sx, maxX - minX + 1 + pad * 2);
+          const sh = Math.min(h - sy, maxY - minY + 1 + pad * 2);
+          outCanvas.width = sw;
+          outCanvas.height = sh;
+          outCanvas.getContext('2d').drawImage(c, sx, sy, sw, sh, 0, 0, sw, sh);
+        } else {
+          outCanvas.width = w;
+          outCanvas.height = h;
+          outCanvas.getContext('2d').drawImage(c, 0, 0);
+        }
+
+        settings.cleanSigDataUrl = outCanvas.toDataURL('image/png');
+        cachedSignatureImg = await loadImageFromSrc(settings.cleanSigDataUrl);
+      }
+
+      // =========================================================================
+      // 6. High-Resolution 4x Thai Stamp Renderer
+      // =========================================================================
+      async function ensureFontLoaded(fontFamily, weight) {
+        try {
+          await document.fonts.load(`${weight} 48px "${fontFamily}"`, 'รับรองสำเนาถูกต้องเท่านั้นที่ปู่');
+          await document.fonts.ready;
+        } catch (err) {
+          // Proceed gracefully with fallback if offline
+        }
+      }
+
+      async function buildStampCanvas() {
+        const fontFamily = settings.font || 'Sarabun';
+        const fontWeight = settings.fontWeight || '700';
+        await ensureFontLoaded(fontFamily, fontWeight);
+
+        const SS = 4; // 4x supersampling for razor-sharp Thai tone marks and printing
+        const LOGICAL_W = 820;
+
+        const mainText = getResolvedLine();
+        const certifyText = (settings.certifyText || '').trim();
+        const signerText = getFormattedSignerName();
+        const sigImg = cachedSignatureImg;
+
+        // Scale user's 26pt setting cleanly to logical 820px stamp width
+        const baseFontPx = (Number(settings.fontSize) || 26) * 1.25;
+
+        // Temporary measure context
+        const measureCanvas = document.createElement('canvas');
+        const mctx = measureCanvas.getContext('2d');
+
+        // Auto-fit main line if very long so it never overflows the dashed lines
+        let mainFontPx = baseFontPx;
+        if (mainText) {
+          mctx.font = `${fontWeight} ${mainFontPx}px "${fontFamily}", "Sarabun", sans-serif`;
+          const measuredW = mctx.measureText(mainText).width;
+          const maxLineW = LOGICAL_W - 24;
+          if (measuredW > maxLineW && measuredW > 0) {
+            mainFontPx = Math.max(14, mainFontPx * (maxLineW / measuredW));
+          }
+        }
+
+        const certFontPx = Math.max(14, baseFontPx * 0.80);
+        const signerFontPx = Math.max(12, baseFontPx * 0.68);
+        const lineStrokeW = Math.max(2.2, baseFontPx * 0.075);
+
+        // Generous vertical padding so Thai upper vowels + tone marks (e.g. "ที่", "ปู่", "เท่านั้น") never touch lines
+        const topMargin = 10;
+        const padAboveText = mainFontPx * 0.72;
+        const padBelowText = mainFontPx * 0.56;
+        const gapAfterLine = mainFontPx * 0.55;
+        const gapAfterCert = mainFontPx * 0.35;
+
+        let curY = topMargin;
+        let topLineY = null;
+        let mainTextY = null;
+        let bottomLineY = null;
+
+        if (settings.showLines) {
+          topLineY = curY + lineStrokeW / 2;
+          curY += lineStrokeW;
+        }
+
+        if (mainText) {
+          curY += padAboveText;
+          mainTextY = curY + mainFontPx * 0.42; // middle baseline
+          curY += mainFontPx * 0.82 + padBelowText;
+        } else if (settings.showLines) {
+          curY += mainFontPx * 0.6;
+        }
+
+        if (settings.showLines) {
+          bottomLineY = curY + lineStrokeW / 2;
+          curY += lineStrokeW + gapAfterLine;
+        } else if (mainText) {
+          curY += gapAfterLine * 0.6;
+        }
+
+        let certY = null;
+        if (certifyText) {
+          certY = curY + certFontPx * 0.55;
+          curY += certFontPx * 1.35 + (sigImg || signerText ? gapAfterCert : 8);
+        }
+
+        let sigBox = null;
+        if (sigImg && sigImg.width > 0 && sigImg.height > 0) {
+          const targetSigH = Math.max(26, baseFontPx * 2.1 * (Number(settings.sigScale) || 1));
+          const maxSigW = LOGICAL_W * 0.52;
+          const aspect = sigImg.width / sigImg.height;
+          let drawW = targetSigH * aspect;
+          let drawH = targetSigH;
+          if (drawW > maxSigW) {
+            drawW = maxSigW;
+            drawH = drawW / aspect;
+          }
+          sigBox = {
+            x: (LOGICAL_W - drawW) / 2,
+            y: curY,
+            w: drawW,
+            h: drawH
+          };
+          curY += drawH + (signerText ? 10 : 8);
+        }
+
+        let signerY = null;
+        if (signerText) {
+          signerY = curY + signerFontPx * 0.55;
+          curY += signerFontPx * 1.45;
+        }
+
+        const LOGICAL_H = Math.max(60, Math.ceil(curY + 8));
+
+        const stampCanvas = document.createElement('canvas');
+        stampCanvas.width = LOGICAL_W * SS;
+        stampCanvas.height = LOGICAL_H * SS;
+
+        const ctx = stampCanvas.getContext('2d');
+        ctx.scale(SS, SS);
+        ctx.fillStyle = settings.color || '#0D33BF';
+        ctx.strokeStyle = settings.color || '#0D33BF';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Draw top & bottom framing lines
+        if (settings.showLines) {
+          ctx.lineWidth = lineStrokeW;
+          ctx.lineCap = 'butt';
+          if (settings.lineStyle === 'dashed') {
+            ctx.setLineDash([16, 11]);
+          } else {
+            ctx.setLineDash([]);
+          }
+
+          if (topLineY !== null) {
+            ctx.beginPath();
+            ctx.moveTo(4, topLineY);
+            ctx.lineTo(LOGICAL_W - 4, topLineY);
+            ctx.stroke();
+          }
+          if (bottomLineY !== null) {
+            ctx.beginPath();
+            ctx.moveTo(4, bottomLineY);
+            ctx.lineTo(LOGICAL_W - 4, bottomLineY);
+            ctx.stroke();
+          }
+          ctx.setLineDash([]);
+        }
+
+        // Draw restricted-use line
+        if (mainText && mainTextY !== null) {
+          ctx.font = `${fontWeight} ${mainFontPx}px "${fontFamily}", "Sarabun", sans-serif`;
+          ctx.fillText(mainText, LOGICAL_W / 2, mainTextY);
+        }
+
+        // Draw certification text
+        if (certifyText && certY !== null) {
+          ctx.font = `${fontWeight} ${certFontPx}px "${fontFamily}", "Sarabun", sans-serif`;
+          ctx.fillText(certifyText, LOGICAL_W / 2, certY);
+        }
+
+        // Draw signature
+        if (sigBox && sigImg) {
+          ctx.drawImage(sigImg, sigBox.x, sigBox.y, sigBox.w, sigBox.h);
+        }
+
+        // Draw optional printed name
+        if (signerText && signerY !== null) {
+          ctx.font = `600 ${signerFontPx}px "${fontFamily}", "Sarabun", sans-serif`;
+          ctx.fillText(signerText, LOGICAL_W / 2, signerY);
+        }
+
+        return stampCanvas;
+      }
+
+      function drawStampOntoCanvas(targetCtx, pageW, pageH, stampCanvas) {
+        if (!stampCanvas || stampCanvas.width === 0) return;
+
+        const targetStampW = pageW * (Number(settings.stampScale) || 0.93);
+        const targetStampH = targetStampW * (stampCanvas.height / stampCanvas.width);
+        const cx = pageW * (Number(settings.posX) || 0.5);
+        const cy = pageH * (Number(settings.posY) || 0.5);
+        const rad = -(Number(settings.angle) || 0) * (Math.PI / 180);
+
+        targetCtx.save();
+        targetCtx.translate(cx, cy);
+        targetCtx.rotate(rad);
+        targetCtx.globalAlpha = Number(settings.opacity) || 0.85;
+        targetCtx.globalCompositeOperation = settings.multiplyInk ? 'multiply' : 'source-over';
+        targetCtx.drawImage(
+          stampCanvas,
+          -targetStampW / 2,
+          -targetStampH / 2,
+          targetStampW,
+          targetStampH
+        );
+        targetCtx.restore();
+      }
+
+      async function refreshStampAndPreview() {
+        const myToken = ++stampRenderToken;
+        cachedStampCanvas = await buildStampCanvas();
+        if (myToken !== stampRenderToken) return;
+        await renderActivePagePreview();
+      }
+
+      // =========================================================================
+      // 7. File Upload & Password Handling
+      // =========================================================================
+      function askPasswordModal(fileName, isRetry) {
+        return new Promise((resolve) => {
+          els.pwModalDesc.textContent = `ไฟล์ "${fileName}" มีการตั้งรหัสผ่าน กรุณากรอกรหัสผ่านเพื่อเปิดอ่านเอกสาร`;
+          els.pwModalError.style.display = isRetry ? 'block' : 'none';
+          els.pwInput.value = '';
+          els.pwInput.type = 'password';
+          els.btnTogglePw.textContent = 'แสดง';
+          els.passwordModal.classList.add('open');
+          setTimeout(() => els.pwInput.focus(), 50);
+
+          const cleanup = () => {
+            els.passwordModal.classList.remove('open');
+            els.btnPwSubmit.removeEventListener('click', onSubmit);
+            els.btnPwCancel.removeEventListener('click', onCancel);
+            els.pwInput.removeEventListener('keydown', onKey);
+          };
+
+          const onSubmit = () => {
+            const val = els.pwInput.value;
+            cleanup();
+            resolve(val);
+          };
+
+          const onCancel = () => {
+            cleanup();
+            resolve(null);
+          };
+
+          const onKey = (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              onSubmit();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              onCancel();
+            }
+          };
+
+          els.btnPwSubmit.addEventListener('click', onSubmit);
+          els.btnPwCancel.addEventListener('click', onCancel);
+          els.pwInput.addEventListener('keydown', onKey);
+        });
+      }
+
+      async function openPdfDocumentWithPrompt(rawBytes, fileName) {
+        let pw = undefined;
+        let attempt = 0;
+        let disableWorker = false;
+
+        while (true) {
+          try {
+            const loadingTask = pdfjsLib.getDocument({
+              data: rawBytes.slice(),
+              password: pw,
+              disableWorker
+            });
+            const pdfProxy = await loadingTask.promise;
+            return {
+              pdfProxy,
+              password: pw || null,
+              isPasswordProtected: Boolean(pw)
+            };
+          } catch (err) {
+            if (err && err.name === 'PasswordException') {
+              const isRetry = attempt > 0 || err.code === 2;
+              const entered = await askPasswordModal(fileName, isRetry);
+              if (entered === null) {
+                return null; // user skipped
+              }
+              pw = entered;
+              attempt++;
+            } else if (!disableWorker && err && /worker/i.test(String(err.message || ''))) {
+              disableWorker = true;
+            } else {
+              throw err;
+            }
+          }
+        }
+      }
+
+      async function handleIncomingFiles(fileListInput) {
+        const incoming = Array.from(fileListInput || []);
+        if (incoming.length === 0) return;
+
+        let addedCount = 0;
+        for (const f of incoming) {
+          const lower = f.name.toLowerCase();
+          const isPdf = f.type === 'application/pdf' || lower.endsWith('.pdf');
+          const isImg = f.type.startsWith('image/') || /\.(jpe?g|png|webp)$/i.test(lower);
+
+          if (!isPdf && !isImg) {
+            showToast(`ไม่รองรับไฟล์ ${f.name} (รองรับเฉพาะ PDF, JPG, PNG)`);
+            continue;
+          }
+
+          try {
+            const buffer = await f.arrayBuffer();
+            const rawBytes = new Uint8Array(buffer);
+
+            if (isPdf) {
+              const result = await openPdfDocumentWithPrompt(rawBytes, f.name);
+              if (!result) continue;
+
+              const fileObj = {
+                id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                name: f.name,
+                kind: 'pdf',
+                mimeType: 'application/pdf',
+                rawBytes,
+                password: result.password,
+                isPasswordProtected: result.isPasswordProtected,
+                pdfDocProxy: result.pdfProxy,
+                imageElement: null,
+                pageCount: result.pdfProxy.numPages,
+                pageCache: new Map(),
+                outputBytes: null,
+                outputName: null
+              };
+              files.push(fileObj);
+              activeFileId = fileObj.id;
+              activePageNum = 1;
+              addedCount++;
+            } else {
+              const blob = new Blob([rawBytes], { type: f.type || 'image/jpeg' });
+              const objUrl = URL.createObjectURL(blob);
+              const imgEl = await loadImageFromSrc(objUrl);
+
+              const fileObj = {
+                id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                name: f.name,
+                kind: 'image',
+                mimeType: f.type || 'image/jpeg',
+                rawBytes,
+                objUrl,
+                password: null,
+                isPasswordProtected: false,
+                pdfDocProxy: null,
+                imageElement: imgEl,
+                pageCount: 1,
+                pageCache: new Map(),
+                outputBytes: null,
+                outputName: null
+              };
+              files.push(fileObj);
+              activeFileId = fileObj.id;
+              activePageNum = 1;
+              addedCount++;
+            }
+          } catch (err) {
+            console.error(err);
+            showToast(`เปิดไฟล์ ${f.name} ไม่สำเร็จ: ${err.message || 'ไฟล์อาจเสียหาย'}`);
+          }
+        }
+
+        if (addedCount > 0) {
+          renderFileList();
+          await renderThumbnails();
+          await renderActivePagePreview();
+          updateReadyBanner();
+          showToast(`เพิ่มเอกสารเรียบร้อย ${addedCount} ไฟล์`);
+        }
+      }
+
+      // =========================================================================
+      // 8. Preview & Thumbnails Rendering
+      // =========================================================================
+      function getActiveFile() {
+        return files.find(f => f.id === activeFileId) || null;
+      }
+
+      async function getPreviewPageBitmap(fileObj, pageNum) {
+        if (fileObj.pageCache.has(pageNum)) {
+          return fileObj.pageCache.get(pageNum);
+        }
+
+        const c = document.createElement('canvas');
+
+        if (fileObj.kind === 'image') {
+          const img = fileObj.imageElement;
+          const naturalW = img.naturalWidth || img.width;
+          const naturalH = img.naturalHeight || img.height;
+          const scale = Math.min(1, 1150 / Math.max(naturalW, naturalH));
+          c.width = Math.max(1, Math.round(naturalW * scale));
+          c.height = Math.max(1, Math.round(naturalH * scale));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+
+          const entry = {
+            canvas: c,
+            widthPt: naturalW * 0.75,
+            heightPt: naturalH * 0.75,
+            rotation: 0
+          };
+          fileObj.pageCache.set(pageNum, entry);
+          return entry;
+        }
+
+        // PDF page via pdf.js
+        const page = await fileObj.pdfDocProxy.getPage(pageNum);
+        const vp1 = page.getViewport({ scale: 1 });
+        const maxSide = Math.max(vp1.width, vp1.height);
+        const previewScale = Math.min(2.0, Math.max(1.1, 1100 / maxSide));
+        const vp = page.getViewport({ scale: previewScale });
+
+        c.width = Math.round(vp.width);
+        c.height = Math.round(vp.height);
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+        const entry = {
+          canvas: c,
+          widthPt: vp1.width,
+          heightPt: vp1.height,
+          rotation: page.rotate || 0
+        };
+        fileObj.pageCache.set(pageNum, entry);
+        return entry;
+      }
+
+      async function renderActivePagePreview() {
+        const fileObj = getActiveFile();
+        if (!fileObj) {
+          els.previewEmpty.style.display = 'block';
+          els.canvasPaperWrap.style.display = 'none';
+          els.pageIndicator.textContent = 'หน้า 0 / 0';
+          els.pageInfoBadge.style.display = 'none';
+          els.btnPrevPage.disabled = true;
+          els.btnNextPage.disabled = true;
+          els.btnGenerate.disabled = true;
+          return;
+        }
+
+        els.previewEmpty.style.display = 'none';
+        els.canvasPaperWrap.style.display = 'block';
+        els.btnGenerate.disabled = false;
+
+        if (activePageNum < 1) activePageNum = 1;
+        if (activePageNum > fileObj.pageCount) activePageNum = fileObj.pageCount;
+
+        els.pageIndicator.textContent = `หน้า ${activePageNum} / ${fileObj.pageCount}`;
+        els.btnPrevPage.disabled = activePageNum <= 1;
+        els.btnNextPage.disabled = activePageNum >= fileObj.pageCount;
+
+        const pageData = await getPreviewPageBitmap(fileObj, activePageNum);
+
+        // Size info badge
+        const wMm = Math.round((pageData.widthPt / 72) * 25.4);
+        const hMm = Math.round((pageData.heightPt / 72) * 25.4);
+        const rotText = pageData.rotation ? ` · หมุน ${pageData.rotation}°` : '';
+        els.pageInfoBadge.textContent = `${wMm}×${hMm} มม.${rotText}`;
+        els.pageInfoBadge.style.display = 'inline-flex';
+
+        if (!cachedStampCanvas) {
+          cachedStampCanvas = await buildStampCanvas();
+        }
+
+        const outC = els.previewCanvas;
+        outC.width = pageData.canvas.width;
+        outC.height = pageData.canvas.height;
+        const ctx = outC.getContext('2d');
+        ctx.clearRect(0, 0, outC.width, outC.height);
+        ctx.drawImage(pageData.canvas, 0, 0);
+
+        drawStampOntoCanvas(ctx, outC.width, outC.height, cachedStampCanvas);
+
+        // Apply view zoom CSS size
+        const maxFitW = Math.min(760, outC.width);
+        outC.style.width = `${Math.round(maxFitW * viewZoom)}px`;
+
+        updateThumbnailSelection();
+      }
+
+      async function renderThumbnails() {
+        const fileObj = getActiveFile();
+        if (!fileObj) {
+          els.thumbSection.style.display = 'none';
+          els.thumbGrid.innerHTML = '';
+          return;
+        }
+
+        els.thumbSection.style.display = 'block';
+        els.thumbCountBadge.textContent = `${fileObj.pageCount} หน้า`;
+        els.thumbGrid.innerHTML = '';
+
+        const renderFileId = fileObj.id;
+        for (let p = 1; p <= fileObj.pageCount; p++) {
+          const item = document.createElement('div');
+          item.className = `thumb-item ${p === activePageNum ? 'active' : ''}`;
+          item.dataset.page = String(p);
+
+          const c = document.createElement('canvas');
+          const lbl = document.createElement('div');
+          lbl.className = 'thumb-label';
+          lbl.textContent = `หน้า ${p}`;
+
+          item.appendChild(c);
+          item.appendChild(lbl);
+          item.addEventListener('click', async () => {
+            activePageNum = p;
+            await renderActivePagePreview();
+            closeMobileSheets();
+          });
+
+          els.thumbGrid.appendChild(item);
+
+          // Render thumbnail asynchronously without blocking UI
+          (async (pageNum, thumbCanvas) => {
+            if (activeFileId !== renderFileId) return;
+            if (fileObj.kind === 'image') {
+              const img = fileObj.imageElement;
+              const aspect = img.height / img.width;
+              thumbCanvas.width = 160;
+              thumbCanvas.height = Math.round(160 * aspect);
+              thumbCanvas.getContext('2d').drawImage(img, 0, 0, thumbCanvas.width, thumbCanvas.height);
+            } else {
+              const page = await fileObj.pdfDocProxy.getPage(pageNum);
+              if (activeFileId !== renderFileId) return;
+              const vp1 = page.getViewport({ scale: 1 });
+              const tScale = 160 / vp1.width;
+              const vp = page.getViewport({ scale: tScale });
+              thumbCanvas.width = Math.round(vp.width);
+              thumbCanvas.height = Math.round(vp.height);
+              const tCtx = thumbCanvas.getContext('2d');
+              tCtx.fillStyle = '#fff';
+              tCtx.fillRect(0, 0, thumbCanvas.width, thumbCanvas.height);
+              await page.render({ canvasContext: tCtx, viewport: vp }).promise;
+            }
+          })(p, c);
+        }
+      }
+
+      function updateThumbnailSelection() {
+        const items = els.thumbGrid.querySelectorAll('.thumb-item');
+        items.forEach((el) => {
+          const p = Number(el.dataset.page);
+          el.classList.toggle('active', p === activePageNum);
+        });
+      }
+
+      function renderFileList() {
+        els.fileCountLabel.textContent = String(files.length);
+        els.mobileFileCount.textContent = String(files.length);
+        els.fileList.innerHTML = '';
+
+        for (const f of files) {
+          const card = document.createElement('div');
+          card.className = `file-card ${f.id === activeFileId ? 'active' : ''}`;
+
+          const top = document.createElement('div');
+          top.className = 'file-card-top';
+
+          const nameDiv = document.createElement('div');
+          nameDiv.className = 'file-name';
+          nameDiv.textContent = f.name;
+
+          const delBtn = document.createElement('button');
+          delBtn.className = 'btn btn-danger-ghost btn-xs';
+          delBtn.type = 'button';
+          delBtn.title = 'ลบไฟล์นี้';
+          delBtn.textContent = '✕';
+          delBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            removeFile(f.id);
+          });
+
+          top.appendChild(nameDiv);
+          top.appendChild(delBtn);
+
+          const meta = document.createElement('div');
+          meta.className = 'file-meta';
+
+          const pageBadge = document.createElement('span');
+          pageBadge.className = 'badge';
+          pageBadge.textContent = `${f.pageCount} หน้า`;
+          meta.appendChild(pageBadge);
+
+          if (f.isPasswordProtected) {
+            const lockBadge = document.createElement('span');
+            lockBadge.className = 'badge badge-lock';
+            lockBadge.textContent = '🔓 ปลดล็อกแล้ว';
+            meta.appendChild(lockBadge);
+          }
+
+          if (f.outputBytes) {
+            const doneBadge = document.createElement('span');
+            doneBadge.className = 'badge badge-success';
+            doneBadge.textContent = '✓ รับรองแล้ว';
+            meta.appendChild(doneBadge);
+          }
+
+          card.appendChild(top);
+          card.appendChild(meta);
+
+          if (f.outputBytes) {
+            const actRow = document.createElement('div');
+            actRow.className = 'file-card-actions';
+
+            const dlBtn = document.createElement('button');
+            dlBtn.className = 'btn btn-success btn-xs';
+            dlBtn.type = 'button';
+            dlBtn.textContent = '⬇ ดาวน์โหลด';
+            dlBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              downloadSingleFile(f);
+            });
+
+            const shBtn = document.createElement('button');
+            shBtn.className = 'btn btn-soft btn-xs';
+            shBtn.type = 'button';
+            shBtn.textContent = '📤 แชร์';
+            shBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              shareFiles([f]);
+            });
+
+            actRow.appendChild(dlBtn);
+            actRow.appendChild(shBtn);
+            card.appendChild(actRow);
+          }
+
+          card.addEventListener('click', async () => {
+            if (activeFileId === f.id) return;
+            activeFileId = f.id;
+            activePageNum = 1;
+            renderFileList();
+            await renderThumbnails();
+            await renderActivePagePreview();
+            updateReadyBanner();
+          });
+
+          els.fileList.appendChild(card);
+        }
+      }
+
+      async function removeFile(id) {
+        const idx = files.findIndex(f => f.id === id);
+        if (idx === -1) return;
+        const removed = files.splice(idx, 1)[0];
+        if (removed.objUrl) URL.revokeObjectURL(removed.objUrl);
+        if (removed.pdfDocProxy) {
+          try { await removed.pdfDocProxy.destroy(); } catch (e) {}
+        }
+        if (activeFileId === id) {
+          activeFileId = files.length > 0 ? files[Math.max(0, idx - 1)].id : null;
+          activePageNum = 1;
+        }
+        renderFileList();
+        await renderThumbnails();
+        await renderActivePagePreview();
+        updateReadyBanner();
+      }
+
+      function updateReadyBanner() {
+        const readyFiles = files.filter(f => Boolean(f.outputBytes));
+        if (readyFiles.length === 0) {
+          els.readyBanner.style.display = 'none';
+          return;
+        }
+        const active = getActiveFile();
+        els.readyBanner.style.display = 'flex';
+        els.btnDownloadCurrent.style.display = active && active.outputBytes ? 'inline-flex' : 'none';
+        els.btnShareCurrent.style.display = active && active.outputBytes ? 'inline-flex' : 'none';
+        els.btnDownloadZip.style.display = readyFiles.length > 1 ? 'inline-flex' : 'none';
+        els.btnShareAll.style.display = readyFiles.length > 1 ? 'inline-flex' : 'none';
+
+        if (active && active.outputBytes) {
+          const kb = Math.round(active.outputBytes.byteLength / 1024);
+          const sizeStr = kb > 1024 ? `${(kb / 1024).toFixed(2)} MB` : `${kb} KB`;
+          els.readyBannerSub.textContent = `${active.outputName} (${sizeStr})`;
+        } else {
+          els.readyBannerSub.textContent = `สร้างแล้ว ${readyFiles.length} ไฟล์`;
+        }
+      }
+
+      // =========================================================================
+      // 9. PDF Generation (Flatten ON / Flatten OFF / Images / Password PDFs)
+      // =========================================================================
+      function createStampCanvasWithOpacity(baseStamp, opacity) {
+        const c = document.createElement('canvas');
+        c.width = baseStamp.width;
+        c.height = baseStamp.height;
+        const ctx = c.getContext('2d');
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(baseStamp, 0, 0);
+        return c;
+      }
+
+      async function generateStampedPdfForFile(fileObj, stampCanvas, onPageProgress) {
+        const mustFlatten = settings.flatten || fileObj.isPasswordProtected || fileObj.kind === 'image';
+        const { PDFDocument, degrees, BlendMode } = PDFLib;
+
+        if (mustFlatten) {
+          // Flatten Mode: render each page via pdf.js at ~185 DPI, composite stamp with Real Ink multiply, export JPEG -> PDF
+          const outPdf = await PDFDocument.create();
+
+          if (fileObj.kind === 'image') {
+            const img = fileObj.imageElement;
+            const natW = img.naturalWidth || img.width;
+            const natH = img.naturalHeight || img.height;
+
+            const maxDim = 2200;
+            const scale = Math.min(1, maxDim / Math.max(natW, natH));
+            const cw = Math.max(1, Math.round(natW * scale));
+            const ch = Math.max(1, Math.round(natH * scale));
+
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = cw;
+            pageCanvas.height = ch;
+            const ctx = pageCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.drawImage(img, 0, 0, cw, ch);
+
+            drawStampOntoCanvas(ctx, cw, ch, stampCanvas);
+
+            const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.84));
+            const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
+            const embeddedJpg = await outPdf.embedJpg(jpegBytes);
+
+            // Preserve clean aspect ratio in PDF points (fit within ~595pt width if huge)
+            const ptW = Math.min(842, natW * 0.75);
+            const ptH = ptW * (natH / natW);
+            const pdfPage = outPdf.addPage([ptW, ptH]);
+            pdfPage.drawImage(embeddedJpg, { x: 0, y: 0, width: ptW, height: ptH });
+
+            pageCanvas.width = 0;
+            pageCanvas.height = 0;
+            onPageProgress(1, 1);
+          } else {
+            for (let p = 1; p <= fileObj.pageCount; p++) {
+              const page = await fileObj.pdfDocProxy.getPage(p);
+              const vp1 = page.getViewport({ scale: 1 });
+              const maxSidePt = Math.max(vp1.width, vp1.height);
+              // ~185 DPI (185/72 ≈ 2.57x), capped at 2200px so 14+ page files stay < 1MB/page & safe on mobile
+              const renderScale = Math.min(2.55, 2200 / maxSidePt);
+              const vp = page.getViewport({ scale: renderScale });
+
+              const pageCanvas = document.createElement('canvas');
+              pageCanvas.width = Math.round(vp.width);
+              pageCanvas.height = Math.round(vp.height);
+              const ctx = pageCanvas.getContext('2d');
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+              await page.render({ canvasContext: ctx, viewport: vp }).promise;
+              drawStampOntoCanvas(ctx, pageCanvas.width, pageCanvas.height, stampCanvas);
+
+              const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.84));
+              const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
+              const embeddedJpg = await outPdf.embedJpg(jpegBytes);
+
+              const pdfPage = outPdf.addPage([vp1.width, vp1.height]);
+              pdfPage.drawImage(embeddedJpg, {
+                x: 0,
+                y: 0,
+                width: vp1.width,
+                height: vp1.height
+              });
+
+              // Release canvas memory immediately for mobile stability
+              pageCanvas.width = 0;
+              pageCanvas.height = 0;
+              onPageProgress(p, fileObj.pageCount);
+              await new Promise(r => setTimeout(r, 8));
+            }
+          }
+
+          return await outPdf.save();
+        } else {
+          // Flatten OFF (Vector Mode for unlocked PDFs)
+          const pdfDoc = await PDFDocument.load(fileObj.rawBytes.slice());
+          const opacityStamp = createStampCanvasWithOpacity(stampCanvas, Number(settings.opacity) || 0.85);
+          const pngBlob = await new Promise(res => opacityStamp.toBlob(res, 'image/png'));
+          const pngBytes = new Uint8Array(await pngBlob.arrayBuffer());
+          const embeddedStamp = await pdfDoc.embedPng(pngBytes);
+
+          opacityStamp.width = 0;
+          opacityStamp.height = 0;
+
+          const pdfPages = pdfDoc.getPages();
+          const aspect = stampCanvas.height / stampCanvas.width;
+
+          for (let i = 0; i < pdfPages.length; i++) {
+            const pdfPage = pdfPages[i];
+            const box = pdfPage.getCropBox() || pdfPage.getMediaBox();
+            const rawW = box.width;
+            const rawH = box.height;
+            const rot = ((pdfPage.getRotation().angle % 360) + 360) % 360;
+
+            const isSwapped = rot === 90 || rot === 270;
+            const visW = isSwapped ? rawH : rawW;
+            const vx = Number(settings.posX) || 0.5;
+            const vy = Number(settings.posY) || 0.5;
+
+            const drawW = visW * (Number(settings.stampScale) || 0.93);
+            const drawH = drawW * aspect;
+
+            // Map normalized visual coordinates (vx, vy) into raw PDF coordinates (origin bottom-left)
+            let cx, cy, pdfAngleDeg;
+            if (rot === 90) {
+              cx = box.x + vy * rawW;
+              cy = box.y + vx * rawH;
+              pdfAngleDeg = (Number(settings.angle) || 0) + 90;
+            } else if (rot === 180) {
+              cx = box.x + (1 - vx) * rawW;
+              cy = box.y + vy * rawH;
+              pdfAngleDeg = (Number(settings.angle) || 0) + 180;
+            } else if (rot === 270) {
+              cx = box.x + (1 - vy) * rawW;
+              cy = box.y + (1 - vx) * rawH;
+              pdfAngleDeg = (Number(settings.angle) || 0) + 270;
+            } else {
+              cx = box.x + vx * rawW;
+              cy = box.y + (1 - vy) * rawH;
+              pdfAngleDeg = Number(settings.angle) || 0;
+            }
+
+            // Compute rotated bottom-left anchor so stamp rotates around (cx, cy)
+            const rad = (pdfAngleDeg * Math.PI) / 180;
+            const cos = Math.cos(rad);
+            const sin = Math.sin(rad);
+            const drawX = cx - ((drawW / 2) * cos - (drawH / 2) * sin);
+            const drawY = cy - ((drawW / 2) * sin + (drawH / 2) * cos);
+
+            const drawOpts = {
+              x: drawX,
+              y: drawY,
+              width: drawW,
+              height: drawH,
+              rotate: degrees(pdfAngleDeg)
+            };
+            if (settings.multiplyInk && BlendMode && BlendMode.Multiply) {
+              drawOpts.blendMode = BlendMode.Multiply;
+            }
+
+            pdfPage.drawImage(embeddedStamp, drawOpts);
+            onPageProgress(i + 1, pdfPages.length);
+            await new Promise(r => setTimeout(r, 6));
+          }
+
+          return await pdfDoc.save();
+        }
+      }
+
+      async function generateAllFiles() {
+        if (files.length === 0) return;
+
+        els.progressModal.classList.add('open');
+        els.progFill.style.width = '0%';
+        els.progPercent.textContent = '0%';
+
+        try {
+          const stampCanvas = await buildStampCanvas();
+          const totalPagesAll = files.reduce((acc, f) => acc + f.pageCount, 0);
+          let processedPagesAll = 0;
+
+          for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const baseDone = processedPagesAll;
+
+            const outBytes = await generateStampedPdfForFile(f, stampCanvas, (p, pTotal) => {
+              const currentAll = baseDone + p;
+              const pct = Math.round((currentAll / Math.max(1, totalPagesAll)) * 100);
+              els.progDesc.textContent = `ไฟล์ ${i + 1}/${files.length}: ${f.name} (หน้า ${p}/${pTotal})`;
+              els.progFill.style.width = `${pct}%`;
+              els.progPercent.textContent = `${pct}%`;
+            });
+
+            processedPagesAll += f.pageCount;
+            f.outputBytes = outBytes;
+            f.outputName = buildOutputFileName(f.name);
+          }
+
+          renderFileList();
+          updateReadyBanner();
+          showToast(`สร้างไฟล์รับรองสำเนาสำเร็จ ${files.length} ไฟล์ 🎉`, 3500);
+        } catch (err) {
+          console.error(err);
+          showToast(`เกิดข้อผิดพลาดระหว่างสร้าง PDF: ${err.message || err}`);
+        } finally {
+          els.progressModal.classList.remove('open');
+        }
+      }
+
+      // =========================================================================
+      // 10. Download & Share (LINE / WhatsApp / Email)
+      // =========================================================================
+      function triggerBlobDownload(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+      }
+
+      function downloadSingleFile(fileObj) {
+        if (!fileObj || !fileObj.outputBytes) return;
+        const blob = new Blob([fileObj.outputBytes], { type: 'application/pdf' });
+        triggerBlobDownload(blob, fileObj.outputName);
+      }
+
+      async function downloadAllAsZip() {
+        const ready = files.filter(f => Boolean(f.outputBytes));
+        if (ready.length === 0) return;
+
+        const zip = new JSZip();
+        const usedNames = new Set();
+
+        for (const f of ready) {
+          let name = f.outputName;
+          let n = 2;
+          while (usedNames.has(name)) {
+            name = f.outputName.replace(/\.pdf$/i, ` (${n}).pdf`);
+            n++;
+          }
+          usedNames.add(name);
+          zip.file(name, f.outputBytes);
+        }
+
+        const dateTag = new Date().toISOString().slice(0, 10);
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        triggerBlobDownload(zipBlob, `TrueCopy_รับรองสำเนา_${dateTag}.zip`);
+        showToast(`ดาวน์โหลด ZIP (${ready.length} ไฟล์) เรียบร้อย`);
+      }
+
+      async function shareFiles(targetFiles) {
+        const ready = (targetFiles || []).filter(f => Boolean(f.outputBytes));
+        if (ready.length === 0) return;
+
+        const shareFileObjs = ready.map(
+          f => new File([f.outputBytes], f.outputName, { type: 'application/pdf' })
+        );
+
+        const canNativeShare =
+          typeof navigator.share === 'function' &&
+          typeof navigator.canShare === 'function' &&
+          navigator.canShare({ files: shareFileObjs });
+
+        if (canNativeShare) {
+          try {
+            await navigator.share({
+              files: shareFileObjs,
+              title: ready.length === 1 ? ready[0].outputName : `เอกสารรับรองสำเนาถูกต้อง (${ready.length} ไฟล์)`,
+              text: `เอกสารรับรองสำเนาถูกต้อง — ${getResolvedLine()}`
+            });
+            return;
+          } catch (err) {
+            if (err && err.name === 'AbortError') {
+              return; // User closed the share sheet intentionally
+            }
+            console.warn('Web Share failed, falling back to download:', err);
+          }
+        }
+
+        // Graceful fallback for desktop browsers that do not support direct file sharing
+        if (ready.length === 1) {
+          downloadSingleFile(ready[0]);
+        } else {
+          await downloadAllAsZip();
+        }
+        const subject = encodeURIComponent(`เอกสารรับรองสำเนาถูกต้อง (${settings.org || 'TrueCopy'})`);
+        const body = encodeURIComponent(`ส่งเอกสารรับรองสำเนาถูกต้อง: ${getResolvedLine()}\n(กรุณาแนบไฟล์ PDF ที่ดาวน์โหลดไว้)`);
+        els.btnOpenEmailClient.href = `mailto:?subject=${subject}&body=${body}`;
+        els.shareFallbackModal.classList.add('open');
+      }
+
+      // =========================================================================
+      // 11. UI Sync & Event Wiring
+      // =========================================================================
+      function syncControlsFromSettings() {
+        els.inputPurpose.value = settings.purpose;
+        els.inputOrg.value = settings.org;
+        els.inputTemplateLine.value = settings.templateLine;
+        els.resolvedLinePreview.textContent = getResolvedLine() || '(ไม่มีข้อความ)';
+        els.chkShowLines.checked = settings.showLines;
+        els.selectLineStyle.value = settings.lineStyle;
+        els.selectLineStyle.disabled = !settings.showLines;
+        els.inputCertifyText.value = settings.certifyText;
+
+        els.rangeSigThreshold.value = settings.sigThreshold;
+        els.valSigThreshold.textContent = String(settings.sigThreshold);
+        els.chkTintSignature.checked = settings.tintSignature;
+        els.rangeSigScale.value = Math.round(settings.sigScale * 100);
+        els.valSigScale.textContent = `${Math.round(settings.sigScale * 100)}%`;
+
+        els.chkShowSignerName.checked = settings.showSignerName;
+        els.inputSignerName.value = settings.signerName;
+        els.inputSignerName.style.display = settings.showSignerName ? 'block' : 'none';
+
+        // Font dropdown
+        if (!Array.from(els.selectFont.options).some(o => o.value === settings.font)) {
+          settings.font = 'Sarabun';
+        }
+        els.selectFont.value = settings.font;
+        els.selectWeight.value = settings.fontWeight;
+
+        // Color swatches
+        els.inputColorPicker.value = settings.color;
+        els.valColorHex.textContent = settings.color.toUpperCase();
+        document.querySelectorAll('.color-swatch').forEach((sw) => {
+          sw.classList.toggle('active', sw.dataset.color.toUpperCase() === settings.color.toUpperCase());
+        });
+
+        els.rangeOpacity.value = Math.round(settings.opacity * 100);
+        els.valOpacity.textContent = `${Math.round(settings.opacity * 100)}%`;
+        els.chkMultiplyInk.checked = settings.multiplyInk;
+
+        els.rangeStampScale.value = Math.round(settings.stampScale * 100);
+        els.valStampScale.textContent = `${Math.round(settings.stampScale * 100)}%`;
+        els.rangeFontSize.value = settings.fontSize;
+        els.valFontSize.textContent = `${settings.fontSize} pt`;
+        els.rangeAngle.value = settings.angle;
+        els.valAngle.textContent = `${settings.angle}°`;
+        els.rangePosX.value = Math.round(settings.posX * 100);
+        els.valPosX.textContent = `${Math.round(settings.posX * 100)}%`;
+        els.rangePosY.value = Math.round(settings.posY * 100);
+        els.valPosY.textContent = `${Math.round(settings.posY * 100)}%`;
+        els.chkFlatten.checked = settings.flatten;
+
+        if (settings.cleanSigDataUrl) {
+          els.sigControlsWrap.style.display = 'block';
+          els.btnRemoveSig.style.display = 'inline-flex';
+          els.sigPreviewImg.src = settings.cleanSigDataUrl;
+        } else {
+          els.sigControlsWrap.style.display = 'none';
+          els.btnRemoveSig.style.display = 'none';
+          els.sigPreviewImg.removeAttribute('src');
+        }
+      }
+
+      function invalidateOutputs() {
+        let hadOutputs = false;
+        for (const f of files) {
+          if (f.outputBytes) {
+            f.outputBytes = null;
+            f.outputName = null;
+            hadOutputs = true;
+          }
+        }
+        if (hadOutputs) {
+          renderFileList();
+          updateReadyBanner();
+        }
+      }
+
+      function onSettingChanged(reprocessSig = false) {
+        invalidateOutputs();
+        saveSettings();
+        els.resolvedLinePreview.textContent = getResolvedLine() || '(ไม่มีข้อความ)';
+        if (reprocessSig && settings.rawSigDataUrl) {
+          processSignatureDataUrl(settings.rawSigDataUrl).then(() => {
+            if (settings.cleanSigDataUrl) els.sigPreviewImg.src = settings.cleanSigDataUrl;
+            refreshStampAndPreview();
+          });
+        } else {
+          refreshStampAndPreview();
+        }
+      }
+
+      function wireEvents() {
+        // Upload triggers
+        els.btnAddFilesHeader.addEventListener('click', () => els.fileInput.click());
+        els.btnUploadEmpty.addEventListener('click', () => els.fileInput.click());
+        els.dropzone.addEventListener('click', () => els.fileInput.click());
+        els.dropzone.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            els.fileInput.click();
+          }
+        });
+
+        els.fileInput.addEventListener('change', (e) => {
+          handleIncomingFiles(e.target.files);
+          e.target.value = '';
+        });
+
+        // Drag and drop on dropzone and whole window
+        ['dragenter', 'dragover'].forEach((ev) => {
+          els.dropzone.addEventListener(ev, (e) => {
+            e.preventDefault();
+            els.dropzone.classList.add('dragover');
+          });
+        });
+        ['dragleave', 'drop'].forEach((ev) => {
+          els.dropzone.addEventListener(ev, (e) => {
+            e.preventDefault();
+            els.dropzone.classList.remove('dragover');
+          });
+        });
+        els.dropzone.addEventListener('drop', (e) => {
+          handleIncomingFiles(e.dataTransfer.files);
+        });
+        window.addEventListener('dragover', (e) => e.preventDefault());
+        window.addEventListener('drop', (e) => {
+          if (e.target !== els.dropzone && !els.dropzone.contains(e.target)) {
+            e.preventDefault();
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              handleIncomingFiles(e.dataTransfer.files);
+            }
+          }
+        });
+
+        // Page navigation & zoom
+        els.btnPrevPage.addEventListener('click', async () => {
+          if (activePageNum > 1) {
+            activePageNum--;
+            await renderActivePagePreview();
+          }
+        });
+        els.btnNextPage.addEventListener('click', async () => {
+          const f = getActiveFile();
+          if (f && activePageNum < f.pageCount) {
+            activePageNum++;
+            await renderActivePagePreview();
+          }
+        });
+        els.btnZoomOut.addEventListener('click', () => {
+          viewZoom = Math.max(0.5, Math.round((viewZoom - 0.15) * 100) / 100);
+          els.zoomLabel.textContent = `${Math.round(viewZoom * 100)}%`;
+          renderActivePagePreview();
+        });
+        els.btnZoomIn.addEventListener('click', () => {
+          viewZoom = Math.min(2.2, Math.round((viewZoom + 0.15) * 100) / 100);
+          els.zoomLabel.textContent = `${Math.round(viewZoom * 100)}%`;
+          renderActivePagePreview();
+        });
+
+        // Text & line controls
+        els.inputPurpose.addEventListener('input', () => {
+          settings.purpose = els.inputPurpose.value;
+          onSettingChanged();
+        });
+        els.inputOrg.addEventListener('input', () => {
+          settings.org = els.inputOrg.value;
+          onSettingChanged();
+        });
+        els.inputTemplateLine.addEventListener('input', () => {
+          settings.templateLine = els.inputTemplateLine.value;
+          onSettingChanged();
+        });
+        els.chkShowLines.addEventListener('change', () => {
+          settings.showLines = els.chkShowLines.checked;
+          els.selectLineStyle.disabled = !settings.showLines;
+          onSettingChanged();
+        });
+        els.selectLineStyle.addEventListener('change', () => {
+          settings.lineStyle = els.selectLineStyle.value;
+          onSettingChanged();
+        });
+        els.inputCertifyText.addEventListener('input', () => {
+          settings.certifyText = els.inputCertifyText.value;
+          onSettingChanged();
+        });
+
+        // Signature controls
+        els.btnUploadSig.addEventListener('click', () => els.sigInput.click());
+        els.sigInput.addEventListener('change', async (e) => {
+          const f = e.target.files && e.target.files[0];
+          e.target.value = '';
+          if (!f) return;
+          const objUrl = URL.createObjectURL(f);
+          try {
+            const img = await loadImageFromSrc(objUrl);
+            const maxDim = 1000;
+            let w = img.naturalWidth || img.width;
+            let h = img.naturalHeight || img.height;
+            if (w > maxDim || h > maxDim) {
+              const r = Math.min(maxDim / w, maxDim / h);
+              w = Math.max(1, Math.round(w * r));
+              h = Math.max(1, Math.round(h * r));
+            }
+            const c = document.createElement('canvas');
+            c.width = w;
+            c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            settings.rawSigDataUrl = c.toDataURL('image/png');
+
+            await processSignatureDataUrl(settings.rawSigDataUrl);
+            invalidateOutputs();
+            syncControlsFromSettings();
+            saveSettings();
+            await refreshStampAndPreview();
+            showToast('เพิ่มลายเซ็นและลบพื้นหลังเรียบร้อย');
+          } catch (err) {
+            showToast('ไม่สามารถอ่านไฟล์รูปลายเซ็นได้');
+          } finally {
+            URL.revokeObjectURL(objUrl);
+          }
+        });
+
+        els.btnRemoveSig.addEventListener('click', () => {
+          settings.rawSigDataUrl = null;
+          settings.cleanSigDataUrl = null;
+          cachedSignatureImg = null;
+          syncControlsFromSettings();
+          onSettingChanged();
+        });
+
+        els.rangeSigThreshold.addEventListener('input', () => {
+          settings.sigThreshold = Number(els.rangeSigThreshold.value);
+          els.valSigThreshold.textContent = String(settings.sigThreshold);
+          onSettingChanged(true);
+        });
+        els.chkTintSignature.addEventListener('change', () => {
+          settings.tintSignature = els.chkTintSignature.checked;
+          onSettingChanged(true);
+        });
+        els.rangeSigScale.addEventListener('input', () => {
+          settings.sigScale = Number(els.rangeSigScale.value) / 100;
+          els.valSigScale.textContent = `${els.rangeSigScale.value}%`;
+          onSettingChanged();
+        });
+
+        els.chkShowSignerName.addEventListener('change', () => {
+          settings.showSignerName = els.chkShowSignerName.checked;
+          els.inputSignerName.style.display = settings.showSignerName ? 'block' : 'none';
+          onSettingChanged();
+        });
+        els.inputSignerName.addEventListener('input', () => {
+          settings.signerName = els.inputSignerName.value;
+          onSettingChanged();
+        });
+
+        // Font & Color controls
+        els.selectFont.addEventListener('change', () => {
+          settings.font = els.selectFont.value;
+          onSettingChanged();
+        });
+        els.selectWeight.addEventListener('change', () => {
+          settings.fontWeight = els.selectWeight.value;
+          onSettingChanged();
+        });
+
+        els.btnUploadFont.addEventListener('click', () => els.fontInput.click());
+        els.fontInput.addEventListener('change', async (e) => {
+          const f = e.target.files && e.target.files[0];
+          e.target.value = '';
+          if (!f) return;
+          try {
+            const buf = await f.arrayBuffer();
+            const familyName = `CustomFont_${++customFontCounter}`;
+            const face = new FontFace(familyName, buf);
+            await face.load();
+            document.fonts.add(face);
+
+            const opt = document.createElement('option');
+            opt.value = familyName;
+            opt.textContent = `${f.name.replace(/\.[^.]+$/, '')} (อัปโหลด)`;
+            els.selectFont.appendChild(opt);
+            els.selectFont.value = familyName;
+
+            settings.font = familyName;
+            els.customFontStatus.textContent = `โหลดฟอนต์ "${f.name}" สำเร็จ`;
+            els.customFontStatus.style.display = 'block';
+            invalidateOutputs();
+            await refreshStampAndPreview();
+            showToast(`ใช้ฟอนต์ ${f.name} เรียบร้อย`);
+          } catch (err) {
+            showToast('ไม่สามารถโหลดไฟล์ฟอนต์นี้ได้ กรุณาใช้ไฟล์ .ttf หรือ .otf');
+          }
+        });
+
+        document.querySelectorAll('.color-swatch').forEach((sw) => {
+          sw.addEventListener('click', () => {
+            settings.color = sw.dataset.color;
+            syncControlsFromSettings();
+            onSettingChanged(true);
+          });
+        });
+
+        els.inputColorPicker.addEventListener('input', () => {
+          settings.color = els.inputColorPicker.value;
+          els.valColorHex.textContent = settings.color.toUpperCase();
+          document.querySelectorAll('.color-swatch').forEach(sw => sw.classList.remove('active'));
+          onSettingChanged(true);
+        });
+
+        els.rangeOpacity.addEventListener('input', () => {
+          settings.opacity = Number(els.rangeOpacity.value) / 100;
+          els.valOpacity.textContent = `${els.rangeOpacity.value}%`;
+          onSettingChanged();
+        });
+
+        els.chkMultiplyInk.addEventListener('change', () => {
+          settings.multiplyInk = els.chkMultiplyInk.checked;
+          onSettingChanged();
+        });
+
+        // Position & Size sliders
+        els.rangeStampScale.addEventListener('input', () => {
+          settings.stampScale = Number(els.rangeStampScale.value) / 100;
+          els.valStampScale.textContent = `${els.rangeStampScale.value}%`;
+          onSettingChanged();
+        });
+        els.rangeFontSize.addEventListener('input', () => {
+          settings.fontSize = Number(els.rangeFontSize.value);
+          els.valFontSize.textContent = `${settings.fontSize} pt`;
+          onSettingChanged();
+        });
+        els.rangeAngle.addEventListener('input', () => {
+          settings.angle = Number(els.rangeAngle.value);
+          els.valAngle.textContent = `${settings.angle}°`;
+          onSettingChanged();
+        });
+        els.btnAngle0.addEventListener('click', () => {
+          settings.angle = 0;
+          els.rangeAngle.value = '0';
+          els.valAngle.textContent = '0°';
+          onSettingChanged();
+        });
+        els.btnAngle35.addEventListener('click', () => {
+          settings.angle = 35;
+          els.rangeAngle.value = '35';
+          els.valAngle.textContent = '35°';
+          onSettingChanged();
+        });
+        els.rangePosX.addEventListener('input', () => {
+          settings.posX = Number(els.rangePosX.value) / 100;
+          els.valPosX.textContent = `${els.rangePosX.value}%`;
+          onSettingChanged();
+        });
+        els.rangePosY.addEventListener('input', () => {
+          settings.posY = Number(els.rangePosY.value) / 100;
+          els.valPosY.textContent = `${els.rangePosY.value}%`;
+          onSettingChanged();
+        });
+        els.chkFlatten.addEventListener('change', () => {
+          settings.flatten = els.chkFlatten.checked;
+          invalidateOutputs();
+          saveSettings();
+        });
+
+        // Reset defaults
+        els.btnResetDefaults.addEventListener('click', async () => {
+          const keepRawSig = settings.rawSigDataUrl;
+          const keepCleanSig = settings.cleanSigDataUrl;
+          settings = {
+            ...DEFAULT_SETTINGS,
+            rawSigDataUrl: keepRawSig,
+            cleanSigDataUrl: keepCleanSig
+          };
+          if (settings.rawSigDataUrl) {
+            await processSignatureDataUrl(settings.rawSigDataUrl);
+          }
+          invalidateOutputs();
+          syncControlsFromSettings();
+          saveSettings();
+          await refreshStampAndPreview();
+          showToast('คืนค่าเริ่มต้นเรียบร้อย');
+        });
+
+        // Generate, Download & Share
+        els.btnGenerate.addEventListener('click', generateAllFiles);
+        els.btnDownloadCurrent.addEventListener('click', () => downloadSingleFile(getActiveFile()));
+        els.btnShareCurrent.addEventListener('click', () => shareFiles([getActiveFile()]));
+        els.btnDownloadZip.addEventListener('click', downloadAllAsZip);
+        els.btnShareAll.addEventListener('click', () => shareFiles(files.filter(f => Boolean(f.outputBytes))));
+
+        // Password toggle
+        els.btnTogglePw.addEventListener('click', () => {
+          const isPw = els.pwInput.type === 'password';
+          els.pwInput.type = isPw ? 'text' : 'password';
+          els.btnTogglePw.textContent = isPw ? 'ซ่อน' : 'แสดง';
+        });
+
+        // Share fallback modal
+        els.btnCloseShareFb.addEventListener('click', () => {
+          els.shareFallbackModal.classList.remove('open');
+        });
+
+        // Mobile tabs
+        els.tabMobileFiles.addEventListener('click', () => openMobileSheet('left'));
+        els.tabMobilePreview.addEventListener('click', () => closeMobileSheets());
+        els.tabMobileSettings.addEventListener('click', () => openMobileSheet('right'));
+        els.btnCloseLeft.addEventListener('click', () => closeMobileSheets());
+        els.btnCloseRight.addEventListener('click', () => closeMobileSheets());
+      }
+
+      function openMobileSheet(side) {
+        els.panelLeft.classList.toggle('mobile-open', side === 'left');
+        els.panelRight.classList.toggle('mobile-open', side === 'right');
+        els.tabMobileFiles.classList.toggle('active', side === 'left');
+        els.tabMobileSettings.classList.toggle('active', side === 'right');
+        els.tabMobilePreview.classList.remove('active');
+      }
+
+      function closeMobileSheets() {
+        els.panelLeft.classList.remove('mobile-open');
+        els.panelRight.classList.remove('mobile-open');
+        els.tabMobileFiles.classList.remove('active');
+        els.tabMobileSettings.classList.remove('active');
+        els.tabMobilePreview.classList.add('active');
+      }
+
+      // =========================================================================
+      // 12. Boot Application
+      // =========================================================================
+      async function init() {
+        syncControlsFromSettings();
+        wireEvents();
+
+        if (settings.cleanSigDataUrl) {
+          try {
+            cachedSignatureImg = await loadImageFromSrc(settings.cleanSigDataUrl);
+          } catch (e) {
+            cachedSignatureImg = null;
+          }
+        }
+
+        cachedStampCanvas = await buildStampCanvas();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
