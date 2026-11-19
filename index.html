@@ -1126,6 +1126,80 @@
       transition: width 0.15s ease;
     }
 
+    /* Firebase Auth Header & Template Manager */
+    .auth-slot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .auth-user-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--success-soft);
+      border: 1px solid #a7f3d0;
+      border-radius: 999px;
+      padding: 3px 6px 3px 10px;
+    }
+
+    .auth-pill {
+      font-size: 12px;
+      font-weight: 700;
+      color: #065f46;
+      white-space: nowrap;
+    }
+
+    .template-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 330px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    .template-item {
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 12px;
+      background: var(--surface-muted);
+    }
+
+    .template-item.is-default {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .template-item-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .template-item-preview {
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .template-item-meta {
+      font-size: 11.5px;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .template-item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -1298,6 +1372,13 @@
       </div>
     </div>
     <div class="header-actions">
+      <div id="authHeaderSlot" class="auth-slot">
+        <button id="btnGoogleSignIn" class="btn btn-soft btn-sm" type="button" title="เข้าสู่ระบบด้วย Google เพื่อซิงก์ลายเซ็นและเทมเพลตข้ามเครื่อง">🔐 เข้าสู่ระบบ</button>
+        <div id="authUserBox" class="auth-user-box" style="display:none;">
+          <span id="authUserPill" class="auth-pill">☁️ ซิงก์แล้ว</span>
+          <button id="btnSignOut" class="btn btn-xs" type="button">ออก</button>
+        </div>
+      </div>
       <button id="btnAddFilesHeader" class="btn btn-hide-sm" type="button">+ เพิ่มไฟล์</button>
       <button id="btnResetDefaults" class="btn btn-hide-sm" type="button" title="คืนค่าตราประทับเริ่มต้น">รีเซ็ตค่าเริ่มต้น</button>
       <button id="btnGenerate" class="btn btn-primary" type="button" disabled>ประมวลผลและสร้างไฟล์ PDF</button>
@@ -1414,6 +1495,19 @@
       </div>
       <div class="panel-scroll">
 
+        <!-- 0. Template Manager -->
+        <div class="setting-card">
+          <div class="setting-title">
+            <span>0. เทมเพลตตราประทับ</span>
+            <button id="btnOpenTemplateMgr" class="btn btn-xs btn-soft" type="button">📋 จัดการเทมเพลต</button>
+          </div>
+          <div class="field" style="display:flex;gap:6px;align-items:center;">
+            <select id="selectTemplate" class="select" style="flex:1;"></select>
+            <button id="btnQuickSaveTemplate" class="btn btn-sm btn-primary" type="button" title="บันทึกการตั้งค่าปัจจุบันเป็นเทมเพลต">💾 บันทึก</button>
+          </div>
+          <div id="templateStatusHint" class="helper-text" style="margin-top:4px;">เลือกเทมเพลตที่บันทึกไว้ หรือบันทึกชุดข้อความที่ใช้บ่อย</div>
+        </div>
+
         <!-- 1. Restricted-Use Line -->
         <div class="setting-card">
           <div class="setting-title">1. ข้อความจำกัดวัตถุประสงค์</div>
@@ -1471,7 +1565,7 @@
             <div class="field-label" style="margin-bottom:2px;">
               <span>ลายเซ็นที่บันทึกไว้ (<span id="savedSigCount">0</span>)</span>
             </div>
-            <div class="helper-text" style="margin-top:0;">💾 บันทึกลายเซ็นไว้ในเครื่องนี้อัตโนมัติ (ใช้งานครั้งหน้าได้ทันที)</div>
+            <div id="sigStorageNote" class="helper-text" style="margin-top:0;">💾 บันทึกลายเซ็นไว้ในเครื่องนี้ (เข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง)</div>
             <div id="savedSigGrid" class="saved-sig-grid"></div>
           </div>
 
@@ -1736,8 +1830,192 @@
     </div>
   </div>
 
+  <!-- Template Manager Modal -->
+  <div id="templateModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="tplModalTitle">
+    <div class="modal-card" style="max-width:520px;">
+      <h3 id="tplModalTitle" class="modal-title">📋 จัดการเทมเพลตตราประทับ</h3>
+      <p class="modal-desc">บันทึกชุดข้อความ ฟอนต์ สี และตำแหน่งที่ใช้ประจำ เพื่อเรียกใช้ได้ทันทีบนทุกอุปกรณ์</p>
+
+      <div class="field" style="display:flex;gap:6px;">
+        <input id="inputNewTemplateName" class="input" type="text" placeholder="ตั้งชื่อเทมเพลต เช่น Refinance ธนาคาร CIMB" style="flex:1;" />
+        <button id="btnCreateTemplate" class="btn btn-primary btn-sm" type="button">+ บันทึก</button>
+      </div>
+
+      <div id="templateList" class="template-list"></div>
+
+      <div class="modal-actions">
+        <button id="btnCloseTemplateMgr" class="btn btn-primary" type="button">ปิด</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast"></div>
+
+  <!-- Firebase Modular SDK v11 (Google Sign-In + Firestore Cloud Sync) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithRedirect,
+      getRedirectResult,
+      signOut,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+    import {
+      getFirestore,
+      collection,
+      doc,
+      getDoc,
+      getDocs,
+      setDoc,
+      deleteDoc
+    } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+
+    const ALLOWED_EMAIL = 'taxicashflow@gmail.com';
+    const firebaseConfig = {
+      apiKey: 'AIzaSyC3p5Ezu_N3e4sXS1iBtHL2epT75ROgzqk',
+      authDomain: 'truecopy-cert-th.firebaseapp.com',
+      projectId: 'truecopy-cert-th',
+      storageBucket: 'truecopy-cert-th.firebasestorage.app',
+      messagingSenderId: '1061111836252',
+      appId: '1:1061111836252:web:1c05d0d682b77cf8aec099'
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    // Complete redirect login on iOS/mobile Safari if applicable
+    getRedirectResult(auth).catch((err) => {
+      console.warn('Redirect sign-in note:', err?.code || err?.message);
+    });
+
+    function toSignaturePayload(sig) {
+      return {
+        name: String(sig.name || 'ลายเซ็น').slice(0, 100),
+        dataUrl: String(sig.cleanDataUrl || '').slice(0, 600000),
+        threshold: Math.min(255, Math.max(0, Number(sig.threshold) || 200)),
+        tintSignature: Boolean(sig.tintSignature),
+        createdAt: Number(sig.createdAt) || Date.now(),
+        rawDataUrl: sig.rawDataUrl && sig.rawDataUrl.length <= 580000 ? sig.rawDataUrl : null,
+        updatedAt: Date.now()
+      };
+    }
+
+    function toTemplatePayload(tpl) {
+      const clamp = (v, min, max, fb) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fb;
+      };
+      return {
+        name: String(tpl.name || 'เทมเพลต').slice(0, 120),
+        purpose: String(tpl.purpose ?? '').slice(0, 200),
+        org: String(tpl.org ?? '').slice(0, 200),
+        templateLine: String(tpl.templateLine ?? '').slice(0, 400),
+        certifyText: String(tpl.certifyText ?? '').slice(0, 200),
+        showLines: Boolean(tpl.showLines),
+        lineStyle: tpl.lineStyle === 'solid' ? 'solid' : 'dashed',
+        color: String(tpl.color || '#0D33BF').slice(0, 20),
+        font: String(tpl.font && !String(tpl.font).startsWith('CustomFont_') ? tpl.font : 'Sarabun').slice(0, 60),
+        fontWeight: String(tpl.fontWeight || '700').slice(0, 10),
+        fontSize: clamp(tpl.fontSize, 8, 100, 26),
+        opacity: clamp(tpl.opacity, 0.05, 1.0, 0.85),
+        multiplyInk: Boolean(tpl.multiplyInk),
+        stampScale: clamp(tpl.stampScale, 0.1, 2.0, 0.93),
+        angle: clamp(tpl.angle, -180, 180, 35),
+        posX: clamp(tpl.posX, 0, 1, 0.5),
+        posY: clamp(tpl.posY, 0, 1, 0.5),
+        flatten: Boolean(tpl.flatten),
+        showSignerName: Boolean(tpl.showSignerName),
+        signerName: String(tpl.signerName ?? '').slice(0, 200),
+        sigScale: clamp(tpl.sigScale, 0.1, 3.0, 1.0),
+        tintSignature: Boolean(tpl.tintSignature),
+        createdAt: Number(tpl.createdAt) || Date.now(),
+        updatedAt: Date.now()
+      };
+    }
+
+    window.TrueCopyCloud = {
+      ALLOWED_EMAIL,
+      async signInWithGoogle() {
+        try {
+          return await signInWithPopup(auth, googleProvider);
+        } catch (err) {
+          if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment')) {
+            await signInWithRedirect(auth, googleProvider);
+            return null;
+          }
+          throw err;
+        }
+      },
+      async signOutUser() {
+        await signOut(auth);
+      },
+      onAuthChange(cb) {
+        return onAuthStateChanged(auth, cb);
+      },
+      async loadUserData(uid) {
+        const [sigSnap, tplSnap, defSnap] = await Promise.all([
+          getDocs(collection(db, 'users', uid, 'signatures')),
+          getDocs(collection(db, 'users', uid, 'templates')),
+          getDoc(doc(db, 'users', uid, 'settings', 'default'))
+        ]);
+
+        const signatures = [];
+        sigSnap.forEach((d) => {
+          const v = d.data();
+          signatures.push({
+            id: d.id,
+            name: v.name,
+            cleanDataUrl: v.dataUrl,
+            rawDataUrl: v.rawDataUrl || v.dataUrl,
+            threshold: v.threshold,
+            tintSignature: v.tintSignature,
+            createdAt: v.createdAt
+          });
+        });
+        signatures.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        const templates = [];
+        tplSnap.forEach((d) => {
+          templates.push({ id: d.id, ...d.data() });
+        });
+        templates.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        const defaultSettings = defSnap.exists() ? defSnap.data() : {};
+        return { signatures, templates, defaultSettings };
+      },
+      async saveSignature(uid, sig) {
+        const payload = toSignaturePayload(sig);
+        if (!payload.dataUrl || payload.dataUrl.length > 590000) return false;
+        await setDoc(doc(db, 'users', uid, 'signatures', sig.id), payload);
+        return true;
+      },
+      async deleteSignature(uid, sigId) {
+        await deleteDoc(doc(db, 'users', uid, 'signatures', sigId));
+      },
+      async saveTemplate(uid, tpl) {
+        await setDoc(doc(db, 'users', uid, 'templates', tpl.id), toTemplatePayload(tpl));
+      },
+      async deleteTemplate(uid, tplId) {
+        await deleteDoc(doc(db, 'users', uid, 'templates', tplId));
+      },
+      async saveUserDefaultSettings(uid, data) {
+        await setDoc(doc(db, 'users', uid, 'settings', 'default'), {
+          defaultTemplateId: data.defaultTemplateId || null,
+          defaultSignatureId: data.defaultSignatureId || null,
+          updatedAt: Date.now()
+        });
+      }
+    };
+
+    window.dispatchEvent(new CustomEvent('truecopy-cloud-ready'));
+  </script>
 
   <script>
     (() => {
@@ -1768,6 +2046,8 @@
       // =========================================================================
       const STORAGE_KEY = 'truecopy_phase1_settings_v1';
       const SAVED_SIGS_KEY = 'truecopy_saved_signatures_v1';
+      const SAVED_TEMPLATES_KEY = 'truecopy_saved_templates_v1';
+      const DEFAULT_TPL_KEY = 'truecopy_default_template_id_v1';
 
       const DEFAULT_SETTINGS = {
         purpose: 'Refinance',
@@ -1799,6 +2079,11 @@
 
       let settings = loadSettings();
       let savedSignatures = loadSavedSignatures();
+      let savedTemplates = loadSavedTemplates();
+      let defaultTemplateId = loadDefaultTemplateId();
+      let activeTemplateId = '';
+      let cloudUser = null;
+      let cloudBound = false;
       let customFontCounter = 0;
 
       /**
@@ -1867,6 +2152,19 @@
         btnResetDefaults: $('btnResetDefaults'),
         btnGenerate: $('btnGenerate'),
         btnUploadEmpty: $('btnUploadEmpty'),
+
+        // Auth UI
+        btnGoogleSignIn: $('btnGoogleSignIn'),
+        authUserBox: $('authUserBox'),
+        authUserPill: $('authUserPill'),
+        btnSignOut: $('btnSignOut'),
+
+        // Template Manager UI
+        btnOpenTemplateMgr: $('btnOpenTemplateMgr'),
+        selectTemplate: $('selectTemplate'),
+        btnQuickSaveTemplate: $('btnQuickSaveTemplate'),
+        templateStatusHint: $('templateStatusHint'),
+        sigStorageNote: $('sigStorageNote'),
 
         btnPrevPage: $('btnPrevPage'),
         btnNextPage: $('btnNextPage'),
@@ -1991,6 +2289,12 @@
         btnCancelDraw: $('btnCancelDraw'),
         btnSaveDraw: $('btnSaveDraw'),
 
+        templateModal: $('templateModal'),
+        inputNewTemplateName: $('inputNewTemplateName'),
+        btnCreateTemplate: $('btnCreateTemplate'),
+        templateList: $('templateList'),
+        btnCloseTemplateMgr: $('btnCloseTemplateMgr'),
+
         toast: $('toast')
       };
 
@@ -2102,6 +2406,7 @@
         saveSettings();
         renderSavedSignatures();
         await refreshStampAndPreview();
+        syncDefaultSettingsToCloud();
         showToast(`เลือกลายเซ็น "${sig.name}" แล้ว`);
       }
 
@@ -2110,6 +2415,9 @@
         if (idx === -1) return;
         savedSignatures.splice(idx, 1);
         saveSavedSignatures();
+        if (cloudUser && window.TrueCopyCloud) {
+          window.TrueCopyCloud.deleteSignature(cloudUser.uid, sigId).catch(console.warn);
+        }
         if (settings.activeSigId === sigId) {
           if (savedSignatures.length > 0) {
             await selectSavedSignature(savedSignatures[0].id);
@@ -2122,6 +2430,7 @@
           invalidateOutputs();
           syncControlsFromSettings();
           saveSettings();
+          syncDefaultSettingsToCloud();
           await refreshStampAndPreview();
         }
         renderSavedSignatures();
@@ -2145,7 +2454,398 @@
         settings.activeSigId = entry.id;
         saveSavedSignatures();
         renderSavedSignatures();
+        if (cloudUser && window.TrueCopyCloud) {
+          window.TrueCopyCloud.saveSignature(cloudUser.uid, entry).catch(console.warn);
+          syncDefaultSettingsToCloud();
+        }
         return entry;
+      }
+
+      // =========================================================================
+      // 4B. Template Manager & Firebase Cloud Sync
+      // =========================================================================
+      function loadSavedTemplates() {
+        try {
+          const raw = localStorage.getItem(SAVED_TEMPLATES_KEY);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr : [];
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveSavedTemplates() {
+        try {
+          localStorage.setItem(SAVED_TEMPLATES_KEY, JSON.stringify(savedTemplates));
+        } catch (err) {}
+      }
+
+      function loadDefaultTemplateId() {
+        try {
+          return localStorage.getItem(DEFAULT_TPL_KEY) || null;
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function saveDefaultTemplateId(id) {
+        defaultTemplateId = id || null;
+        try {
+          if (defaultTemplateId) {
+            localStorage.setItem(DEFAULT_TPL_KEY, defaultTemplateId);
+          } else {
+            localStorage.removeItem(DEFAULT_TPL_KEY);
+          }
+        } catch (err) {}
+      }
+
+      function buildTemplateFromSettings(name, existingId = null, existingCreatedAt = null) {
+        return {
+          id: existingId || `tpl_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          name: name.trim(),
+          purpose: settings.purpose || '',
+          org: settings.org || '',
+          templateLine: settings.templateLine || '',
+          certifyText: settings.certifyText || '',
+          showLines: Boolean(settings.showLines),
+          lineStyle: settings.lineStyle === 'solid' ? 'solid' : 'dashed',
+          color: settings.color || '#0D33BF',
+          font: settings.font && !settings.font.startsWith('CustomFont_') ? settings.font : 'Sarabun',
+          fontWeight: String(settings.fontWeight || '700'),
+          fontSize: Number(settings.fontSize) || 26,
+          opacity: Number(settings.opacity) || 0.85,
+          multiplyInk: Boolean(settings.multiplyInk),
+          stampScale: Number(settings.stampScale) || 0.93,
+          angle: Number.isFinite(Number(settings.angle)) ? Number(settings.angle) : 35,
+          posX: Number.isFinite(Number(settings.posX)) ? Number(settings.posX) : 0.5,
+          posY: Number.isFinite(Number(settings.posY)) ? Number(settings.posY) : 0.5,
+          flatten: Boolean(settings.flatten),
+          showSignerName: Boolean(settings.showSignerName),
+          signerName: settings.signerName || '',
+          sigScale: Number(settings.sigScale) || 1.0,
+          tintSignature: Boolean(settings.tintSignature),
+          createdAt: existingCreatedAt || Date.now(),
+          updatedAt: Date.now()
+        };
+      }
+
+      function renderTemplateSelect() {
+        if (!els.selectTemplate) return;
+        els.selectTemplate.innerHTML = '';
+
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = savedTemplates.length > 0
+          ? '-- เลือกเทมเพลตที่บันทึกไว้ --'
+          : '-- ยังไม่มีเทมเพลตที่บันทึก --';
+        els.selectTemplate.appendChild(placeholder);
+
+        for (const tpl of savedTemplates) {
+          const opt = document.createElement('option');
+          opt.value = tpl.id;
+          const star = tpl.id === defaultTemplateId ? '⭐ ' : '';
+          opt.textContent = `${star}${tpl.name}`;
+          els.selectTemplate.appendChild(opt);
+        }
+
+        if (activeTemplateId && savedTemplates.some(t => t.id === activeTemplateId)) {
+          els.selectTemplate.value = activeTemplateId;
+        } else {
+          els.selectTemplate.value = '';
+        }
+      }
+
+      function renderTemplateModalList() {
+        if (!els.templateList) return;
+        els.templateList.innerHTML = '';
+
+        if (savedTemplates.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'helper-text';
+          empty.style.textAlign = 'center';
+          empty.style.padding = '16px 8px';
+          empty.textContent = 'ยังไม่มีเทมเพลตที่บันทึกไว้ ตั้งชื่อด้านบนแล้วกด "+ บันทึก" เพื่อสร้างเทมเพลตแรกได้เลย';
+          els.templateList.appendChild(empty);
+          return;
+        }
+
+        for (const tpl of savedTemplates) {
+          const isDef = tpl.id === defaultTemplateId;
+          const card = document.createElement('div');
+          card.className = `template-item ${isDef ? 'is-default' : ''}`;
+
+          const head = document.createElement('div');
+          head.className = 'template-item-head';
+          const title = document.createElement('span');
+          title.textContent = tpl.name;
+          head.appendChild(title);
+
+          if (isDef) {
+            const badge = document.createElement('span');
+            badge.className = 'badge badge-success';
+            badge.textContent = '⭐ ค่าเริ่มต้น';
+            head.appendChild(badge);
+          }
+
+          const resolved = (tpl.templateLine || '')
+            .replace(/\{purpose\}/gi, tpl.purpose || '')
+            .replace(/\{org\}/gi, tpl.org || '')
+            .trim();
+          const prev = document.createElement('div');
+          prev.className = 'template-item-preview';
+          prev.style.color = tpl.color || '#0D33BF';
+          prev.textContent = resolved || tpl.certifyText || '(ไม่มีข้อความ)';
+
+          const meta = document.createElement('div');
+          meta.className = 'template-item-meta';
+          meta.textContent = `ฟอนต์ ${tpl.font} · เอียง ${tpl.angle}° · ความเข้ม ${Math.round((tpl.opacity || 0.85) * 100)}%`;
+
+          const actions = document.createElement('div');
+          actions.className = 'template-item-actions';
+
+          const btnUse = document.createElement('button');
+          btnUse.type = 'button';
+          btnUse.className = 'btn btn-primary btn-xs';
+          btnUse.textContent = 'ใช้งาน';
+          btnUse.addEventListener('click', () => {
+            applyTemplate(tpl.id);
+            els.templateModal.classList.remove('open');
+          });
+
+          const btnDef = document.createElement('button');
+          btnDef.type = 'button';
+          btnDef.className = 'btn btn-xs';
+          btnDef.textContent = isDef ? '⭐ ค่าเริ่มต้นอยู่แล้ว' : '⭐ ตั้งเป็นค่าเริ่มต้น';
+          btnDef.disabled = isDef;
+          btnDef.addEventListener('click', () => setDefaultTemplate(tpl.id));
+
+          const btnUpd = document.createElement('button');
+          btnUpd.type = 'button';
+          btnUpd.className = 'btn btn-soft btn-xs';
+          btnUpd.textContent = 'อัปเดตด้วยค่าปัจจุบัน';
+          btnUpd.addEventListener('click', () => updateTemplateFromCurrent(tpl.id));
+
+          const btnDel = document.createElement('button');
+          btnDel.type = 'button';
+          btnDel.className = 'btn btn-danger-ghost btn-xs';
+          btnDel.textContent = 'ลบ';
+          btnDel.addEventListener('click', () => deleteTemplate(tpl.id));
+
+          actions.appendChild(btnUse);
+          actions.appendChild(btnDef);
+          actions.appendChild(btnUpd);
+          actions.appendChild(btnDel);
+
+          card.appendChild(head);
+          card.appendChild(prev);
+          card.appendChild(meta);
+          card.appendChild(actions);
+          els.templateList.appendChild(card);
+        }
+      }
+
+      async function applyTemplate(tplId, silent = false) {
+        const tpl = savedTemplates.find(t => t.id === tplId);
+        if (!tpl) return;
+        activeTemplateId = tpl.id;
+        Object.assign(settings, {
+          purpose: tpl.purpose ?? settings.purpose,
+          org: tpl.org ?? settings.org,
+          templateLine: tpl.templateLine ?? settings.templateLine,
+          certifyText: tpl.certifyText ?? settings.certifyText,
+          showLines: tpl.showLines !== undefined ? Boolean(tpl.showLines) : settings.showLines,
+          lineStyle: tpl.lineStyle || settings.lineStyle,
+          color: tpl.color || settings.color,
+          font: tpl.font || settings.font,
+          fontWeight: String(tpl.fontWeight || settings.fontWeight),
+          fontSize: Number(tpl.fontSize) || settings.fontSize,
+          opacity: Number(tpl.opacity) || settings.opacity,
+          multiplyInk: tpl.multiplyInk !== undefined ? Boolean(tpl.multiplyInk) : settings.multiplyInk,
+          stampScale: Number(tpl.stampScale) || settings.stampScale,
+          angle: Number.isFinite(Number(tpl.angle)) ? Number(tpl.angle) : settings.angle,
+          posX: Number.isFinite(Number(tpl.posX)) ? Number(tpl.posX) : settings.posX,
+          posY: Number.isFinite(Number(tpl.posY)) ? Number(tpl.posY) : settings.posY,
+          flatten: tpl.flatten !== undefined ? Boolean(tpl.flatten) : settings.flatten,
+          showSignerName: tpl.showSignerName !== undefined ? Boolean(tpl.showSignerName) : settings.showSignerName,
+          signerName: tpl.signerName ?? settings.signerName,
+          sigScale: Number(tpl.sigScale) || settings.sigScale,
+          tintSignature: tpl.tintSignature !== undefined ? Boolean(tpl.tintSignature) : settings.tintSignature
+        });
+        invalidateOutputs();
+        if (settings.rawSigDataUrl) {
+          await processSignatureDataUrl(settings.rawSigDataUrl);
+        }
+        syncControlsFromSettings();
+        renderTemplateSelect();
+        saveSettings();
+        await refreshStampAndPreview();
+        if (!silent) {
+          showToast(`ใช้เทมเพลต "${tpl.name}" แล้ว`);
+        }
+      }
+
+      function createTemplateFromCurrent(nameInput) {
+        const cleanName = (nameInput || '').trim() || `${settings.purpose || 'ตราประทับ'} ${settings.org || ''}`.trim() || `เทมเพลต ${savedTemplates.length + 1}`;
+        const tpl = buildTemplateFromSettings(cleanName);
+        savedTemplates.unshift(tpl);
+        activeTemplateId = tpl.id;
+        saveSavedTemplates();
+        renderTemplateSelect();
+        renderTemplateModalList();
+        if (cloudUser && window.TrueCopyCloud) {
+          window.TrueCopyCloud.saveTemplate(cloudUser.uid, tpl).catch(console.warn);
+        }
+        showToast(`บันทึกเทมเพลต "${tpl.name}" แล้ว`);
+      }
+
+      function updateTemplateFromCurrent(tplId) {
+        const idx = savedTemplates.findIndex(t => t.id === tplId);
+        if (idx === -1) return;
+        const old = savedTemplates[idx];
+        const updated = buildTemplateFromSettings(old.name, old.id, old.createdAt);
+        savedTemplates[idx] = updated;
+        activeTemplateId = updated.id;
+        saveSavedTemplates();
+        renderTemplateSelect();
+        renderTemplateModalList();
+        if (cloudUser && window.TrueCopyCloud) {
+          window.TrueCopyCloud.saveTemplate(cloudUser.uid, updated).catch(console.warn);
+        }
+        showToast(`อัปเดตเทมเพลต "${updated.name}" เรียบร้อย`);
+      }
+
+      function setDefaultTemplate(tplId) {
+        saveDefaultTemplateId(tplId);
+        renderTemplateSelect();
+        renderTemplateModalList();
+        syncDefaultSettingsToCloud();
+        const tpl = savedTemplates.find(t => t.id === tplId);
+        if (tpl) showToast(`ตั้ง "${tpl.name}" เป็นค่าเริ่มต้นแล้ว`);
+      }
+
+      function deleteTemplate(tplId) {
+        const idx = savedTemplates.findIndex(t => t.id === tplId);
+        if (idx === -1) return;
+        const [removed] = savedTemplates.splice(idx, 1);
+        if (activeTemplateId === tplId) activeTemplateId = '';
+        if (defaultTemplateId === tplId) {
+          saveDefaultTemplateId(null);
+          syncDefaultSettingsToCloud();
+        }
+        saveSavedTemplates();
+        renderTemplateSelect();
+        renderTemplateModalList();
+        if (cloudUser && window.TrueCopyCloud) {
+          window.TrueCopyCloud.deleteTemplate(cloudUser.uid, tplId).catch(console.warn);
+        }
+        showToast(`ลบเทมเพลต "${removed.name}" แล้ว`);
+      }
+
+      function syncDefaultSettingsToCloud() {
+        if (!cloudUser || !window.TrueCopyCloud) return;
+        window.TrueCopyCloud.saveUserDefaultSettings(cloudUser.uid, {
+          defaultTemplateId: defaultTemplateId || null,
+          defaultSignatureId: settings.activeSigId || null
+        }).catch(console.warn);
+      }
+
+      function syncAuthUi() {
+        if (cloudUser) {
+          els.btnGoogleSignIn.style.display = 'none';
+          els.authUserBox.style.display = 'flex';
+          const shortName = cloudUser.email ? cloudUser.email.split('@')[0] : 'Cloud';
+          els.authUserPill.textContent = `☁️ ${shortName}`;
+          els.sigStorageNote.textContent = '☁️ ซิงก์ลายเซ็นบน Cloud แล้ว (ใช้ได้ทุกเครื่อง)';
+          els.templateStatusHint.textContent = '☁️ เทมเพลตซิงก์กับบัญชี Google ของคุณอัตโนมัติ';
+        } else {
+          els.btnGoogleSignIn.style.display = 'inline-flex';
+          els.authUserBox.style.display = 'none';
+          els.sigStorageNote.textContent = '💾 บันทึกลายเซ็นไว้ในเครื่องนี้ (เข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง)';
+          els.templateStatusHint.textContent = 'เลือกเทมเพลตที่บันทึกไว้ หรือเข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง';
+        }
+      }
+
+      async function handleCloudAuthState(user) {
+        if (user) {
+          const allowed = window.TrueCopyCloud?.ALLOWED_EMAIL || 'taxicashflow@gmail.com';
+          if (user.email !== allowed) {
+            showToast(`อนุญาตเฉพาะบัญชี ${allowed} เท่านั้น`);
+            await window.TrueCopyCloud.signOutUser();
+            cloudUser = null;
+            syncAuthUi();
+            return;
+          }
+
+          cloudUser = user;
+          syncAuthUi();
+
+          try {
+            const data = await window.TrueCopyCloud.loadUserData(user.uid);
+
+            // 1. Merge signatures (cloud + push any local-only signatures up to Firestore)
+            const cloudSigMap = new Map(data.signatures.map(s => [s.id, s]));
+            const mergedSigs = [...data.signatures];
+            for (const localSig of savedSignatures) {
+              if (!cloudSigMap.has(localSig.id)) {
+                mergedSigs.push(localSig);
+                window.TrueCopyCloud.saveSignature(user.uid, localSig).catch(console.warn);
+              }
+            }
+            mergedSigs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            savedSignatures = mergedSigs.slice(0, 10);
+            saveSavedSignatures();
+
+            // 2. Merge templates (cloud + push any local-only templates up to Firestore)
+            const cloudTplMap = new Map(data.templates.map(t => [t.id, t]));
+            const mergedTpls = [...data.templates];
+            for (const localTpl of savedTemplates) {
+              if (!cloudTplMap.has(localTpl.id)) {
+                mergedTpls.push(localTpl);
+                window.TrueCopyCloud.saveTemplate(user.uid, localTpl).catch(console.warn);
+              }
+            }
+            mergedTpls.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            savedTemplates = mergedTpls;
+            saveSavedTemplates();
+
+            // 3. Apply cloud defaults if present
+            if (data.defaultSettings && data.defaultSettings.defaultTemplateId) {
+              saveDefaultTemplateId(data.defaultSettings.defaultTemplateId);
+              if (files.length === 0) {
+                await applyTemplate(defaultTemplateId, true);
+              }
+            }
+
+            if (data.defaultSettings && data.defaultSettings.defaultSignatureId && savedSignatures.some(s => s.id === data.defaultSettings.defaultSignatureId)) {
+              if (!settings.activeSigId) {
+                await selectSavedSignature(data.defaultSettings.defaultSignatureId);
+              }
+            } else if (!settings.activeSigId && savedSignatures.length > 0) {
+              await selectSavedSignature(savedSignatures[0].id);
+            }
+
+            renderSavedSignatures();
+            renderTemplateSelect();
+            if (els.templateModal.classList.contains('open')) {
+              renderTemplateModalList();
+            }
+            showToast('ซิงก์ข้อมูลจาก Firebase เรียบร้อย ☁️');
+          } catch (err) {
+            console.error('Cloud load failed:', err);
+            showToast('โหลดข้อมูลจาก Cloud ไม่สำเร็จ (กำลังใช้ข้อมูลในเครื่องแทน)');
+          }
+        } else {
+          cloudUser = null;
+          syncAuthUi();
+        }
+      }
+
+      function bindCloudAuth() {
+        if (window.TrueCopyCloud && !cloudBound) {
+          cloudBound = true;
+          window.TrueCopyCloud.onAuthChange(handleCloudAuthState);
+        }
       }
 
       let toastTimer = null;
@@ -3610,6 +4310,7 @@
         }
       }
 
+      let cloudSigSyncTimer = null;
       function onSettingChanged(reprocessSig = false) {
         invalidateOutputs();
         saveSettings();
@@ -3625,6 +4326,14 @@
                 activeSig.tintSignature = settings.tintSignature;
                 saveSavedSignatures();
                 renderSavedSignatures();
+                if (cloudUser && window.TrueCopyCloud) {
+                  clearTimeout(cloudSigSyncTimer);
+                  cloudSigSyncTimer = setTimeout(() => {
+                    if (cloudUser && window.TrueCopyCloud) {
+                      window.TrueCopyCloud.saveSignature(cloudUser.uid, activeSig).catch(console.warn);
+                    }
+                  }, 500);
+                }
               }
             }
             refreshStampAndPreview();
@@ -4219,6 +4928,77 @@
           els.shareFallbackModal.classList.remove('open');
         });
 
+        // Auth UI events
+        els.btnGoogleSignIn.addEventListener('click', async () => {
+          if (location.protocol === 'file:') {
+            showToast('การเข้าสู่ระบบ Google ต้องเปิดผ่านเว็บ (https://truecopy-3rh.pages.dev/ หรือ localhost)', 4000);
+            return;
+          }
+          if (!window.TrueCopyCloud) {
+            showToast('กำลังโหลดระบบเชื่อมต่อ Firebase กรุณาลองใหม่อีกครั้ง');
+            return;
+          }
+          try {
+            await window.TrueCopyCloud.signInWithGoogle();
+          } catch (err) {
+            if (err && err.code === 'auth/popup-closed-by-user') return;
+            if (err && err.code === 'auth/unauthorized-domain') {
+              showToast('โดเมนนี้ยังไม่ได้เพิ่มใน Authorized domains ของ Firebase Authentication', 4500);
+              return;
+            }
+            console.error('Sign in error:', err);
+            showToast(`เข้าสู่ระบบไม่สำเร็จ: ${err?.message || err?.code || 'กรุณาลองใหม่'}`);
+          }
+        });
+
+        els.btnSignOut.addEventListener('click', async () => {
+          if (window.TrueCopyCloud) {
+            await window.TrueCopyCloud.signOutUser();
+            showToast('ออกจากระบบแล้ว (ข้อมูลยังใช้งานต่อบนเครื่องนี้ได้)');
+          }
+        });
+
+        // Template Manager events
+        els.selectTemplate.addEventListener('change', (e) => {
+          const tplId = e.target.value;
+          if (tplId) {
+            applyTemplate(tplId);
+          } else {
+            activeTemplateId = '';
+          }
+        });
+
+        els.btnOpenTemplateMgr.addEventListener('click', () => {
+          els.inputNewTemplateName.value = '';
+          renderTemplateModalList();
+          els.templateModal.classList.add('open');
+        });
+
+        els.btnQuickSaveTemplate.addEventListener('click', () => {
+          const suggested = `${settings.purpose || ''} ${settings.org || ''}`.trim();
+          els.inputNewTemplateName.value = suggested;
+          renderTemplateModalList();
+          els.templateModal.classList.add('open');
+          setTimeout(() => els.inputNewTemplateName.focus(), 50);
+        });
+
+        els.btnCreateTemplate.addEventListener('click', () => {
+          createTemplateFromCurrent(els.inputNewTemplateName.value);
+          els.inputNewTemplateName.value = '';
+        });
+
+        els.inputNewTemplateName.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            createTemplateFromCurrent(els.inputNewTemplateName.value);
+            els.inputNewTemplateName.value = '';
+          }
+        });
+
+        els.btnCloseTemplateMgr.addEventListener('click', () => {
+          els.templateModal.classList.remove('open');
+        });
+
         // Mobile tabs
         els.tabMobileFiles.addEventListener('click', () => openMobileSheet('left'));
         els.tabMobilePreview.addEventListener('click', () => closeMobileSheets());
@@ -4265,9 +5045,18 @@
           }
         }
 
+        if (defaultTemplateId && savedTemplates.some(t => t.id === defaultTemplateId)) {
+          await applyTemplate(defaultTemplateId, true);
+        }
+
         renderSavedSignatures();
+        renderTemplateSelect();
         syncControlsFromSettings();
+        syncAuthUi();
         wireEvents();
+
+        bindCloudAuth();
+        window.addEventListener('truecopy-cloud-ready', bindCloudAuth);
 
         if (settings.cleanSigDataUrl) {
           try {

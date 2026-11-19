@@ -1,0 +1,21 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "database": "(default)",
+    "location": "asia-southeast1"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "TrueCopy",
+        "supportEmail": "taxicashflow@gmail.com",
+        "authorizedRedirectUris": [
+          "https://truecopy-cert-th.firebaseapp.com/__/auth/handler",
+          "https://truecopy-3rh.pages.dev",
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}

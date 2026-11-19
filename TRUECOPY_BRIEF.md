@@ -41,8 +41,8 @@
 | What is stored on Firebase | Signatures (stored directly in Firestore as compact transparent PNG data URLs, ~15–30 KB), text templates, default settings, history, and optionally stamped output files — **never the original documents** |
 | Encrypt files before upload | **No** (security rules protect the data) |
 | Flatten pages to images | **On by default**; the user can turn it off |
-| Hosting | **Cloudflare Pages/Workers** on a free subdomain such as `truecopy.pages.dev`. The user has no custom domain yet |
-| Accounts | Google / Firebase / Cloudflare: `taxicashflow@gmail.com` (Cloudflare Account ID: `6cf13c91bf3d927563c99ece990518ea`) · GitHub: `PTAero-dev` (`PTAero-dev/TrueCopy`) |
+| Hosting | **Cloudflare Pages** (`https://truecopy-3rh.pages.dev/`) |
+| Accounts | Google / Firebase / Cloudflare: `taxicashflow@gmail.com` (Firebase Project: `truecopy-cert-th`, Region: `asia-southeast1` Spark plan · Cloudflare Account ID: `6cf13c91bf3d927563c99ece990518ea`) · GitHub: `PTAero-dev` (`PTAero-dev/TrueCopy`) |
 | Fonts the user likes | **Thai Niramit (Niramit)** or **Thai Sarabun (Sarabun)** — see section 5 |
 
 ---
@@ -236,7 +236,7 @@ service firebase.storage {
 ## 8. Development phases
 
 1. **Phase 1 — Local stamping (no Firebase yet):** multi-file upload, restricted-use line + certification text + dashed lines, color/font choice (Sarabun/Niramit), ink opacity + Real Ink blend, signature photo upload or on-screen drawing pad + memorized local signature library, optional `(ชื่อ-นามสกุล)` line, direct hand move/rotate/resize (handles + 2-finger pinch/twist) with per-page overrides, PDF page removal/restore, flatten toggle (on by default), preview, individual + ZIP download, and **Share button (`แชร์ไฟล์` — LINE / WhatsApp / Email)**. Keep defaults and signatures in `localStorage` (wrapped in try/catch).
-2. **Phase 2 — Connect Firebase:** Google sign-in, sync memorized signatures and templates across devices in Firestore (free Spark plan, no credit card needed), write security rules, build template manager screens.
+2. **Phase 2 — Connect Firebase *(Implemented)*:** Google sign-in (`taxicashflow@gmail.com` only), sync memorized signatures and templates across devices in Firestore (`truecopy-cert-th`, `asia-southeast1`, free Spark plan, no credit card needed), strict owner-only `firestore.rules`, and Template Manager UI.
 3. **Phase 3 — Extra features:** Buddhist Era date, anti-forgery watermark, history.
 4. **Phase 4 — Publish:** deploy on Cloudflare (`*.pages.dev`), set Authorized domains and App Check, make it a PWA (a small `manifest.json` and `sw.js` can sit beside `index.html` on Cloudflare Pages while keeping all app code inside the single HTML file).
 
