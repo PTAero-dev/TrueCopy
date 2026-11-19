@@ -282,6 +282,14 @@ Bug fixed: on phones the header buttons (`flex-shrink: 0`) were wider than the s
 - Tested worst case (signed in + PIN lock + install button all visible) in headless Chrome at 320/360/375/390/412/430, 768, 820, 1024 and 1180 px. The page width never exceeded the screen width.
 - `sw.js` serves HTML network-first, so layout fixes reach installed PWAs without bumping `CACHE_NAME`.
 
+### How to deploy (Cloudflare Pages)
+
+The Pages project `truecopy` is **not** connected to GitHub (direct upload), so `git push` does **not** deploy. After committing, copy **only the app files** (`index.html`, `manifest.json`, `sw.js`, `icon.svg`, `icon-192.png`, `icon-512.png`) into a temporary folder and run:
+
+`npx wrangler pages deploy <that-folder> --project-name truecopy --branch main --commit-hash <sha>`
+
+Never deploy the project root. Until 2026-11-19 it was deployed that way, which made `TRUECOPY_BRIEF.md`, `firestore.rules` and `firebase.json` public.
+
 ---
 
 ## 10. User flow
