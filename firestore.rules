@@ -51,6 +51,13 @@ service cloud.firestore {
     //   - tintSignature: bool (required)
     //   - createdAt: number (required, > 0, immutable on update) - epoch ms
     //   - updatedAt: number (optional, >= 0) - epoch ms
+    //   - showDate: bool (optional, Phase 3)
+    //   - dateEra: string (optional, Phase 3, 'BE' | 'CE')
+    //   - dateFormat: string (optional, Phase 3, 'long' | 'short' | 'numeric')
+    //   - useThaiDigits: bool (optional, Phase 3)
+    //   - watermarkEnabled: bool (optional, Phase 3)
+    //   - watermarkOpacity: number (optional, Phase 3, 0.02..0.40)
+    //   - watermarkText: string (optional, Phase 3, <= 200 chars)
     //
     // Collection: users/{uid}/settings/{docId} (e.g., 'default')
     // Document ID: 'default' (or settings doc identifier)
@@ -174,7 +181,9 @@ service cloud.firestore {
         'showLines', 'lineStyle', 'color', 'font', 'fontWeight',
         'fontSize', 'opacity', 'multiplyInk', 'stampScale', 'angle',
         'posX', 'posY', 'flatten', 'showSignerName', 'signerName',
-        'sigScale', 'tintSignature', 'createdAt', 'updatedAt'
+        'sigScale', 'tintSignature', 'createdAt', 'updatedAt',
+        'showDate', 'dateEra', 'dateFormat', 'useThaiDigits',
+        'watermarkEnabled', 'watermarkOpacity', 'watermarkText'
       ];
       return hasRequiredFields(data, required) &&
              hasOnlyAllowedFields(data, allowed) &&
@@ -201,7 +210,14 @@ service cloud.firestore {
              isNumberInRange(data.sigScale, 0.1, 3.0) &&
              data.tintSignature is bool &&
              isPositiveNumber(data.createdAt) &&
-             isValidOptionalNonNegativeNumber(data, 'updatedAt');
+             isValidOptionalNonNegativeNumber(data, 'updatedAt') &&
+             (!('showDate' in data) || data.showDate is bool) &&
+             (!('dateEra' in data) || (data.dateEra is string && data.dateEra in ['BE', 'CE'])) &&
+             (!('dateFormat' in data) || (data.dateFormat is string && data.dateFormat in ['long', 'short', 'numeric'])) &&
+             (!('useThaiDigits' in data) || data.useThaiDigits is bool) &&
+             (!('watermarkEnabled' in data) || data.watermarkEnabled is bool) &&
+             (!('watermarkOpacity' in data) || isNumberInRange(data.watermarkOpacity, 0.02, 0.40)) &&
+             (!('watermarkText' in data) || isValidString(data.watermarkText, 0, 200));
     }
 
     function isValidSettings(data) {

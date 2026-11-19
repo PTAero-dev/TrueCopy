@@ -1200,6 +1200,76 @@
       margin-top: 8px;
     }
 
+    .nested-subcard {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 9px;
+      background: var(--surface-muted);
+      border: 1px dashed var(--border-strong);
+    }
+
+    .date-preview-pill {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: 7px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .history-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 12px;
+      background: var(--surface-muted);
+    }
+
+    .history-item-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .history-item-files {
+      font-size: 12.5px;
+      color: var(--text);
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .history-item-meta {
+      font-size: 11.5px;
+      color: var(--text-soft);
+      margin-top: 3px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 719px) {
+      .btn-history-label {
+        display: none;
+      }
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -1373,12 +1443,13 @@
     </div>
     <div class="header-actions">
       <div id="authHeaderSlot" class="auth-slot">
-        <button id="btnGoogleSignIn" class="btn btn-soft btn-sm" type="button" title="เข้าสู่ระบบด้วย Google เพื่อซิงก์ลายเซ็นและเทมเพลตข้ามเครื่อง">🔐 เข้าสู่ระบบ</button>
+        <button id="btnGoogleSignIn" class="btn btn-soft btn-sm" type="button" title="เข้าสู่ระบบด้วย Google เพื่อซิงก์ลายเซ็น เทมเพลต และประวัติข้ามเครื่อง">🔐 เข้าสู่ระบบ</button>
         <div id="authUserBox" class="auth-user-box" style="display:none;">
           <span id="authUserPill" class="auth-pill">☁️ ซิงก์แล้ว</span>
           <button id="btnSignOut" class="btn btn-xs" type="button">ออก</button>
         </div>
       </div>
+      <button id="btnOpenHistory" class="btn btn-sm" type="button" title="ดูประวัติเอกสารที่รับรองสำเนาแล้ว">📜 <span class="btn-history-label">ประวัติ</span> <span id="historyCountBadge" class="badge">0</span></button>
       <button id="btnAddFilesHeader" class="btn btn-hide-sm" type="button">+ เพิ่มไฟล์</button>
       <button id="btnResetDefaults" class="btn btn-hide-sm" type="button" title="คืนค่าตราประทับเริ่มต้น">รีเซ็ตค่าเริ่มต้น</button>
       <button id="btnGenerate" class="btn btn-primary" type="button" disabled>ประมวลผลและสร้างไฟล์ PDF</button>
@@ -1605,6 +1676,44 @@
             </label>
             <input id="inputSignerName" class="input" type="text" placeholder="เช่น นายสมชาย ใจดี" style="margin-top:6px;display:none;" />
           </div>
+
+          <div class="field" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
+            <label class="checkbox-row">
+              <input id="chkShowDate" type="checkbox" />
+              <span>แสดงวันที่รับรองสำเนาใต้ลายเซ็น (พ.ศ. / ค.ศ.)</span>
+            </label>
+            <div id="dateControlsWrap" class="nested-subcard" style="display:none;">
+              <div class="field">
+                <label class="field-label" for="inputCertDate">วันที่ประทับตรา</label>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <input id="inputCertDate" class="input" type="date" style="flex:1;" />
+                  <button id="btnDateToday" class="btn btn-soft btn-sm" type="button">วันนี้</button>
+                </div>
+              </div>
+              <div class="grid-2 field">
+                <div>
+                  <label class="field-label" for="selectDateEra">ศักราช</label>
+                  <select id="selectDateEra" class="select">
+                    <option value="BE">พ.ศ. (พุทธศักราช)</option>
+                    <option value="CE">ค.ศ. (คริสต์ศักราช)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" for="selectDateFormat">รูปแบบวันที่</label>
+                  <select id="selectDateFormat" class="select">
+                    <option value="long">เต็ม (19 พฤศจิกายน พ.ศ. 2569)</option>
+                    <option value="short">ย่อ (19 พ.ย. 2569)</option>
+                    <option value="numeric">ตัวเลข (19/11/2569)</option>
+                  </select>
+                </div>
+              </div>
+              <label class="checkbox-row">
+                <input id="chkThaiDigits" type="checkbox" />
+                <span>ใช้ตัวเลขไทย (๐-๙)</span>
+              </label>
+              <div id="datePreviewBadge" class="date-preview-pill"></div>
+            </div>
+          </div>
         </div>
 
         <!-- 4. Font, Color & Real Ink -->
@@ -1728,15 +1837,39 @@
           <div class="helper-text">💡 ลากตราประทับบนตัวอย่างเอกสารด้วยเมาส์หรือนิ้วได้เลย</div>
         </div>
 
-        <!-- 6. Output Security (Flatten) -->
+        <!-- 6. Output Security (Flatten) & Anti-Forgery Watermark -->
         <div class="setting-card">
-          <div class="setting-title">6. ความปลอดภัยของไฟล์ผลลัพธ์</div>
-          <label class="checkbox-row">
-            <input id="chkFlatten" type="checkbox" />
-            <span>รวมตราประทับเป็นเนื้อเดียวกับหน้ากระดาษ (Flatten — แนะนำ)</span>
-          </label>
-          <div class="helper-text">
-            ป้องกันการลบตราประทับหรือดึงรูปลายเซ็นออกไปใช้ต่อในโปรแกรมแก้ PDF (ไฟล์ที่มีรหัสผ่านหรือรูปภาพจะถูก Flatten อัตโนมัติ)
+          <div class="setting-title">6. ความปลอดภัยและลายน้ำป้องกันการปลอมแปลง</div>
+          <div class="field">
+            <label class="checkbox-row">
+              <input id="chkFlatten" type="checkbox" />
+              <span>รวมตราประทับเป็นเนื้อเดียวกับหน้ากระดาษ (Flatten — แนะนำ)</span>
+            </label>
+            <div class="helper-text">
+              ป้องกันการลบตราประทับหรือดึงรูปลายเซ็นออกไปใช้ต่อในโปรแกรมแก้ PDF (ไฟล์ที่มีรหัสผ่านหรือรูปภาพจะถูก Flatten อัตโนมัติ)
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
+            <label class="checkbox-row">
+              <input id="chkWatermarkEnabled" type="checkbox" />
+              <span>ใส่ลายน้ำเฉียงทั่วหน้าป้องกันการปลอมแปลง</span>
+            </label>
+            <div class="helper-text">พิมพ์ข้อความจางๆ เฉียงคลุมทั้งหน้าเพื่อป้องกันการตัดต่อเอกสารไปใช้ผิดวัตถุประสงค์</div>
+
+            <div id="watermarkControlsWrap" class="nested-subcard" style="display:none;">
+              <div class="field">
+                <label class="field-label" for="inputWatermarkText">ข้อความลายน้ำ</label>
+                <input id="inputWatermarkText" class="input" type="text" maxlength="200" placeholder="เว้นว่างเพื่อใช้ข้อความวัตถุประสงค์ + วันที่อัตโนมัติ" />
+              </div>
+              <div class="field" style="margin-bottom:0;">
+                <div class="field-label">
+                  <span>ความจางของลายน้ำ</span>
+                  <span id="valWatermarkOpacity" class="field-val">10%</span>
+                </div>
+                <input id="rangeWatermarkOpacity" class="range" type="range" min="4" max="30" step="1" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1849,6 +1982,25 @@
     </div>
   </div>
 
+  <!-- Certification History Modal -->
+  <div id="historyModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <div class="modal-card" style="max-width:560px;">
+      <h3 id="historyModalTitle" class="modal-title">📜 ประวัติการรับรองสำเนา</h3>
+      <p id="historyStorageNote" class="modal-desc">บันทึกเฉพาะชื่อไฟล์ วัตถุประสงค์ และวันเวลา (เอกสารต้นฉบับไม่ถูกอัปโหลดขึ้นคลาวด์)</p>
+
+      <div class="history-toolbar">
+        <input id="inputHistorySearch" class="input" type="search" placeholder="🔍 ค้นหาชื่อไฟล์ วัตถุประสงค์ หรือธนาคาร..." style="flex:1;" />
+        <button id="btnClearHistory" class="btn btn-danger-ghost btn-sm" type="button">ล้างทั้งหมด</button>
+      </div>
+
+      <div id="historyList" class="history-list"></div>
+
+      <div class="modal-actions">
+        <button id="btnCloseHistory" class="btn btn-primary" type="button">ปิด</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
@@ -1935,8 +2087,29 @@
         signerName: String(tpl.signerName ?? '').slice(0, 200),
         sigScale: clamp(tpl.sigScale, 0.1, 3.0, 1.0),
         tintSignature: Boolean(tpl.tintSignature),
+        showDate: Boolean(tpl.showDate),
+        dateEra: tpl.dateEra === 'CE' ? 'CE' : 'BE',
+        dateFormat: ['long', 'short', 'numeric'].includes(tpl.dateFormat) ? tpl.dateFormat : 'long',
+        useThaiDigits: Boolean(tpl.useThaiDigits),
+        watermarkEnabled: Boolean(tpl.watermarkEnabled),
+        watermarkOpacity: clamp(tpl.watermarkOpacity, 0.02, 0.40, 0.10),
+        watermarkText: String(tpl.watermarkText ?? '').slice(0, 200),
         createdAt: Number(tpl.createdAt) || Date.now(),
         updatedAt: Date.now()
+      };
+    }
+
+    function toHistoryPayload(entry) {
+      const rawFiles = Array.isArray(entry.fileNames) ? entry.fileNames : [];
+      const cleanFiles = rawFiles.map(n => String(n || '').slice(0, 400)).filter(Boolean).slice(0, 100);
+      if (cleanFiles.length === 0) cleanFiles.push('document.pdf');
+      return {
+        createdAt: Math.max(1, Number(entry.createdAt) || Date.now()),
+        fileNames: cleanFiles,
+        templateId: entry.templateId ? String(entry.templateId).slice(0, 128) : null,
+        purposeText: String(entry.purposeText ?? '').slice(0, 400),
+        pageCount: Math.max(1, Math.round(Number(entry.pageCount) || 1)),
+        outputPath: entry.outputPath ? String(entry.outputPath).slice(0, 400) : null
       };
     }
 
@@ -1960,10 +2133,11 @@
         return onAuthStateChanged(auth, cb);
       },
       async loadUserData(uid) {
-        const [sigSnap, tplSnap, defSnap] = await Promise.all([
+        const [sigSnap, tplSnap, defSnap, histSnap] = await Promise.all([
           getDocs(collection(db, 'users', uid, 'signatures')),
           getDocs(collection(db, 'users', uid, 'templates')),
-          getDoc(doc(db, 'users', uid, 'settings', 'default'))
+          getDoc(doc(db, 'users', uid, 'settings', 'default')),
+          getDocs(collection(db, 'users', uid, 'history'))
         ]);
 
         const signatures = [];
@@ -1987,8 +2161,14 @@
         });
         templates.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+        const history = [];
+        histSnap.forEach((d) => {
+          history.push({ id: d.id, ...d.data() });
+        });
+        history.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
         const defaultSettings = defSnap.exists() ? defSnap.data() : {};
-        return { signatures, templates, defaultSettings };
+        return { signatures, templates, defaultSettings, history };
       },
       async saveSignature(uid, sig) {
         const payload = toSignaturePayload(sig);
@@ -2004,6 +2184,12 @@
       },
       async deleteTemplate(uid, tplId) {
         await deleteDoc(doc(db, 'users', uid, 'templates', tplId));
+      },
+      async saveHistoryEntry(uid, entry) {
+        await setDoc(doc(db, 'users', uid, 'history', entry.id), toHistoryPayload(entry));
+      },
+      async deleteHistoryEntry(uid, historyId) {
+        await deleteDoc(doc(db, 'users', uid, 'history', historyId));
       },
       async saveUserDefaultSettings(uid, data) {
         await setDoc(doc(db, 'users', uid, 'settings', 'default'), {
@@ -2048,6 +2234,7 @@
       const SAVED_SIGS_KEY = 'truecopy_saved_signatures_v1';
       const SAVED_TEMPLATES_KEY = 'truecopy_saved_templates_v1';
       const DEFAULT_TPL_KEY = 'truecopy_default_template_id_v1';
+      const HISTORY_KEY = 'truecopy_history_v1';
 
       const DEFAULT_SETTINGS = {
         purpose: 'Refinance',
@@ -2074,13 +2261,22 @@
         cleanSigDataUrl: null,
         sigThreshold: 200,
         tintSignature: true,
-        sigScale: 1.0
+        sigScale: 1.0,
+        showDate: false,
+        dateValue: '',
+        dateEra: 'BE',
+        dateFormat: 'long',
+        useThaiDigits: false,
+        watermarkEnabled: false,
+        watermarkOpacity: 0.10,
+        watermarkText: ''
       };
 
       let settings = loadSettings();
       let savedSignatures = loadSavedSignatures();
       let savedTemplates = loadSavedTemplates();
       let defaultTemplateId = loadDefaultTemplateId();
+      let savedHistory = loadSavedHistory();
       let activeTemplateId = '';
       let cloudUser = null;
       let cloudBound = false;
@@ -2153,11 +2349,13 @@
         btnGenerate: $('btnGenerate'),
         btnUploadEmpty: $('btnUploadEmpty'),
 
-        // Auth UI
+        // Auth & History UI
         btnGoogleSignIn: $('btnGoogleSignIn'),
         authUserBox: $('authUserBox'),
         authUserPill: $('authUserPill'),
         btnSignOut: $('btnSignOut'),
+        btnOpenHistory: $('btnOpenHistory'),
+        historyCountBadge: $('historyCountBadge'),
 
         // Template Manager UI
         btnOpenTemplateMgr: $('btnOpenTemplateMgr'),
@@ -2219,6 +2417,14 @@
         valSigScale: $('valSigScale'),
         chkShowSignerName: $('chkShowSignerName'),
         inputSignerName: $('inputSignerName'),
+        chkShowDate: $('chkShowDate'),
+        dateControlsWrap: $('dateControlsWrap'),
+        inputCertDate: $('inputCertDate'),
+        btnDateToday: $('btnDateToday'),
+        selectDateEra: $('selectDateEra'),
+        selectDateFormat: $('selectDateFormat'),
+        chkThaiDigits: $('chkThaiDigits'),
+        datePreviewBadge: $('datePreviewBadge'),
 
         selectFont: $('selectFont'),
         selectWeight: $('selectWeight'),
@@ -2243,6 +2449,11 @@
         rangePosY: $('rangePosY'),
         valPosY: $('valPosY'),
         chkFlatten: $('chkFlatten'),
+        chkWatermarkEnabled: $('chkWatermarkEnabled'),
+        watermarkControlsWrap: $('watermarkControlsWrap'),
+        inputWatermarkText: $('inputWatermarkText'),
+        rangeWatermarkOpacity: $('rangeWatermarkOpacity'),
+        valWatermarkOpacity: $('valWatermarkOpacity'),
 
         // Per-page placement mode controls
         btnModeAllPages: $('btnModeAllPages'),
@@ -2294,6 +2505,13 @@
         btnCreateTemplate: $('btnCreateTemplate'),
         templateList: $('templateList'),
         btnCloseTemplateMgr: $('btnCloseTemplateMgr'),
+
+        historyModal: $('historyModal'),
+        historyStorageNote: $('historyStorageNote'),
+        inputHistorySearch: $('inputHistorySearch'),
+        btnClearHistory: $('btnClearHistory'),
+        historyList: $('historyList'),
+        btnCloseHistory: $('btnCloseHistory'),
 
         toast: $('toast')
       };
@@ -2525,6 +2743,13 @@
           signerName: settings.signerName || '',
           sigScale: Number(settings.sigScale) || 1.0,
           tintSignature: Boolean(settings.tintSignature),
+          showDate: Boolean(settings.showDate),
+          dateEra: settings.dateEra === 'CE' ? 'CE' : 'BE',
+          dateFormat: ['long', 'short', 'numeric'].includes(settings.dateFormat) ? settings.dateFormat : 'long',
+          useThaiDigits: Boolean(settings.useThaiDigits),
+          watermarkEnabled: Boolean(settings.watermarkEnabled),
+          watermarkOpacity: Number(settings.watermarkOpacity) || 0.10,
+          watermarkText: settings.watermarkText || '',
           createdAt: existingCreatedAt || Date.now(),
           updatedAt: Date.now()
         };
@@ -2670,7 +2895,14 @@
           showSignerName: tpl.showSignerName !== undefined ? Boolean(tpl.showSignerName) : settings.showSignerName,
           signerName: tpl.signerName ?? settings.signerName,
           sigScale: Number(tpl.sigScale) || settings.sigScale,
-          tintSignature: tpl.tintSignature !== undefined ? Boolean(tpl.tintSignature) : settings.tintSignature
+          tintSignature: tpl.tintSignature !== undefined ? Boolean(tpl.tintSignature) : settings.tintSignature,
+          showDate: tpl.showDate !== undefined ? Boolean(tpl.showDate) : settings.showDate,
+          dateEra: tpl.dateEra === 'CE' ? 'CE' : (tpl.dateEra === 'BE' ? 'BE' : settings.dateEra),
+          dateFormat: ['long', 'short', 'numeric'].includes(tpl.dateFormat) ? tpl.dateFormat : settings.dateFormat,
+          useThaiDigits: tpl.useThaiDigits !== undefined ? Boolean(tpl.useThaiDigits) : settings.useThaiDigits,
+          watermarkEnabled: tpl.watermarkEnabled !== undefined ? Boolean(tpl.watermarkEnabled) : settings.watermarkEnabled,
+          watermarkOpacity: tpl.watermarkOpacity !== undefined ? (Number(tpl.watermarkOpacity) || 0.10) : settings.watermarkOpacity,
+          watermarkText: tpl.watermarkText !== undefined ? String(tpl.watermarkText) : settings.watermarkText
         });
         invalidateOutputs();
         if (settings.rawSigDataUrl) {
@@ -2750,6 +2982,180 @@
         }).catch(console.warn);
       }
 
+      // =========================================================================
+      // 4C. Certification History (Local + Cloud Metadata)
+      // =========================================================================
+      function loadSavedHistory() {
+        try {
+          const raw = localStorage.getItem(HISTORY_KEY);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr.slice(0, 100) : [];
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveSavedHistory() {
+        try {
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(savedHistory.slice(0, 100)));
+        } catch (err) {}
+      }
+
+      function updateHistoryBadge() {
+        if (els.historyCountBadge) {
+          els.historyCountBadge.textContent = String(savedHistory.length);
+        }
+      }
+
+      function formatThaiDateTime(ts) {
+        const dt = new Date(Number(ts) || Date.now());
+        if (Number.isNaN(dt.getTime())) return '';
+        const d = dt.getDate();
+        const m = THAI_MONTHS_SHORT[dt.getMonth()];
+        const be = dt.getFullYear() + 543;
+        const hh = String(dt.getHours()).padStart(2, '0');
+        const mm = String(dt.getMinutes()).padStart(2, '0');
+        return `${d} ${m} ${be} ${hh}:${mm} น.`;
+      }
+
+      function renderHistoryModalList() {
+        if (!els.historyList) return;
+        els.historyList.innerHTML = '';
+
+        const q = (els.inputHistorySearch?.value || '').trim().toLowerCase();
+        if (els.btnClearHistory) {
+          els.btnClearHistory.disabled = savedHistory.length === 0;
+        }
+
+        const filtered = savedHistory.filter((item) => {
+          if (!q) return true;
+          const tplName = savedTemplates.find(t => t.id === item.templateId)?.name || '';
+          const filesStr = Array.isArray(item.fileNames) ? item.fileNames.join(' ') : '';
+          const haystack = `${filesStr} ${item.purposeText || ''} ${item.outputPath || ''} ${tplName}`.toLowerCase();
+          return haystack.includes(q);
+        });
+
+        if (filtered.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'helper-text';
+          empty.style.textAlign = 'center';
+          empty.style.padding = '20px 8px';
+          empty.textContent = savedHistory.length === 0
+            ? 'ยังไม่มีประวัติการรับรองสำเนา เมื่อประมวลผลสร้างไฟล์ PDF ระบบจะบันทึกประวัติไว้ที่นี่อัตโนมัติ'
+            : 'ไม่พบประวัติที่ตรงกับคำค้นหา';
+          els.historyList.appendChild(empty);
+          return;
+        }
+
+        for (const item of filtered) {
+          const card = document.createElement('div');
+          card.className = 'history-item';
+
+          const head = document.createElement('div');
+          head.className = 'history-item-head';
+
+          const leftHead = document.createElement('div');
+          leftHead.style.display = 'flex';
+          leftHead.style.alignItems = 'center';
+          leftHead.style.gap = '6px';
+          leftHead.style.flexWrap = 'wrap';
+
+          const timeSpan = document.createElement('span');
+          timeSpan.textContent = `🕒 ${formatThaiDateTime(item.createdAt)}`;
+          leftHead.appendChild(timeSpan);
+
+          const pageBadge = document.createElement('span');
+          pageBadge.className = 'badge badge-success';
+          pageBadge.textContent = `${item.pageCount || 1} หน้า`;
+          leftHead.appendChild(pageBadge);
+
+          const tplMatch = item.templateId ? savedTemplates.find(t => t.id === item.templateId) : null;
+          if (tplMatch) {
+            const tplBadge = document.createElement('span');
+            tplBadge.className = 'badge';
+            tplBadge.textContent = `📋 ${tplMatch.name}`;
+            leftHead.appendChild(tplBadge);
+          }
+
+          const btnDel = document.createElement('button');
+          btnDel.type = 'button';
+          btnDel.className = 'btn btn-danger-ghost btn-xs';
+          btnDel.textContent = '🗑️ ลบ';
+          btnDel.addEventListener('click', () => deleteHistoryItem(item.id));
+
+          head.appendChild(leftHead);
+          head.appendChild(btnDel);
+
+          const filesDiv = document.createElement('div');
+          filesDiv.className = 'history-item-files';
+          const fileNamesList = Array.isArray(item.fileNames) ? item.fileNames : [];
+          filesDiv.textContent = `📄 ${fileNamesList.join(', ') || 'เอกสาร'}`;
+
+          const metaDiv = document.createElement('div');
+          metaDiv.className = 'history-item-meta';
+          const parts = [];
+          if (item.purposeText) parts.push(`ข้อความ: ${item.purposeText}`);
+          if (item.outputPath) parts.push(`ไฟล์ผลลัพธ์: ${item.outputPath}`);
+          metaDiv.textContent = parts.join(' · ');
+
+          card.appendChild(head);
+          card.appendChild(filesDiv);
+          if (parts.length > 0) card.appendChild(metaDiv);
+          els.historyList.appendChild(card);
+        }
+      }
+
+      function recordHistoryEntry(processedFiles, totalActivePages) {
+        if (!Array.isArray(processedFiles) || processedFiles.length === 0) return;
+        const entry = {
+          id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          createdAt: Date.now(),
+          fileNames: processedFiles.map(f => String(f.name || 'document.pdf').slice(0, 400)).slice(0, 100),
+          templateId: activeTemplateId ? String(activeTemplateId).slice(0, 128) : null,
+          purposeText: String(getResolvedLine() || settings.certifyText || '').slice(0, 400),
+          pageCount: Math.max(1, Number(totalActivePages) || 1),
+          outputPath: processedFiles.map(f => f.outputName || buildOutputFileName(f.name)).join(', ').slice(0, 400) || null
+        };
+        savedHistory.unshift(entry);
+        savedHistory = savedHistory.slice(0, 100);
+        saveSavedHistory();
+        updateHistoryBadge();
+        if (els.historyModal && els.historyModal.classList.contains('open')) {
+          renderHistoryModalList();
+        }
+        if (cloudUser && window.TrueCopyCloud) {
+          window.TrueCopyCloud.saveHistoryEntry(cloudUser.uid, entry).catch(console.warn);
+        }
+      }
+
+      function deleteHistoryItem(histId) {
+        const idx = savedHistory.findIndex(h => h.id === histId);
+        if (idx === -1) return;
+        savedHistory.splice(idx, 1);
+        saveSavedHistory();
+        updateHistoryBadge();
+        renderHistoryModalList();
+        if (cloudUser && window.TrueCopyCloud) {
+          window.TrueCopyCloud.deleteHistoryEntry(cloudUser.uid, histId).catch(console.warn);
+        }
+        showToast('ลบรายการประวัติแล้ว');
+      }
+
+      function clearAllHistory() {
+        const removed = [...savedHistory];
+        savedHistory = [];
+        saveSavedHistory();
+        updateHistoryBadge();
+        renderHistoryModalList();
+        if (cloudUser && window.TrueCopyCloud) {
+          for (const item of removed) {
+            window.TrueCopyCloud.deleteHistoryEntry(cloudUser.uid, item.id).catch(console.warn);
+          }
+        }
+        showToast('ล้างประวัติทั้งหมดแล้ว');
+      }
+
       function syncAuthUi() {
         if (cloudUser) {
           els.btnGoogleSignIn.style.display = 'none';
@@ -2758,11 +3164,17 @@
           els.authUserPill.textContent = `☁️ ${shortName}`;
           els.sigStorageNote.textContent = '☁️ ซิงก์ลายเซ็นบน Cloud แล้ว (ใช้ได้ทุกเครื่อง)';
           els.templateStatusHint.textContent = '☁️ เทมเพลตซิงก์กับบัญชี Google ของคุณอัตโนมัติ';
+          if (els.historyStorageNote) {
+            els.historyStorageNote.textContent = '☁️ ซิงก์ประวัติข้ามเครื่องแล้ว (บันทึกเฉพาะชื่อไฟล์และวัตถุประสงค์ ไม่มีการอัปโหลดไฟล์เอกสาร)';
+          }
         } else {
           els.btnGoogleSignIn.style.display = 'inline-flex';
           els.authUserBox.style.display = 'none';
           els.sigStorageNote.textContent = '💾 บันทึกลายเซ็นไว้ในเครื่องนี้ (เข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง)';
           els.templateStatusHint.textContent = 'เลือกเทมเพลตที่บันทึกไว้ หรือเข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง';
+          if (els.historyStorageNote) {
+            els.historyStorageNote.textContent = '💾 บันทึกประวัติไว้ในเครื่องนี้เท่านั้น (เฉพาะชื่อไฟล์และวัตถุประสงค์ ไม่มีการอัปโหลดไฟล์เอกสาร)';
+          }
         }
       }
 
@@ -2809,7 +3221,21 @@
             savedTemplates = mergedTpls;
             saveSavedTemplates();
 
-            // 3. Apply cloud defaults if present
+            // 3. Merge history (cloud + push any local-only history entries up to Firestore)
+            const cloudHistList = Array.isArray(data.history) ? data.history : [];
+            const cloudHistMap = new Map(cloudHistList.map(h => [h.id, h]));
+            const mergedHist = [...cloudHistList];
+            for (const localHist of savedHistory) {
+              if (!cloudHistMap.has(localHist.id)) {
+                mergedHist.push(localHist);
+                window.TrueCopyCloud.saveHistoryEntry(user.uid, localHist).catch(console.warn);
+              }
+            }
+            mergedHist.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            savedHistory = mergedHist.slice(0, 100);
+            saveSavedHistory();
+
+            // 4. Apply cloud defaults if present
             if (data.defaultSettings && data.defaultSettings.defaultTemplateId) {
               saveDefaultTemplateId(data.defaultSettings.defaultTemplateId);
               if (files.length === 0) {
@@ -2827,8 +3253,12 @@
 
             renderSavedSignatures();
             renderTemplateSelect();
+            updateHistoryBadge();
             if (els.templateModal.classList.contains('open')) {
               renderTemplateModalList();
+            }
+            if (els.historyModal && els.historyModal.classList.contains('open')) {
+              renderHistoryModalList();
             }
             showToast('ซิงก์ข้อมูลจาก Firebase เรียบร้อย ☁️');
           } catch (err) {
@@ -2870,6 +3300,72 @@
         if (!settings.showSignerName || !raw) return '';
         if (raw.startsWith('(') && raw.endsWith(')')) return raw;
         return `(${raw})`;
+      }
+
+      const THAI_MONTHS_LONG = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      ];
+      const THAI_MONTHS_SHORT = [
+        'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+        'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
+      ];
+      const THAI_DIGITS = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
+
+      function toThaiDigitsIfNeeded(str, forceThai = false) {
+        if (!forceThai && !settings.useThaiDigits) return String(str);
+        return String(str).replace(/[0-9]/g, d => THAI_DIGITS[Number(d)]);
+      }
+
+      function getTodayIsoDate() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function parseLocalIsoDate(isoStr) {
+        if (isoStr && /^\d{4}-\d{2}-\d{2}$/.test(isoStr)) {
+          const [y, m, d] = isoStr.split('-').map(Number);
+          const dt = new Date(y, m - 1, d);
+          if (!Number.isNaN(dt.getTime())) return dt;
+        }
+        return new Date();
+      }
+
+      function getFormattedCertDate(ignoreShowFlag = false) {
+        if (!ignoreShowFlag && !settings.showDate) return '';
+        const dt = parseLocalIsoDate(settings.dateValue);
+        const day = dt.getDate();
+        const mIdx = dt.getMonth();
+        const ceYear = dt.getFullYear();
+        const beYear = ceYear + 543;
+        const useBE = settings.dateEra !== 'CE';
+        const displayYear = useBE ? beYear : ceYear;
+        const eraPrefix = useBE ? 'พ.ศ. ' : 'ค.ศ. ';
+
+        let formatted = '';
+        if (settings.dateFormat === 'numeric') {
+          const dd = String(day).padStart(2, '0');
+          const mm = String(mIdx + 1).padStart(2, '0');
+          formatted = `${dd}/${mm}/${displayYear}`;
+        } else if (settings.dateFormat === 'short') {
+          formatted = `วันที่ ${day} ${THAI_MONTHS_SHORT[mIdx]} ${displayYear}`;
+        } else {
+          formatted = `วันที่ ${day} ${THAI_MONTHS_LONG[mIdx]} ${eraPrefix}${displayYear}`;
+        }
+        return toThaiDigitsIfNeeded(formatted);
+      }
+
+      function getResolvedWatermarkText() {
+        const custom = (settings.watermarkText || '').trim();
+        if (custom) return custom;
+        const line = getResolvedLine();
+        const base = line || [settings.purpose, settings.org].filter(Boolean).join(' · ') || 'รับรองสำเนาถูกต้อง';
+        const dt = parseLocalIsoDate(settings.dateValue);
+        const shortDate = `${dt.getDate()} ${THAI_MONTHS_SHORT[dt.getMonth()]} ${settings.dateEra === 'CE' ? dt.getFullYear() : dt.getFullYear() + 543}`;
+        return `${base} · ${toThaiDigitsIfNeeded(shortDate)}`;
       }
 
       function sanitizeFileNamePart(str) {
@@ -3024,6 +3520,7 @@
         const mainText = getResolvedLine();
         const certifyText = (settings.certifyText || '').trim();
         const signerText = getFormattedSignerName();
+        const dateText = getFormattedCertDate();
         const sigImg = cachedSignatureImg;
 
         // Scale user's 26pt setting cleanly to logical 820px stamp width
@@ -3046,6 +3543,7 @@
 
         const certFontPx = Math.max(14, baseFontPx * 0.80);
         const signerFontPx = Math.max(12, baseFontPx * 0.68);
+        const dateFontPx = Math.max(12, baseFontPx * 0.66);
         const lineStrokeW = Math.max(2.2, baseFontPx * 0.075);
 
         // Generous vertical padding so Thai upper vowels + tone marks (e.g. "ที่", "ปู่", "เท่านั้น") never touch lines
@@ -3083,7 +3581,7 @@
         let certY = null;
         if (certifyText) {
           certY = curY + certFontPx * 0.55;
-          curY += certFontPx * 1.35 + (sigImg || signerText ? gapAfterCert : 8);
+          curY += certFontPx * 1.35 + (sigImg || signerText || dateText ? gapAfterCert : 8);
         }
 
         let sigBox = null;
@@ -3103,13 +3601,19 @@
             w: drawW,
             h: drawH
           };
-          curY += drawH + (signerText ? 10 : 8);
+          curY += drawH + (signerText || dateText ? 10 : 8);
         }
 
         let signerY = null;
         if (signerText) {
           signerY = curY + signerFontPx * 0.55;
-          curY += signerFontPx * 1.45;
+          curY += signerFontPx * 1.45 + (dateText ? 2 : 0);
+        }
+
+        let dateY = null;
+        if (dateText) {
+          dateY = curY + dateFontPx * 0.55;
+          curY += dateFontPx * 1.42;
         }
 
         const LOGICAL_H = Math.max(60, Math.ceil(curY + 8));
@@ -3173,6 +3677,12 @@
           ctx.fillText(signerText, LOGICAL_W / 2, signerY);
         }
 
+        // Draw optional certification date
+        if (dateText && dateY !== null) {
+          ctx.font = `600 ${dateFontPx}px "${fontFamily}", "Sarabun", sans-serif`;
+          ctx.fillText(dateText, LOGICAL_W / 2, dateY);
+        }
+
         return stampCanvas;
       }
 
@@ -3198,6 +3708,45 @@
           targetStampW,
           targetStampH
         );
+        targetCtx.restore();
+      }
+
+      async function drawWatermarkOntoCanvas(targetCtx, pageW, pageH, forTransparentPng = false) {
+        if (!settings.watermarkEnabled || pageW <= 0 || pageH <= 0) return;
+        const wmText = getResolvedWatermarkText();
+        if (!wmText) return;
+
+        const fontFamily = settings.font || 'Sarabun';
+        const fontWeight = settings.fontWeight || '700';
+        await ensureFontLoaded(fontFamily, fontWeight);
+
+        const rawOp = Number(settings.watermarkOpacity);
+        const wmOpacity = Math.min(0.40, Math.max(0.02, Number.isFinite(rawOp) ? rawOp : 0.10));
+        const fontSize = Math.max(12, Math.round(Math.min(pageW, pageH) * 0.026));
+
+        targetCtx.save();
+        targetCtx.font = `600 ${fontSize}px "${fontFamily}", "Sarabun", sans-serif`;
+        const measuredW = Math.max(fontSize * 6, targetCtx.measureText(wmText).width);
+        const stepX = measuredW + fontSize * 3.5;
+        const stepY = Math.max(fontSize * 5.2, Math.min(pageW, pageH) * 0.22);
+
+        targetCtx.translate(pageW / 2, pageH / 2);
+        targetCtx.rotate((-30 * Math.PI) / 180);
+        targetCtx.fillStyle = settings.color || '#0D33BF';
+        targetCtx.globalAlpha = wmOpacity;
+        targetCtx.globalCompositeOperation = (!forTransparentPng && settings.multiplyInk) ? 'multiply' : 'source-over';
+        targetCtx.textAlign = 'center';
+        targetCtx.textBaseline = 'middle';
+
+        const diag = Math.hypot(pageW, pageH) * 0.72;
+        let rowIdx = 0;
+        for (let y = -diag; y <= diag; y += stepY) {
+          const offsetX = (rowIdx % 2) * (stepX * 0.5);
+          for (let x = -diag - stepX; x <= diag + stepX; x += stepX) {
+            targetCtx.fillText(wmText, x + offsetX, y);
+          }
+          rowIdx++;
+        }
         targetCtx.restore();
       }
 
@@ -3576,6 +4125,10 @@
         ctx.clearRect(0, 0, outC.width, outC.height);
         ctx.drawImage(pageData.canvas, 0, 0);
 
+        if (settings.watermarkEnabled) {
+          await drawWatermarkOntoCanvas(ctx, outC.width, outC.height);
+        }
+
         const placement = getEffectivePlacement(fileObj, activePageNum);
         drawStampOntoCanvas(ctx, outC.width, outC.height, cachedStampCanvas, placement);
 
@@ -3875,6 +4428,9 @@
             ctx.fillRect(0, 0, cw, ch);
             ctx.drawImage(img, 0, 0, cw, ch);
 
+            if (settings.watermarkEnabled) {
+              await drawWatermarkOntoCanvas(ctx, cw, ch);
+            }
             drawStampOntoCanvas(ctx, cw, ch, stampCanvas, getEffectivePlacement(fileObj, 1));
 
             const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.84));
@@ -3911,6 +4467,9 @@
               ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
 
               await page.render({ canvasContext: ctx, viewport: vp }).promise;
+              if (settings.watermarkEnabled) {
+                await drawWatermarkOntoCanvas(ctx, pageCanvas.width, pageCanvas.height);
+              }
               drawStampOntoCanvas(ctx, pageCanvas.width, pageCanvas.height, stampCanvas, getEffectivePlacement(fileObj, p));
 
               const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.84));
@@ -3946,6 +4505,65 @@
           opacityStamp.width = 0;
           opacityStamp.height = 0;
 
+          const computePdfDrawOpts = (box, rot, vx, vy, drawW, drawH, angleDeg) => {
+            const rawW = box.width;
+            const rawH = box.height;
+            let cx, cy, pdfAngleDeg;
+            if (rot === 90) {
+              cx = box.x + vy * rawW;
+              cy = box.y + vx * rawH;
+              pdfAngleDeg = angleDeg + 90;
+            } else if (rot === 180) {
+              cx = box.x + (1 - vx) * rawW;
+              cy = box.y + vy * rawH;
+              pdfAngleDeg = angleDeg + 180;
+            } else if (rot === 270) {
+              cx = box.x + (1 - vy) * rawW;
+              cy = box.y + (1 - vx) * rawH;
+              pdfAngleDeg = angleDeg + 270;
+            } else {
+              cx = box.x + vx * rawW;
+              cy = box.y + (1 - vy) * rawH;
+              pdfAngleDeg = angleDeg;
+            }
+            const rad = (pdfAngleDeg * Math.PI) / 180;
+            const cos = Math.cos(rad);
+            const sin = Math.sin(rad);
+            const drawX = cx - ((drawW / 2) * cos - (drawH / 2) * sin);
+            const drawY = cy - ((drawW / 2) * sin + (drawH / 2) * cos);
+            const opts = {
+              x: drawX,
+              y: drawY,
+              width: drawW,
+              height: drawH,
+              rotate: degrees(pdfAngleDeg)
+            };
+            if (settings.multiplyInk && BlendMode && BlendMode.Multiply) {
+              opts.blendMode = BlendMode.Multiply;
+            }
+            return opts;
+          };
+
+          const wmCache = new Map();
+          const getEmbeddedWatermark = async (visW, visH) => {
+            const ratioKey = Math.round((visH / Math.max(1, visW)) * 1000);
+            if (wmCache.has(ratioKey)) return wmCache.get(ratioKey);
+            const wmW = 1240;
+            const wmH = Math.max(200, Math.round(wmW * (visH / Math.max(1, visW))));
+            const wmCanvas = document.createElement('canvas');
+            wmCanvas.width = wmW;
+            wmCanvas.height = wmH;
+            const wmCtx = wmCanvas.getContext('2d');
+            await drawWatermarkOntoCanvas(wmCtx, wmW, wmH, true);
+            const wmBlob = await new Promise(res => wmCanvas.toBlob(res, 'image/png'));
+            const wmBytes = new Uint8Array(await wmBlob.arrayBuffer());
+            const embeddedWm = await pdfDoc.embedPng(wmBytes);
+            wmCanvas.width = 0;
+            wmCanvas.height = 0;
+            wmCache.set(ratioKey, embeddedWm);
+            return embeddedWm;
+          };
+
           const pdfPages = pdfDoc.getPages();
           const aspect = stampCanvas.height / stampCanvas.width;
           const activeTotal = Math.max(1, pdfPages.length - (fileObj.excludedPages ? fileObj.excludedPages.size : 0));
@@ -3963,49 +4581,19 @@
             const pl = getEffectivePlacement(fileObj, i + 1);
             const isSwapped = rot === 90 || rot === 270;
             const visW = isSwapped ? rawH : rawW;
+            const visH = isSwapped ? rawW : rawH;
             const vx = Number(pl.posX) || 0.5;
             const vy = Number(pl.posY) || 0.5;
 
+            if (settings.watermarkEnabled) {
+              const embeddedWm = await getEmbeddedWatermark(visW, visH);
+              const wmDrawOpts = computePdfDrawOpts(box, rot, 0.5, 0.5, visW, visH, 0);
+              pdfPage.drawImage(embeddedWm, wmDrawOpts);
+            }
+
             const drawW = visW * (Number(pl.stampScale) || 0.93);
             const drawH = drawW * aspect;
-
-            // Map normalized visual coordinates (vx, vy) into raw PDF coordinates (origin bottom-left)
-            let cx, cy, pdfAngleDeg;
-            if (rot === 90) {
-              cx = box.x + vy * rawW;
-              cy = box.y + vx * rawH;
-              pdfAngleDeg = (Number(pl.angle) || 0) + 90;
-            } else if (rot === 180) {
-              cx = box.x + (1 - vx) * rawW;
-              cy = box.y + vy * rawH;
-              pdfAngleDeg = (Number(pl.angle) || 0) + 180;
-            } else if (rot === 270) {
-              cx = box.x + (1 - vy) * rawW;
-              cy = box.y + (1 - vx) * rawH;
-              pdfAngleDeg = (Number(pl.angle) || 0) + 270;
-            } else {
-              cx = box.x + vx * rawW;
-              cy = box.y + (1 - vy) * rawH;
-              pdfAngleDeg = Number(pl.angle) || 0;
-            }
-
-            // Compute rotated bottom-left anchor so stamp rotates around (cx, cy)
-            const rad = (pdfAngleDeg * Math.PI) / 180;
-            const cos = Math.cos(rad);
-            const sin = Math.sin(rad);
-            const drawX = cx - ((drawW / 2) * cos - (drawH / 2) * sin);
-            const drawY = cy - ((drawW / 2) * sin + (drawH / 2) * cos);
-
-            const drawOpts = {
-              x: drawX,
-              y: drawY,
-              width: drawW,
-              height: drawH,
-              rotate: degrees(pdfAngleDeg)
-            };
-            if (settings.multiplyInk && BlendMode && BlendMode.Multiply) {
-              drawOpts.blendMode = BlendMode.Multiply;
-            }
+            const drawOpts = computePdfDrawOpts(box, rot, vx, vy, drawW, drawH, Number(pl.angle) || 0);
 
             pdfPage.drawImage(embeddedStamp, drawOpts);
             doneCount++;
@@ -4058,6 +4646,7 @@
 
           renderFileList();
           updateReadyBanner();
+          recordHistoryEntry(files, totalPagesAll);
           showToast(`สร้างไฟล์รับรองสำเนาสำเร็จ ${files.length} ไฟล์ 🎉`, 3500);
         } catch (err) {
           console.error(err);
@@ -4175,6 +4764,14 @@
         els.inputSignerName.value = settings.signerName;
         els.inputSignerName.style.display = settings.showSignerName ? 'block' : 'none';
 
+        els.chkShowDate.checked = Boolean(settings.showDate);
+        els.dateControlsWrap.style.display = settings.showDate ? 'block' : 'none';
+        els.inputCertDate.value = settings.dateValue || getTodayIsoDate();
+        els.selectDateEra.value = settings.dateEra === 'CE' ? 'CE' : 'BE';
+        els.selectDateFormat.value = ['long', 'short', 'numeric'].includes(settings.dateFormat) ? settings.dateFormat : 'long';
+        els.chkThaiDigits.checked = Boolean(settings.useThaiDigits);
+        els.datePreviewBadge.textContent = getFormattedCertDate(true);
+
         // Font dropdown
         if (!Array.from(els.selectFont.options).some(o => o.value === settings.font)) {
           settings.font = 'Sarabun';
@@ -4196,6 +4793,13 @@
         els.rangeFontSize.value = settings.fontSize;
         els.valFontSize.textContent = `${settings.fontSize} pt`;
         els.chkFlatten.checked = settings.flatten;
+
+        els.chkWatermarkEnabled.checked = Boolean(settings.watermarkEnabled);
+        els.watermarkControlsWrap.style.display = settings.watermarkEnabled ? 'block' : 'none';
+        els.inputWatermarkText.value = settings.watermarkText || '';
+        const wmPct = Math.round((Number(settings.watermarkOpacity) || 0.10) * 100);
+        els.rangeWatermarkOpacity.value = String(wmPct);
+        els.valWatermarkOpacity.textContent = `${wmPct}%`;
 
         syncPlacementControls();
 
@@ -4315,6 +4919,9 @@
         invalidateOutputs();
         saveSettings();
         els.resolvedLinePreview.textContent = getResolvedLine() || '(ไม่มีข้อความ)';
+        if (els.datePreviewBadge) {
+          els.datePreviewBadge.textContent = getFormattedCertDate(true);
+        }
         if (reprocessSig && settings.rawSigDataUrl) {
           processSignatureDataUrl(settings.rawSigDataUrl).then(() => {
             if (settings.cleanSigDataUrl) els.sigPreviewImg.src = settings.cleanSigDataUrl;
@@ -4637,6 +5244,35 @@
           onSettingChanged();
         });
 
+        // Certification Date controls
+        els.chkShowDate.addEventListener('change', () => {
+          settings.showDate = els.chkShowDate.checked;
+          els.dateControlsWrap.style.display = settings.showDate ? 'block' : 'none';
+          onSettingChanged();
+        });
+        els.inputCertDate.addEventListener('change', () => {
+          settings.dateValue = els.inputCertDate.value || '';
+          onSettingChanged();
+        });
+        els.btnDateToday.addEventListener('click', () => {
+          settings.dateValue = '';
+          els.inputCertDate.value = getTodayIsoDate();
+          onSettingChanged();
+          showToast('ตั้งเป็นวันที่ปัจจุบันแล้ว');
+        });
+        els.selectDateEra.addEventListener('change', () => {
+          settings.dateEra = els.selectDateEra.value === 'CE' ? 'CE' : 'BE';
+          onSettingChanged();
+        });
+        els.selectDateFormat.addEventListener('change', () => {
+          settings.dateFormat = els.selectDateFormat.value;
+          onSettingChanged();
+        });
+        els.chkThaiDigits.addEventListener('change', () => {
+          settings.useThaiDigits = els.chkThaiDigits.checked;
+          onSettingChanged();
+        });
+
         // Font & Color controls
         els.selectFont.addEventListener('change', () => {
           settings.font = els.selectFont.value;
@@ -4888,6 +5524,28 @@
           saveSettings();
         });
 
+        // Anti-Forgery Watermark controls
+        els.chkWatermarkEnabled.addEventListener('change', () => {
+          settings.watermarkEnabled = els.chkWatermarkEnabled.checked;
+          els.watermarkControlsWrap.style.display = settings.watermarkEnabled ? 'block' : 'none';
+          invalidateOutputs();
+          saveSettings();
+          renderActivePagePreview();
+        });
+        els.inputWatermarkText.addEventListener('input', () => {
+          settings.watermarkText = els.inputWatermarkText.value;
+          invalidateOutputs();
+          saveSettings();
+          renderActivePagePreview();
+        });
+        els.rangeWatermarkOpacity.addEventListener('input', () => {
+          settings.watermarkOpacity = Number(els.rangeWatermarkOpacity.value) / 100;
+          els.valWatermarkOpacity.textContent = `${els.rangeWatermarkOpacity.value}%`;
+          invalidateOutputs();
+          saveSettings();
+          renderActivePagePreview();
+        });
+
         // Reset defaults
         els.btnResetDefaults.addEventListener('click', async () => {
           const keepActiveSigId = settings.activeSigId;
@@ -4999,6 +5657,30 @@
           els.templateModal.classList.remove('open');
         });
 
+        // Certification History modal events
+        els.btnOpenHistory.addEventListener('click', () => {
+          if (els.inputHistorySearch) els.inputHistorySearch.value = '';
+          renderHistoryModalList();
+          els.historyModal.classList.add('open');
+        });
+        els.btnCloseHistory.addEventListener('click', () => {
+          els.historyModal.classList.remove('open');
+        });
+        els.historyModal.addEventListener('click', (e) => {
+          if (e.target === els.historyModal) {
+            els.historyModal.classList.remove('open');
+          }
+        });
+        els.inputHistorySearch.addEventListener('input', () => {
+          renderHistoryModalList();
+        });
+        els.btnClearHistory.addEventListener('click', () => {
+          if (savedHistory.length === 0) return;
+          if (confirm('ต้องการล้างประวัติการรับรองสำเนาทั้งหมดหรือไม่?')) {
+            clearAllHistory();
+          }
+        });
+
         // Mobile tabs
         els.tabMobileFiles.addEventListener('click', () => openMobileSheet('left'));
         els.tabMobilePreview.addEventListener('click', () => closeMobileSheets());
@@ -5051,6 +5733,7 @@
 
         renderSavedSignatures();
         renderTemplateSelect();
+        updateHistoryBadge();
         syncControlsFromSettings();
         syncAuthUi();
         wireEvents();

@@ -237,7 +237,7 @@ service firebase.storage {
 
 1. **Phase 1 — Local stamping (no Firebase yet):** multi-file upload, restricted-use line + certification text + dashed lines, color/font choice (Sarabun/Niramit), ink opacity + Real Ink blend, signature photo upload or on-screen drawing pad + memorized local signature library, optional `(ชื่อ-นามสกุล)` line, direct hand move/rotate/resize (handles + 2-finger pinch/twist) with per-page overrides, PDF page removal/restore, flatten toggle (on by default), preview, individual + ZIP download, and **Share button (`แชร์ไฟล์` — LINE / WhatsApp / Email)**. Keep defaults and signatures in `localStorage` (wrapped in try/catch).
 2. **Phase 2 — Connect Firebase *(Implemented)*:** Google sign-in (`taxicashflow@gmail.com` only), sync memorized signatures and templates across devices in Firestore (`truecopy-cert-th`, `asia-southeast1`, free Spark plan, no credit card needed), strict owner-only `firestore.rules`, and Template Manager UI.
-3. **Phase 3 — Extra features:** Buddhist Era date, anti-forgery watermark, history.
+3. **Phase 3 — Extra features *(Implemented)*:** Buddhist Era / Gregorian certification date (with optional Thai digits ๐-๙), diagonal anti-forgery watermark across preview & Flatten ON/OFF exports, and local + Firestore Certification History (`users/{uid}/history/{historyId}`).
 4. **Phase 4 — Publish:** deploy on Cloudflare (`*.pages.dev`), set Authorized domains and App Check, make it a PWA (a small `manifest.json` and `sw.js` can sit beside `index.html` on Cloudflare Pages while keeping all app code inside the single HTML file).
 
 ### Phase 1 acceptance checklist
