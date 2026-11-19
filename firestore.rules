@@ -65,6 +65,10 @@ service cloud.firestore {
     //   - defaultTemplateId: string | null (optional, <= 128 chars)
     //   - defaultSignatureId: string | null (optional, <= 128 chars)
     //   - updatedAt: number (required, > 0) - epoch ms
+    //   - lockPinHash: string | null (optional, Phase 4, <= 256 chars)
+    //   - lockPinSalt: string | null (optional, Phase 4, <= 128 chars)
+    //   - autoLockMinutes: number (optional, Phase 4, 0..120)
+    //   - lockOnTabLeave: bool (optional, Phase 4)
     //
     // Collection: users/{uid}/history/{historyId} (Phase 3 ready)
     // Document ID: client-generated history ID or Firestore auto-ID
@@ -222,12 +226,19 @@ service cloud.firestore {
 
     function isValidSettings(data) {
       let required = ['updatedAt'];
-      let allowed = ['defaultTemplateId', 'defaultSignatureId', 'updatedAt'];
+      let allowed = [
+        'defaultTemplateId', 'defaultSignatureId', 'updatedAt',
+        'lockPinHash', 'lockPinSalt', 'autoLockMinutes', 'lockOnTabLeave'
+      ];
       return hasRequiredFields(data, required) &&
              hasOnlyAllowedFields(data, allowed) &&
              isPositiveNumber(data.updatedAt) &&
              isValidOptionalStringOrNull(data, 'defaultTemplateId', 128) &&
-             isValidOptionalStringOrNull(data, 'defaultSignatureId', 128);
+             isValidOptionalStringOrNull(data, 'defaultSignatureId', 128) &&
+             isValidOptionalStringOrNull(data, 'lockPinHash', 256) &&
+             isValidOptionalStringOrNull(data, 'lockPinSalt', 128) &&
+             (!('autoLockMinutes' in data) || isNumberInRange(data.autoLockMinutes, 0, 120)) &&
+             (!('lockOnTabLeave' in data) || data.lockOnTabLeave is bool);
     }
 
     function isValidHistory(data) {

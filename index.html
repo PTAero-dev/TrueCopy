@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>TrueCopy — รับรองสำเนาถูกต้อง</title>
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#0d33bf" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="TrueCopy" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
 
   <!-- Google Fonts: Sarabun & Niramit -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1264,8 +1271,138 @@
       line-height: 1.45;
     }
 
+    body.app-locked .app-header,
+    body.app-locked .workspace,
+    body.app-locked .mobile-bottom-bar {
+      visibility: hidden !important;
+      pointer-events: none !important;
+      user-select: none !important;
+    }
+
+    .lock-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .lock-overlay.open {
+      display: flex;
+    }
+
+    .lock-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 26px 24px 22px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .lock-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1e40af 0%, #0d33bf 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 20px rgba(13, 51, 191, 0.25);
+    }
+
+    .lock-title {
+      margin: 0 0 6px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .lock-sub {
+      margin: 0 0 18px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .lock-error {
+      display: none;
+      margin: 0 0 12px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: var(--danger-soft);
+      border: 1px solid #fecaca;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .lock-error.show {
+      display: block;
+    }
+
+    .lock-pin-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .lock-pin-row .input {
+      flex: 1;
+      letter-spacing: 0.14em;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .lock-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0 12px;
+    }
+
+    .lock-secondary-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .security-status-box {
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+
+    .security-status-box.is-protected {
+      background: var(--success-soft);
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+
+    .security-status-box.is-unprotected {
+      background: var(--warning-soft);
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
     @media (max-width: 719px) {
-      .btn-history-label {
+      .btn-history-label,
+      .btn-sec-label,
+      .btn-lock-label {
         display: none;
       }
     }
@@ -1450,6 +1587,9 @@
         </div>
       </div>
       <button id="btnOpenHistory" class="btn btn-sm" type="button" title="ดูประวัติเอกสารที่รับรองสำเนาแล้ว">📜 <span class="btn-history-label">ประวัติ</span> <span id="historyCountBadge" class="badge">0</span></button>
+      <button id="btnLockNow" class="btn btn-sm" type="button" style="display:none;" title="ล็อกหน้าจอทันที (Ctrl+Shift+L)">🔒 <span class="btn-lock-label">ล็อก</span></button>
+      <button id="btnOpenSecurity" class="btn btn-sm" type="button" title="ตั้งค่ารหัส PIN และความปลอดภัยของลายเซ็น">🛡️ <span class="btn-sec-label">ความปลอดภัย</span></button>
+      <button id="btnInstallPwa" class="btn btn-soft btn-sm" type="button" style="display:none;" title="ติดตั้งแอป TrueCopy ลงบนเครื่อง">📲 <span class="btn-sec-label">ติดตั้งแอป</span></button>
       <button id="btnAddFilesHeader" class="btn btn-hide-sm" type="button">+ เพิ่มไฟล์</button>
       <button id="btnResetDefaults" class="btn btn-hide-sm" type="button" title="คืนค่าตราประทับเริ่มต้น">รีเซ็ตค่าเริ่มต้น</button>
       <button id="btnGenerate" class="btn btn-primary" type="button" disabled>ประมวลผลและสร้างไฟล์ PDF</button>
@@ -2001,6 +2141,167 @@
     </div>
   </div>
 
+  <!-- Security Settings Modal -->
+  <div id="securityModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="secModalTitle">
+    <div class="modal-card" style="max-width:500px;">
+      <h3 id="secModalTitle" class="modal-title">🛡️ ความปลอดภัยและการล็อกลายเซ็น</h3>
+      <p class="modal-desc">ตั้งรหัส PIN เพื่อเข้ารหัสลายเซ็นในเครื่อง (AES-256) และล็อกหน้าจออัตโนมัติเมื่อลุกจากโต๊ะทำงาน</p>
+
+      <div id="secStatusBanner" class="security-status-box is-unprotected"></div>
+
+      <div class="nested-subcard" style="margin-top:0;margin-bottom:12px;">
+        <div class="field-label" style="margin-bottom:8px;">🔑 จัดการรหัส PIN (4–12 ตัวอักษร/ตัวเลข)</div>
+
+        <div id="secCurrentPinWrap" class="field" style="display:none;">
+          <label class="field-label" for="inputSecCurrentPin">รหัส PIN ปัจจุบัน</label>
+          <input id="inputSecCurrentPin" class="input" type="password" inputmode="numeric" maxlength="12" autocomplete="current-password" placeholder="กรอกรหัส PIN เดิมเพื่อยืนยัน" />
+        </div>
+
+        <div class="grid-2 field">
+          <div>
+            <label class="field-label" for="inputSecNewPin">รหัส PIN ใหม่</label>
+            <input id="inputSecNewPin" class="input" type="password" inputmode="numeric" minlength="4" maxlength="12" autocomplete="new-password" placeholder="เช่น 123456" />
+          </div>
+          <div>
+            <label class="field-label" for="inputSecConfirmPin">ยืนยันรหัส PIN ใหม่</label>
+            <input id="inputSecConfirmPin" class="input" type="password" inputmode="numeric" minlength="4" maxlength="12" autocomplete="new-password" placeholder="กรอกอีกครั้ง" />
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="btnSecSavePin" class="btn btn-primary btn-sm" type="button">💾 บันทึก / เปลี่ยนรหัส PIN</button>
+          <button id="btnSecRemovePin" class="btn btn-danger-ghost btn-sm" type="button" style="display:none;">ปลดล็อกเลิกใช้ PIN</button>
+        </div>
+      </div>
+
+      <div class="nested-subcard" style="margin-top:0;margin-bottom:12px;">
+        <div class="field">
+          <label class="field-label" for="selectSecAutoLock">⏱️ ล็อกหน้าจออัตโนมัติเมื่อไม่มีการใช้งาน</label>
+          <select id="selectSecAutoLock" class="select">
+            <option value="0">ปิดการล็อกอัตโนมัติ</option>
+            <option value="1">1 นาที</option>
+            <option value="3">3 นาที</option>
+            <option value="5">5 นาที (แนะนำ)</option>
+            <option value="15">15 นาที</option>
+            <option value="30">30 นาที</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="checkbox-row">
+            <input id="chkSecLockOnTabLeave" type="checkbox" />
+            <span>ล็อกอัตโนมัติเมื่อสลับแท็บหรือพับหน้าจอเกิน 1 นาที</span>
+          </label>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label class="checkbox-row">
+            <input id="chkSecSessionOnly" type="checkbox" />
+            <span>จำการเข้าสู่ระบบ Google เฉพาะแท็บนี้ (ปิดแท็บแล้วออกอัตโนมัติ)</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="btnSecLockNow" class="btn btn-soft btn-sm" type="button">🔒 ล็อกหน้าจอทันที</button>
+          <button id="btnWipeAndSignOut" class="btn btn-danger-ghost btn-sm" type="button">🧹 ล้างลายเซ็นในเครื่องและออกจากระบบ</button>
+        </div>
+        <button id="btnCloseSecurity" class="btn btn-primary" type="button">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-Screen Owner Authentication & PIN Lock Overlay -->
+  <div id="lockScreenOverlay" class="lock-overlay" role="dialog" aria-modal="true" aria-label="หน้าจอล็อกความปลอดภัย TrueCopy">
+    <div class="lock-card">
+      <!-- 1. Checking auth state -->
+      <div id="lockViewChecking" style="text-align:center;padding:12px 0;">
+        <div class="lock-badge">🔒</div>
+        <h2 class="lock-title">TrueCopy — รับรองสำเนาถูกต้อง</h2>
+        <p class="lock-sub" style="margin-bottom:0;">กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...</p>
+      </div>
+
+      <!-- 2. Mandatory Sign-In Gate -->
+      <div id="lockViewSignIn" style="display:none;">
+        <div class="lock-badge">🔐</div>
+        <h2 class="lock-title">TrueCopy — ยืนยันตัวตนเจ้าของเอกสาร</h2>
+        <p class="lock-sub">
+          เพื่อป้องกันบุคคลอื่นที่ใช้งานคอมพิวเตอร์เครื่องนี้เปิดดูหรือนำลายเซ็นของคุณไปใช้
+          กรุณายืนยันตัวตนด้วยบัญชี Google ของคุณก่อนเข้าใช้งาน
+        </p>
+
+        <div class="field" style="margin-bottom:14px;">
+          <label class="checkbox-row">
+            <input id="chkLockSessionOnly" type="checkbox" checked />
+            <span>จำการเข้าสู่ระบบเฉพาะแท็บนี้ (ปิดแท็บแล้วออกอัตโนมัติ — แนะนำ)</span>
+          </label>
+        </div>
+
+        <button id="btnLockGoogleSignIn" class="btn btn-primary" type="button" style="width:100%;padding:11px 16px;">🔐 เข้าสู่ระบบด้วย Google</button>
+        <button id="btnLockOfflinePin" class="btn btn-soft" type="button" style="width:100%;margin-top:8px;display:none;">🔓 ปลดล็อกใช้งานแบบออฟไลน์ด้วย PIN</button>
+      </div>
+
+      <!-- 3. First-time PIN Setup -->
+      <div id="lockViewPinSetup" style="display:none;">
+        <div class="lock-badge">🛡️</div>
+        <h2 class="lock-title">ตั้งรหัส PIN ป้องกันลายเซ็น</h2>
+        <p class="lock-sub">
+          รหัส PIN นี้จะใช้เข้ารหัสลายเซ็นในเครื่องด้วย AES-256 และช่วยล็อกหน้าจออัตโนมัติเมื่อคุณลุกจากโน้ตบุ๊ก
+        </p>
+
+        <div class="field">
+          <label class="field-label" for="inputSetupPin">ตั้งรหัส PIN (4–12 หลัก)</label>
+          <input id="inputSetupPin" class="input" type="password" inputmode="numeric" minlength="4" maxlength="12" autocomplete="new-password" placeholder="เช่น 123456" />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="inputSetupPinConfirm">ยืนยันรหัส PIN</label>
+          <input id="inputSetupPinConfirm" class="input" type="password" inputmode="numeric" minlength="4" maxlength="12" autocomplete="new-password" placeholder="กรอกรหัส PIN อีกครั้ง" />
+        </div>
+
+        <div class="field" style="margin-bottom:14px;">
+          <label class="field-label" for="selectSetupAutoLock">ล็อกอัตโนมัติเมื่อไม่ได้ใช้งาน</label>
+          <select id="selectSetupAutoLock" class="select">
+            <option value="1">1 นาที</option>
+            <option value="3">3 นาที</option>
+            <option value="5" selected>5 นาที (แนะนำ)</option>
+            <option value="15">15 นาที</option>
+            <option value="30">30 นาที</option>
+          </select>
+        </div>
+
+        <button id="btnSaveSetupPin" class="btn btn-primary" type="button" style="width:100%;padding:11px 16px;">🔒 บันทึกรหัส PIN และเข้าใช้งาน</button>
+        <button id="btnSkipSetupPin" class="btn" type="button" style="width:100%;margin-top:8px;">ตั้งค่าภายหลัง</button>
+      </div>
+
+      <!-- 4. PIN Unlock Screen -->
+      <div id="lockViewPinUnlock" style="display:none;">
+        <div class="lock-badge">🔐</div>
+        <h2 class="lock-title">TrueCopy ถูกล็อกไว้</h2>
+        <p id="lockReasonText" class="lock-sub">กรุณากรอกรหัส PIN เพื่อปลดล็อกลายเซ็นและเอกสาร</p>
+
+        <div id="lockErrorMsg" class="lock-error"></div>
+
+        <div class="field">
+          <label class="field-label" for="inputUnlockPin">รหัส PIN</label>
+          <div class="lock-pin-row">
+            <input id="inputUnlockPin" class="input" type="password" inputmode="numeric" minlength="4" maxlength="12" autocomplete="off" placeholder="••••••" />
+            <button id="btnToggleUnlockPin" class="btn btn-sm" type="button">แสดง</button>
+          </div>
+        </div>
+
+        <button id="btnUnlockPin" class="btn btn-primary" type="button" style="width:100%;padding:11px 16px;">🔓 ปลดล็อก</button>
+
+        <div class="lock-divider"></div>
+        <div class="lock-secondary-actions">
+          <button id="btnLockForgotPin" class="btn btn-soft btn-xs" type="button">ลืมรหัส PIN? ยืนยันบัญชี Google เพื่อตั้งใหม่</button>
+          <button id="btnLockSignOutWipe" class="btn btn-danger-ghost btn-xs" type="button">ออกจากระบบและล้างข้อมูลในเครื่อง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
@@ -2014,7 +2315,10 @@
       signInWithRedirect,
       getRedirectResult,
       signOut,
-      onAuthStateChanged
+      onAuthStateChanged,
+      setPersistence,
+      browserSessionPersistence,
+      browserLocalPersistence
     } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
     import {
       getFirestore,
@@ -2115,7 +2419,12 @@
 
     window.TrueCopyCloud = {
       ALLOWED_EMAIL,
-      async signInWithGoogle() {
+      async signInWithGoogle(sessionOnly = true) {
+        try {
+          await setPersistence(auth, sessionOnly ? browserSessionPersistence : browserLocalPersistence);
+        } catch (err) {
+          console.warn('Auth persistence note:', err?.code || err?.message);
+        }
         try {
           return await signInWithPopup(auth, googleProvider);
         } catch (err) {
@@ -2126,11 +2435,22 @@
           throw err;
         }
       },
+      async reauthWithGoogle() {
+        const res = await signInWithPopup(auth, googleProvider);
+        if (!res || !res.user || res.user.email !== ALLOWED_EMAIL) {
+          throw new Error('บัญชี Google ไม่ตรงกับเจ้าของเอกสาร');
+        }
+        return res.user;
+      },
       async signOutUser() {
         await signOut(auth);
       },
       onAuthChange(cb) {
         return onAuthStateChanged(auth, cb);
+      },
+      async loadUserSecuritySettings(uid) {
+        const defSnap = await getDoc(doc(db, 'users', uid, 'settings', 'default'));
+        return defSnap.exists() ? defSnap.data() : {};
       },
       async loadUserData(uid) {
         const [sigSnap, tplSnap, defSnap, histSnap] = await Promise.all([
@@ -2192,11 +2512,25 @@
         await deleteDoc(doc(db, 'users', uid, 'history', historyId));
       },
       async saveUserDefaultSettings(uid, data) {
-        await setDoc(doc(db, 'users', uid, 'settings', 'default'), {
+        const payload = {
           defaultTemplateId: data.defaultTemplateId || null,
           defaultSignatureId: data.defaultSignatureId || null,
           updatedAt: Date.now()
-        });
+        };
+        if (data.lockPinHash !== undefined) {
+          payload.lockPinHash = data.lockPinHash ? String(data.lockPinHash).slice(0, 256) : null;
+        }
+        if (data.lockPinSalt !== undefined) {
+          payload.lockPinSalt = data.lockPinSalt ? String(data.lockPinSalt).slice(0, 128) : null;
+        }
+        if (data.autoLockMinutes !== undefined) {
+          const mins = Number(data.autoLockMinutes);
+          payload.autoLockMinutes = Number.isFinite(mins) ? Math.min(120, Math.max(0, Math.round(mins))) : 5;
+        }
+        if (data.lockOnTabLeave !== undefined) {
+          payload.lockOnTabLeave = Boolean(data.lockOnTabLeave);
+        }
+        await setDoc(doc(db, 'users', uid, 'settings', 'default'), payload);
       }
     };
 
@@ -2272,8 +2606,12 @@
         watermarkText: ''
       };
 
+      const SECURITY_KEY = 'truecopy_security_v1';
+      const LOCKOUT_KEY = 'truecopy_lockout_until_v1';
+
+      let securityConfig = loadSecurityConfig();
       let settings = loadSettings();
-      let savedSignatures = loadSavedSignatures();
+      let savedSignatures = [];
       let savedTemplates = loadSavedTemplates();
       let defaultTemplateId = loadDefaultTemplateId();
       let savedHistory = loadSavedHistory();
@@ -2281,6 +2619,20 @@
       let cloudUser = null;
       let cloudBound = false;
       let customFontCounter = 0;
+
+      // Security & PWA runtime state (never persisted as decrypted secrets)
+      let isAppLocked = false;
+      let offlineUnlocked = false;
+      let vaultCryptoKey = null;
+      let failedPinAttempts = 0;
+      let idleTimer = null;
+      let lastActivityTick = 0;
+      let hiddenSince = null;
+      let filePickerActive = false;
+      let pendingResetPin = false;
+      let authResolvedOnce = false;
+      let deferredInstallPrompt = null;
+      let sigSaveChain = Promise.resolve(true);
 
       /**
        * Uploaded files array.
@@ -2356,6 +2708,9 @@
         btnSignOut: $('btnSignOut'),
         btnOpenHistory: $('btnOpenHistory'),
         historyCountBadge: $('historyCountBadge'),
+        btnLockNow: $('btnLockNow'),
+        btnOpenSecurity: $('btnOpenSecurity'),
+        btnInstallPwa: $('btnInstallPwa'),
 
         // Template Manager UI
         btnOpenTemplateMgr: $('btnOpenTemplateMgr'),
@@ -2513,18 +2868,168 @@
         historyList: $('historyList'),
         btnCloseHistory: $('btnCloseHistory'),
 
+        // Security Modal & Lock Overlay
+        securityModal: $('securityModal'),
+        secStatusBanner: $('secStatusBanner'),
+        secCurrentPinWrap: $('secCurrentPinWrap'),
+        inputSecCurrentPin: $('inputSecCurrentPin'),
+        inputSecNewPin: $('inputSecNewPin'),
+        inputSecConfirmPin: $('inputSecConfirmPin'),
+        btnSecSavePin: $('btnSecSavePin'),
+        btnSecRemovePin: $('btnSecRemovePin'),
+        selectSecAutoLock: $('selectSecAutoLock'),
+        chkSecLockOnTabLeave: $('chkSecLockOnTabLeave'),
+        chkSecSessionOnly: $('chkSecSessionOnly'),
+        btnSecLockNow: $('btnSecLockNow'),
+        btnWipeAndSignOut: $('btnWipeAndSignOut'),
+        btnCloseSecurity: $('btnCloseSecurity'),
+
+        lockScreenOverlay: $('lockScreenOverlay'),
+        lockViewChecking: $('lockViewChecking'),
+        lockViewSignIn: $('lockViewSignIn'),
+        chkLockSessionOnly: $('chkLockSessionOnly'),
+        btnLockGoogleSignIn: $('btnLockGoogleSignIn'),
+        btnLockOfflinePin: $('btnLockOfflinePin'),
+        lockViewPinSetup: $('lockViewPinSetup'),
+        inputSetupPin: $('inputSetupPin'),
+        inputSetupPinConfirm: $('inputSetupPinConfirm'),
+        selectSetupAutoLock: $('selectSetupAutoLock'),
+        btnSaveSetupPin: $('btnSaveSetupPin'),
+        btnSkipSetupPin: $('btnSkipSetupPin'),
+        lockViewPinUnlock: $('lockViewPinUnlock'),
+        lockReasonText: $('lockReasonText'),
+        lockErrorMsg: $('lockErrorMsg'),
+        inputUnlockPin: $('inputUnlockPin'),
+        btnToggleUnlockPin: $('btnToggleUnlockPin'),
+        btnUnlockPin: $('btnUnlockPin'),
+        btnLockForgotPin: $('btnLockForgotPin'),
+        btnLockSignOutWipe: $('btnLockSignOutWipe'),
+
         toast: $('toast')
       };
 
       // =========================================================================
-      // 4. Persistence & Utilities
+      // 4. Persistence, Crypto Vault & Utilities
       // =========================================================================
+      function loadSecurityConfig() {
+        const defaults = {
+          pinHash: null,
+          pinSalt: null,
+          autoLockMinutes: 5,
+          lockOnTabLeave: false,
+          sessionOnly: true,
+          skippedSetup: false
+        };
+        try {
+          const raw = localStorage.getItem(SECURITY_KEY);
+          if (!raw) return defaults;
+          const parsed = JSON.parse(raw);
+          return { ...defaults, ...parsed };
+        } catch (err) {
+          return defaults;
+        }
+      }
+
+      function saveSecurityConfig() {
+        try {
+          localStorage.setItem(SECURITY_KEY, JSON.stringify(securityConfig));
+        } catch (err) {}
+      }
+
+      function bytesToBase64(bytes) {
+        let bin = '';
+        const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+        for (let i = 0; i < arr.length; i++) {
+          bin += String.fromCharCode(arr[i]);
+        }
+        return btoa(bin);
+      }
+
+      function base64ToBytes(b64) {
+        const bin = atob(b64);
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) {
+          out[i] = bin.charCodeAt(i);
+        }
+        return out;
+      }
+
+      function generateSaltBase64() {
+        const buf = new Uint8Array(16);
+        crypto.getRandomValues(buf);
+        return bytesToBase64(buf);
+      }
+
+      async function derivePinSecrets(pin, saltBase64) {
+        if (!window.crypto || !window.crypto.subtle) {
+          throw new Error('เบราว์เซอร์หรือโหมดนี้ไม่รองรับการเข้ารหัส (กรุณาเปิดผ่าน HTTPS)');
+        }
+        const enc = new TextEncoder();
+        const baseKey = await crypto.subtle.importKey(
+          'raw',
+          enc.encode(String(pin)),
+          'PBKDF2',
+          false,
+          ['deriveBits']
+        );
+        const bits = await crypto.subtle.deriveBits(
+          {
+            name: 'PBKDF2',
+            salt: base64ToBytes(saltBase64),
+            iterations: 150000,
+            hash: 'SHA-256'
+          },
+          baseKey,
+          512
+        );
+        const allBytes = new Uint8Array(bits);
+        const verifyBuf = allBytes.slice(0, 32);
+        const encBuf = allBytes.slice(32, 64);
+
+        const hashDigest = await crypto.subtle.digest('SHA-256', verifyBuf);
+        const pinHash = bytesToBase64(new Uint8Array(hashDigest));
+        const vaultKey = await crypto.subtle.importKey(
+          'raw',
+          encBuf,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+        return { pinHash, vaultKey };
+      }
+
+      async function encryptJsonWithKey(obj, key) {
+        const iv = new Uint8Array(12);
+        crypto.getRandomValues(iv);
+        const data = new TextEncoder().encode(JSON.stringify(obj));
+        const ctBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+        return {
+          v: 1,
+          encrypted: true,
+          iv: bytesToBase64(iv),
+          ct: bytesToBase64(new Uint8Array(ctBuf))
+        };
+      }
+
+      async function decryptJsonWithKey(encObj, key) {
+        const iv = base64ToBytes(encObj.iv);
+        const ct = base64ToBytes(encObj.ct);
+        const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+        return JSON.parse(new TextDecoder().decode(plainBuf));
+      }
+
       function loadSettings() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           if (!raw) return { ...DEFAULT_SETTINGS };
           const parsed = JSON.parse(raw);
-          return { ...DEFAULT_SETTINGS, ...parsed };
+          const merged = { ...DEFAULT_SETTINGS, ...parsed };
+          // Never expose legacy plaintext signatures before PIN unlock
+          if (securityConfig && securityConfig.pinHash) {
+            merged.rawSigDataUrl = null;
+            merged.cleanSigDataUrl = null;
+          }
+          return merged;
         } catch (err) {
           return { ...DEFAULT_SETTINGS };
         }
@@ -2532,36 +3037,63 @@
 
       function saveSettings() {
         try {
-          // Do not save custom uploaded FontFace name if it won't persist across page reload
+          // Do not persist custom FontFace name or raw/clean signature data URLs in plain settings storage
           const toSave = { ...settings };
           if (toSave.font && toSave.font.startsWith('CustomFont_')) {
             toSave.font = 'Sarabun';
           }
+          delete toSave.rawSigDataUrl;
+          delete toSave.cleanSigDataUrl;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
         } catch (err) {
           // Ignore storage quota or private-mode errors safely
         }
       }
 
-      function loadSavedSignatures() {
+      async function loadDecryptedSignatures() {
         try {
           const raw = localStorage.getItem(SAVED_SIGS_KEY);
           if (!raw) return [];
-          const arr = JSON.parse(raw);
-          return Array.isArray(arr) ? arr : [];
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object' && parsed.encrypted === true) {
+            if (!vaultCryptoKey) return [];
+            const decrypted = await decryptJsonWithKey(parsed, vaultCryptoKey);
+            return Array.isArray(decrypted) ? decrypted : [];
+          }
+          if (Array.isArray(parsed)) {
+            if (securityConfig.pinHash && !vaultCryptoKey) return [];
+            return parsed;
+          }
+          return [];
         } catch (err) {
+          console.warn('Could not decrypt signature vault:', err);
           return [];
         }
       }
 
       function saveSavedSignatures() {
-        try {
-          localStorage.setItem(SAVED_SIGS_KEY, JSON.stringify(savedSignatures));
-          return true;
-        } catch (err) {
-          showToast('พื้นที่บันทึกในเบราว์เซอร์เต็ม กรุณาลบลายเซ็นเก่าออกบางอัน');
-          return false;
+        // Never overwrite an encrypted vault while locked or missing key
+        if (isAppLocked || (securityConfig.pinHash && !vaultCryptoKey)) {
+          return Promise.resolve(false);
         }
+        const snapshot = savedSignatures.map(s => ({ ...s }));
+        const activeKey = vaultCryptoKey;
+        const hasPin = Boolean(securityConfig.pinHash);
+        sigSaveChain = sigSaveChain.then(async () => {
+          try {
+            if (hasPin && activeKey) {
+              const encryptedPayload = await encryptJsonWithKey(snapshot, activeKey);
+              localStorage.setItem(SAVED_SIGS_KEY, JSON.stringify(encryptedPayload));
+            } else if (!hasPin) {
+              localStorage.setItem(SAVED_SIGS_KEY, JSON.stringify(snapshot));
+            }
+            return true;
+          } catch (err) {
+            showToast('พื้นที่บันทึกในเบราว์เซอร์เต็ม กรุณาลบลายเซ็นเก่าออกบางอัน');
+            return false;
+          }
+        });
+        return sigSaveChain;
       }
 
       function renderSavedSignatures() {
@@ -2974,11 +3506,16 @@
         showToast(`ลบเทมเพลต "${removed.name}" แล้ว`);
       }
 
-      function syncDefaultSettingsToCloud() {
+      function syncDefaultSettingsToCloud(extra = {}) {
         if (!cloudUser || !window.TrueCopyCloud) return;
         window.TrueCopyCloud.saveUserDefaultSettings(cloudUser.uid, {
           defaultTemplateId: defaultTemplateId || null,
-          defaultSignatureId: settings.activeSigId || null
+          defaultSignatureId: settings.activeSigId || null,
+          lockPinHash: securityConfig.pinHash || null,
+          lockPinSalt: securityConfig.pinSalt || null,
+          autoLockMinutes: Number.isFinite(Number(securityConfig.autoLockMinutes)) ? Number(securityConfig.autoLockMinutes) : 5,
+          lockOnTabLeave: Boolean(securityConfig.lockOnTabLeave),
+          ...extra
         }).catch(console.warn);
       }
 
@@ -3156,13 +3693,422 @@
         showToast('ล้างประวัติทั้งหมดแล้ว');
       }
 
+      // =========================================================================
+      // 4D. Device Security Gate, PIN Lock, Auto-Lock, Wipe & PWA Support
+      // =========================================================================
+      function setLockError(msg) {
+        if (!els.lockErrorMsg) return;
+        els.lockErrorMsg.textContent = msg || '';
+        els.lockErrorMsg.classList.toggle('show', Boolean(msg));
+      }
+
+      function getLockoutRemainingMs() {
+        try {
+          const until = Number(localStorage.getItem(LOCKOUT_KEY)) || 0;
+          return Math.max(0, until - Date.now());
+        } catch (err) {
+          return 0;
+        }
+      }
+
+      function formatLockoutRemaining(ms) {
+        const secs = Math.max(1, Math.ceil(ms / 1000));
+        if (secs < 60) return `${secs} วินาที`;
+        const mins = Math.ceil(secs / 60);
+        return `${mins} นาที`;
+      }
+
+      function setLockView(mode, reasonText = '') {
+        isAppLocked = true;
+        document.body.classList.add('app-locked');
+        if (els.lockScreenOverlay) {
+          els.lockScreenOverlay.classList.add('open');
+        }
+        clearTimeout(idleTimer);
+        idleTimer = null;
+
+        if (els.lockViewChecking) els.lockViewChecking.style.display = mode === 'checking' ? 'block' : 'none';
+        if (els.lockViewSignIn) els.lockViewSignIn.style.display = mode === 'signin' ? 'block' : 'none';
+        if (els.lockViewPinSetup) els.lockViewPinSetup.style.display = mode === 'pin-setup' ? 'block' : 'none';
+        if (els.lockViewPinUnlock) els.lockViewPinUnlock.style.display = mode === 'pin-unlock' ? 'block' : 'none';
+
+        setLockError('');
+
+        if (mode === 'signin') {
+          if (els.chkLockSessionOnly) {
+            els.chkLockSessionOnly.checked = Boolean(securityConfig.sessionOnly);
+          }
+          if (els.btnLockOfflinePin) {
+            const canOfflinePin = navigator.onLine === false && Boolean(securityConfig.pinHash && securityConfig.pinSalt);
+            els.btnLockOfflinePin.style.display = canOfflinePin ? 'block' : 'none';
+          }
+        } else if (mode === 'pin-setup') {
+          if (els.inputSetupPin) els.inputSetupPin.value = '';
+          if (els.inputSetupPinConfirm) els.inputSetupPinConfirm.value = '';
+          if (els.selectSetupAutoLock) {
+            const mins = Number(securityConfig.autoLockMinutes);
+            els.selectSetupAutoLock.value = String([1, 3, 5, 15, 30].includes(mins) ? mins : 5);
+          }
+          setTimeout(() => els.inputSetupPin?.focus(), 60);
+        } else if (mode === 'pin-unlock') {
+          if (els.lockReasonText) {
+            els.lockReasonText.textContent = reasonText || 'กรุณากรอกรหัส PIN เพื่อปลดล็อกลายเซ็นและเอกสาร';
+          }
+          if (els.inputUnlockPin) {
+            els.inputUnlockPin.value = '';
+            els.inputUnlockPin.type = 'password';
+          }
+          if (els.btnToggleUnlockPin) els.btnToggleUnlockPin.textContent = 'แสดง';
+          if (els.btnLockSignOutWipe) {
+            els.btnLockSignOutWipe.style.display = location.protocol !== 'file:' ? 'inline-flex' : 'none';
+          }
+          if (els.btnLockForgotPin) {
+            els.btnLockForgotPin.style.display = location.protocol !== 'file:' ? 'inline-flex' : 'none';
+          }
+          const rem = getLockoutRemainingMs();
+          if (rem > 0) {
+            setLockError(`กรอกรหัสผิดเกินกำหนด กรุณารอ ${formatLockoutRemaining(rem)}`);
+          }
+          setTimeout(() => els.inputUnlockPin?.focus(), 60);
+        }
+        syncSecurityUi();
+      }
+
+      function syncSecurityUi() {
+        const hasPin = Boolean(securityConfig.pinHash && securityConfig.pinSalt);
+        if (els.btnLockNow) {
+          els.btnLockNow.style.display = (hasPin && !isAppLocked) ? 'inline-flex' : 'none';
+        }
+        if (els.secStatusBanner) {
+          els.secStatusBanner.className = `security-status-box ${hasPin ? 'is-protected' : 'is-unprotected'}`;
+          if (hasPin) {
+            const mins = Number(securityConfig.autoLockMinutes) || 0;
+            const autoLabel = mins > 0 ? `ล็อกอัตโนมัติใน ${mins} นาที` : 'ปิดล็อกอัตโนมัติ';
+            els.secStatusBanner.textContent = `🛡️ เปิดใช้รหัส PIN และเข้ารหัสลายเซ็น AES-256 แล้ว (${autoLabel})`;
+          } else {
+            els.secStatusBanner.textContent = '⚠️ ยังไม่ได้ตั้งรหัส PIN ป้องกันลายเซ็น — แนะนำให้ตั้งรหัสเพื่อป้องกันบุคคลอื่นใช้งานเมื่อเปิดโน้ตบุ๊กทิ้งไว้';
+          }
+        }
+        if (els.secCurrentPinWrap) {
+          els.secCurrentPinWrap.style.display = hasPin ? 'block' : 'none';
+        }
+        if (els.btnSecRemovePin) {
+          els.btnSecRemovePin.style.display = hasPin ? 'inline-flex' : 'none';
+        }
+        if (els.selectSecAutoLock) {
+          const curMins = Number.isFinite(Number(securityConfig.autoLockMinutes)) ? Number(securityConfig.autoLockMinutes) : 5;
+          els.selectSecAutoLock.value = String(curMins);
+        }
+        if (els.chkSecLockOnTabLeave) {
+          els.chkSecLockOnTabLeave.checked = Boolean(securityConfig.lockOnTabLeave);
+          els.chkSecLockOnTabLeave.disabled = !hasPin;
+        }
+        if (els.chkSecSessionOnly) {
+          els.chkSecSessionOnly.checked = Boolean(securityConfig.sessionOnly);
+        }
+        if (els.btnSecLockNow) {
+          els.btnSecLockNow.style.display = hasPin ? 'inline-flex' : 'none';
+        }
+      }
+
+      function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        idleTimer = null;
+        if (isAppLocked || !securityConfig.pinHash) return;
+        const mins = Number(securityConfig.autoLockMinutes);
+        if (!Number.isFinite(mins) || mins <= 0) return;
+        idleTimer = setTimeout(() => {
+          lockAppNow(`ล็อกอัตโนมัติเนื่องจากไม่มีการใช้งานเกิน ${mins} นาที`);
+        }, mins * 60 * 1000);
+      }
+
+      function lockAppNow(reason = 'หน้าจอถูกล็อกเพื่อความปลอดภัยของลายเซ็น', targetMode = null) {
+        clearTimeout(idleTimer);
+        idleTimer = null;
+
+        [
+          els.passwordModal, els.progressModal, els.shareFallbackModal,
+          els.drawSigModal, els.templateModal, els.historyModal, els.securityModal
+        ].forEach((m) => m && m.classList.remove('open'));
+
+        // Clear all decrypted signatures & stamp bitmaps from memory immediately
+        vaultCryptoKey = null;
+        savedSignatures = [];
+        cachedSignatureImg = null;
+        cachedStampCanvas = null;
+        settings.rawSigDataUrl = null;
+        settings.cleanSigDataUrl = null;
+
+        if (els.sigPreviewImg) els.sigPreviewImg.removeAttribute('src');
+        if (els.savedSigGrid) els.savedSigGrid.innerHTML = '';
+        if (els.savedSigSection) els.savedSigSection.style.display = 'none';
+        if (els.previewCanvas && els.previewCanvas.width > 0) {
+          const pctx = els.previewCanvas.getContext('2d');
+          if (pctx) pctx.clearRect(0, 0, els.previewCanvas.width, els.previewCanvas.height);
+        }
+
+        const mode = targetMode || (securityConfig.pinHash ? 'pin-unlock' : (location.protocol !== 'file:' && !cloudUser ? 'signin' : 'pin-unlock'));
+        setLockView(mode, reason);
+      }
+
+      async function syncCloudDataAfterUnlock(user) {
+        try {
+          const data = await window.TrueCopyCloud.loadUserData(user.uid);
+
+          // 1. Merge signatures (cloud + push any local-only signatures up to Firestore)
+          const cloudSigMap = new Map(data.signatures.map(s => [s.id, s]));
+          const mergedSigs = [...data.signatures];
+          for (const localSig of savedSignatures) {
+            if (!cloudSigMap.has(localSig.id)) {
+              mergedSigs.push(localSig);
+              window.TrueCopyCloud.saveSignature(user.uid, localSig).catch(console.warn);
+            }
+          }
+          mergedSigs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          savedSignatures = mergedSigs.slice(0, 10);
+          await saveSavedSignatures();
+
+          // 2. Merge templates (cloud + push any local-only templates up to Firestore)
+          const cloudTplMap = new Map(data.templates.map(t => [t.id, t]));
+          const mergedTpls = [...data.templates];
+          for (const localTpl of savedTemplates) {
+            if (!cloudTplMap.has(localTpl.id)) {
+              mergedTpls.push(localTpl);
+              window.TrueCopyCloud.saveTemplate(user.uid, localTpl).catch(console.warn);
+            }
+          }
+          mergedTpls.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          savedTemplates = mergedTpls;
+          saveSavedTemplates();
+
+          // 3. Merge history (cloud + push any local-only history entries up to Firestore)
+          const cloudHistList = Array.isArray(data.history) ? data.history : [];
+          const cloudHistMap = new Map(cloudHistList.map(h => [h.id, h]));
+          const mergedHist = [...cloudHistList];
+          for (const localHist of savedHistory) {
+            if (!cloudHistMap.has(localHist.id)) {
+              mergedHist.push(localHist);
+              window.TrueCopyCloud.saveHistoryEntry(user.uid, localHist).catch(console.warn);
+            }
+          }
+          mergedHist.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          savedHistory = mergedHist.slice(0, 100);
+          saveSavedHistory();
+
+          // 4. Apply cloud defaults if present
+          if (data.defaultSettings && data.defaultSettings.defaultTemplateId) {
+            saveDefaultTemplateId(data.defaultSettings.defaultTemplateId);
+            if (files.length === 0) {
+              await applyTemplate(defaultTemplateId, true);
+            }
+          }
+
+          if (data.defaultSettings && data.defaultSettings.defaultSignatureId && savedSignatures.some(s => s.id === data.defaultSettings.defaultSignatureId)) {
+            if (!settings.activeSigId) {
+              await selectSavedSignature(data.defaultSettings.defaultSignatureId);
+            }
+          } else if (!settings.activeSigId && savedSignatures.length > 0) {
+            await selectSavedSignature(savedSignatures[0].id);
+          }
+
+          showToast('ซิงก์ข้อมูลจาก Firebase เรียบร้อย ☁️');
+        } catch (err) {
+          console.error('Cloud load failed:', err);
+          showToast('โหลดข้อมูลจาก Cloud ไม่สำเร็จ (กำลังใช้ข้อมูลในเครื่องแทน)');
+        }
+      }
+
+      async function unlockAndHydrateWorkspace() {
+        isAppLocked = false;
+        document.body.classList.remove('app-locked');
+        if (els.lockScreenOverlay) els.lockScreenOverlay.classList.remove('open');
+        setLockError('');
+
+        savedSignatures = await loadDecryptedSignatures();
+
+        // Migrate any legacy unencrypted signature from STORAGE_KEY into the library
+        if (savedSignatures.length === 0 && settings.cleanSigDataUrl) {
+          addSavedSignature(
+            'ลายเซ็นเดิม',
+            settings.rawSigDataUrl || settings.cleanSigDataUrl,
+            settings.cleanSigDataUrl,
+            settings.sigThreshold,
+            settings.tintSignature
+          );
+          saveSettings();
+        } else if (vaultCryptoKey) {
+          // Ensure legacy plaintext SAVED_SIGS_KEY gets encrypted cleanly
+          try {
+            const rawCheck = localStorage.getItem(SAVED_SIGS_KEY);
+            if (rawCheck && Array.isArray(JSON.parse(rawCheck))) {
+              await saveSavedSignatures();
+            }
+          } catch (e) {}
+        }
+
+        if (defaultTemplateId && savedTemplates.some(t => t.id === defaultTemplateId)) {
+          await applyTemplate(defaultTemplateId, true);
+        }
+
+        if (cloudUser && window.TrueCopyCloud && navigator.onLine !== false) {
+          await syncCloudDataAfterUnlock(cloudUser);
+        }
+
+        if (settings.activeSigId) {
+          const activeSig = savedSignatures.find(s => s.id === settings.activeSigId);
+          if (activeSig) {
+            settings.rawSigDataUrl = activeSig.rawDataUrl;
+            settings.cleanSigDataUrl = activeSig.cleanDataUrl;
+          }
+        } else if (savedSignatures.length > 0) {
+          const firstSig = savedSignatures[0];
+          settings.activeSigId = firstSig.id;
+          settings.rawSigDataUrl = firstSig.rawDataUrl;
+          settings.cleanSigDataUrl = firstSig.cleanDataUrl;
+        }
+
+        if (settings.cleanSigDataUrl) {
+          try {
+            cachedSignatureImg = await loadImageFromSrc(settings.cleanSigDataUrl);
+          } catch (e) {
+            cachedSignatureImg = null;
+          }
+        } else {
+          cachedSignatureImg = null;
+        }
+
+        cachedStampCanvas = await buildStampCanvas();
+        renderSavedSignatures();
+        renderTemplateSelect();
+        updateHistoryBadge();
+        syncControlsFromSettings();
+        syncSecurityUi();
+
+        if (els.templateModal.classList.contains('open')) renderTemplateModalList();
+        if (els.historyModal && els.historyModal.classList.contains('open')) renderHistoryModalList();
+
+        if (getActiveFile()) {
+          await renderActivePagePreview();
+        }
+
+        resetIdleTimer();
+      }
+
+      function wipeLocalSensitiveData(wipeSecurityToo = false) {
+        clearTimeout(idleTimer);
+        idleTimer = null;
+        vaultCryptoKey = null;
+        savedSignatures = [];
+        savedTemplates = [];
+        savedHistory = [];
+        files.length = 0;
+        activeFileId = null;
+        activePageNum = 1;
+        defaultTemplateId = null;
+        activeTemplateId = '';
+        cachedSignatureImg = null;
+        cachedStampCanvas = null;
+        settings = { ...DEFAULT_SETTINGS };
+
+        [SAVED_SIGS_KEY, SAVED_TEMPLATES_KEY, HISTORY_KEY, DEFAULT_TPL_KEY, STORAGE_KEY].forEach((k) => {
+          try { localStorage.removeItem(k); } catch (e) {}
+        });
+        if (wipeSecurityToo) {
+          [SECURITY_KEY, LOCKOUT_KEY].forEach((k) => {
+            try { localStorage.removeItem(k); } catch (e) {}
+          });
+          securityConfig = loadSecurityConfig();
+        }
+
+        if (els.sigPreviewImg) els.sigPreviewImg.removeAttribute('src');
+        if (els.savedSigGrid) els.savedSigGrid.innerHTML = '';
+        if (els.savedSigSection) els.savedSigSection.style.display = 'none';
+        renderFileList();
+        renderThumbnails();
+        renderTemplateSelect();
+        updateHistoryBadge();
+        syncControlsFromSettings();
+        updateReadyBanner();
+      }
+
+      async function tryUnlockWithPin(pinInput) {
+        const rem = getLockoutRemainingMs();
+        if (rem > 0) {
+          setLockError(`กรอกรหัสผิดเกินกำหนด กรุณารอ ${formatLockoutRemaining(rem)}`);
+          return false;
+        }
+        const pin = String(pinInput || '').trim();
+        if (!pin) {
+          setLockError('กรุณากรอกรหัส PIN');
+          return false;
+        }
+        if (!securityConfig.pinSalt || !securityConfig.pinHash) {
+          await unlockAndHydrateWorkspace();
+          return true;
+        }
+
+        try {
+          const { pinHash, vaultKey } = await derivePinSecrets(pin, securityConfig.pinSalt);
+          if (pinHash === securityConfig.pinHash) {
+            failedPinAttempts = 0;
+            try { localStorage.removeItem(LOCKOUT_KEY); } catch (e) {}
+            vaultCryptoKey = vaultKey;
+            if (!cloudUser && location.protocol !== 'file:') {
+              offlineUnlocked = true;
+            }
+            await unlockAndHydrateWorkspace();
+            showToast('ปลดล็อกเรียบร้อย 🔓');
+            return true;
+          }
+        } catch (err) {
+          setLockError(err?.message || 'เกิดข้อผิดพลาดในการตรวจสอบ PIN');
+          return false;
+        }
+
+        failedPinAttempts++;
+        if (failedPinAttempts >= 8) {
+          try { localStorage.setItem(LOCKOUT_KEY, String(Date.now() + 300000)); } catch (e) {}
+          setLockError('กรอกรหัสผิด 8 ครั้ง กรุณารอ 5 นาที หรือกด "ลืมรหัส PIN" เพื่อยืนยันด้วย Google');
+        } else if (failedPinAttempts >= 5) {
+          try { localStorage.setItem(LOCKOUT_KEY, String(Date.now() + 30000)); } catch (e) {}
+          setLockError('กรอกรหัส PIN ผิดหลายครั้ง กรุณารอ 30 วินาที');
+        } else {
+          setLockError(`รหัส PIN ไม่ถูกต้อง (${failedPinAttempts}/5)`);
+        }
+        return false;
+      }
+
+      function initPwaSupport() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredInstallPrompt = e;
+          if (els.btnInstallPwa) {
+            els.btnInstallPwa.style.display = 'inline-flex';
+          }
+        });
+        window.addEventListener('appinstalled', () => {
+          deferredInstallPrompt = null;
+          if (els.btnInstallPwa) {
+            els.btnInstallPwa.style.display = 'none';
+          }
+          showToast('ติดตั้งแอป TrueCopy ลงบนเครื่องเรียบร้อย 📲');
+        });
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+          navigator.serviceWorker.register('./sw.js').catch((err) => {
+            console.warn('Service worker registration note:', err?.message || err);
+          });
+        }
+      }
+
       function syncAuthUi() {
         if (cloudUser) {
           els.btnGoogleSignIn.style.display = 'none';
           els.authUserBox.style.display = 'flex';
           const shortName = cloudUser.email ? cloudUser.email.split('@')[0] : 'Cloud';
           els.authUserPill.textContent = `☁️ ${shortName}`;
-          els.sigStorageNote.textContent = '☁️ ซิงก์ลายเซ็นบน Cloud แล้ว (ใช้ได้ทุกเครื่อง)';
+          els.sigStorageNote.textContent = securityConfig.pinHash
+            ? '🔒 ลายเซ็นเข้ารหัส AES-256 และซิงก์บน Cloud แล้ว'
+            : '☁️ ซิงก์ลายเซ็นบน Cloud แล้ว (ใช้ได้ทุกเครื่อง)';
           els.templateStatusHint.textContent = '☁️ เทมเพลตซิงก์กับบัญชี Google ของคุณอัตโนมัติ';
           if (els.historyStorageNote) {
             els.historyStorageNote.textContent = '☁️ ซิงก์ประวัติข้ามเครื่องแล้ว (บันทึกเฉพาะชื่อไฟล์และวัตถุประสงค์ ไม่มีการอัปโหลดไฟล์เอกสาร)';
@@ -3170,7 +4116,9 @@
         } else {
           els.btnGoogleSignIn.style.display = 'inline-flex';
           els.authUserBox.style.display = 'none';
-          els.sigStorageNote.textContent = '💾 บันทึกลายเซ็นไว้ในเครื่องนี้ (เข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง)';
+          els.sigStorageNote.textContent = securityConfig.pinHash
+            ? '🔒 บันทึกและเข้ารหัสลายเซ็นไว้ในเครื่องนี้ (AES-256)'
+            : '💾 บันทึกลายเซ็นไว้ในเครื่องนี้ (เข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง)';
           els.templateStatusHint.textContent = 'เลือกเทมเพลตที่บันทึกไว้ หรือเข้าสู่ระบบ Google เพื่อซิงก์ข้ามเครื่อง';
           if (els.historyStorageNote) {
             els.historyStorageNote.textContent = '💾 บันทึกประวัติไว้ในเครื่องนี้เท่านั้น (เฉพาะชื่อไฟล์และวัตถุประสงค์ ไม่มีการอัปโหลดไฟล์เอกสาร)';
@@ -3184,90 +4132,72 @@
           if (user.email !== allowed) {
             showToast(`อนุญาตเฉพาะบัญชี ${allowed} เท่านั้น`);
             await window.TrueCopyCloud.signOutUser();
+            authResolvedOnce = true;
             cloudUser = null;
+            syncAuthUi();
+            lockAppNow(`บัญชี ${user.email || ''} ไม่ได้รับอนุญาต กรุณาเข้าสู่ระบบด้วย ${allowed}`, 'signin');
+            return;
+          }
+
+          if (authResolvedOnce && !isAppLocked && cloudUser && cloudUser.uid === user.uid) {
             syncAuthUi();
             return;
           }
 
+          authResolvedOnce = true;
+          offlineUnlocked = false;
           cloudUser = user;
           syncAuthUi();
 
+          // Fetch ONLY non-secret security settings before PIN gate
+          let cloudSec = {};
           try {
-            const data = await window.TrueCopyCloud.loadUserData(user.uid);
-
-            // 1. Merge signatures (cloud + push any local-only signatures up to Firestore)
-            const cloudSigMap = new Map(data.signatures.map(s => [s.id, s]));
-            const mergedSigs = [...data.signatures];
-            for (const localSig of savedSignatures) {
-              if (!cloudSigMap.has(localSig.id)) {
-                mergedSigs.push(localSig);
-                window.TrueCopyCloud.saveSignature(user.uid, localSig).catch(console.warn);
-              }
-            }
-            mergedSigs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            savedSignatures = mergedSigs.slice(0, 10);
-            saveSavedSignatures();
-
-            // 2. Merge templates (cloud + push any local-only templates up to Firestore)
-            const cloudTplMap = new Map(data.templates.map(t => [t.id, t]));
-            const mergedTpls = [...data.templates];
-            for (const localTpl of savedTemplates) {
-              if (!cloudTplMap.has(localTpl.id)) {
-                mergedTpls.push(localTpl);
-                window.TrueCopyCloud.saveTemplate(user.uid, localTpl).catch(console.warn);
-              }
-            }
-            mergedTpls.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            savedTemplates = mergedTpls;
-            saveSavedTemplates();
-
-            // 3. Merge history (cloud + push any local-only history entries up to Firestore)
-            const cloudHistList = Array.isArray(data.history) ? data.history : [];
-            const cloudHistMap = new Map(cloudHistList.map(h => [h.id, h]));
-            const mergedHist = [...cloudHistList];
-            for (const localHist of savedHistory) {
-              if (!cloudHistMap.has(localHist.id)) {
-                mergedHist.push(localHist);
-                window.TrueCopyCloud.saveHistoryEntry(user.uid, localHist).catch(console.warn);
-              }
-            }
-            mergedHist.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            savedHistory = mergedHist.slice(0, 100);
-            saveSavedHistory();
-
-            // 4. Apply cloud defaults if present
-            if (data.defaultSettings && data.defaultSettings.defaultTemplateId) {
-              saveDefaultTemplateId(data.defaultSettings.defaultTemplateId);
-              if (files.length === 0) {
-                await applyTemplate(defaultTemplateId, true);
-              }
-            }
-
-            if (data.defaultSettings && data.defaultSettings.defaultSignatureId && savedSignatures.some(s => s.id === data.defaultSettings.defaultSignatureId)) {
-              if (!settings.activeSigId) {
-                await selectSavedSignature(data.defaultSettings.defaultSignatureId);
-              }
-            } else if (!settings.activeSigId && savedSignatures.length > 0) {
-              await selectSavedSignature(savedSignatures[0].id);
-            }
-
-            renderSavedSignatures();
-            renderTemplateSelect();
-            updateHistoryBadge();
-            if (els.templateModal.classList.contains('open')) {
-              renderTemplateModalList();
-            }
-            if (els.historyModal && els.historyModal.classList.contains('open')) {
-              renderHistoryModalList();
-            }
-            showToast('ซิงก์ข้อมูลจาก Firebase เรียบร้อย ☁️');
+            cloudSec = await window.TrueCopyCloud.loadUserSecuritySettings(user.uid);
           } catch (err) {
-            console.error('Cloud load failed:', err);
-            showToast('โหลดข้อมูลจาก Cloud ไม่สำเร็จ (กำลังใช้ข้อมูลในเครื่องแทน)');
+            console.warn('Could not preload security settings:', err);
+          }
+
+          if (cloudSec.lockPinHash && cloudSec.lockPinSalt) {
+            securityConfig.pinHash = cloudSec.lockPinHash;
+            securityConfig.pinSalt = cloudSec.lockPinSalt;
+            securityConfig.skippedSetup = false;
+            if (typeof cloudSec.autoLockMinutes === 'number') {
+              securityConfig.autoLockMinutes = cloudSec.autoLockMinutes;
+            }
+            if (typeof cloudSec.lockOnTabLeave === 'boolean') {
+              securityConfig.lockOnTabLeave = cloudSec.lockOnTabLeave;
+            }
+            saveSecurityConfig();
+          } else if (securityConfig.pinHash && securityConfig.pinSalt) {
+            syncDefaultSettingsToCloud({
+              defaultTemplateId: cloudSec.defaultTemplateId || defaultTemplateId || null,
+              defaultSignatureId: cloudSec.defaultSignatureId || settings.activeSigId || null
+            });
+          }
+
+          if (securityConfig.pinHash && securityConfig.pinSalt) {
+            setLockView('pin-unlock', `ยืนยันรหัส PIN เพื่อปลดล็อกลายเซ็น (${user.email})`);
+          } else if (!securityConfig.skippedSetup) {
+            setLockView('pin-setup');
+          } else {
+            await unlockAndHydrateWorkspace();
           }
         } else {
+          authResolvedOnce = true;
           cloudUser = null;
           syncAuthUi();
+
+          if (offlineUnlocked && location.protocol !== 'file:') {
+            return;
+          }
+
+          if (location.protocol !== 'file:') {
+            lockAppNow('กรุณายืนยันตัวตนด้วยบัญชี Google ก่อนเข้าใช้งาน', 'signin');
+          } else if (securityConfig.pinHash && securityConfig.pinSalt) {
+            setLockView('pin-unlock', 'กรุณากรอกรหัส PIN เพื่อเปิดใช้งาน');
+          } else {
+            await unlockAndHydrateWorkspace();
+          }
         }
       }
 
@@ -4714,6 +5644,7 @@
           navigator.canShare({ files: shareFileObjs });
 
         if (canNativeShare) {
+          filePickerActive = true;
           try {
             await navigator.share({
               files: shareFileObjs,
@@ -4726,6 +5657,10 @@
               return; // User closed the share sheet intentionally
             }
             console.warn('Web Share failed, falling back to download:', err);
+          } finally {
+            setTimeout(() => {
+              filePickerActive = false;
+            }, 1200);
           }
         }
 
@@ -4951,18 +5886,29 @@
       }
 
       function wireEvents() {
+        function triggerProtectedFilePicker(inputEl) {
+          filePickerActive = true;
+          const releasePickerFlag = () => {
+            setTimeout(() => { filePickerActive = false; }, 1200);
+            window.removeEventListener('focus', releasePickerFlag);
+          };
+          window.addEventListener('focus', releasePickerFlag);
+          inputEl.click();
+        }
+
         // Upload triggers
-        els.btnAddFilesHeader.addEventListener('click', () => els.fileInput.click());
-        els.btnUploadEmpty.addEventListener('click', () => els.fileInput.click());
-        els.dropzone.addEventListener('click', () => els.fileInput.click());
+        els.btnAddFilesHeader.addEventListener('click', () => triggerProtectedFilePicker(els.fileInput));
+        els.btnUploadEmpty.addEventListener('click', () => triggerProtectedFilePicker(els.fileInput));
+        els.dropzone.addEventListener('click', () => triggerProtectedFilePicker(els.fileInput));
         els.dropzone.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            els.fileInput.click();
+            triggerProtectedFilePicker(els.fileInput);
           }
         });
 
         els.fileInput.addEventListener('change', (e) => {
+          setTimeout(() => { filePickerActive = false; }, 600);
           handleIncomingFiles(e.target.files);
           e.target.value = '';
         });
@@ -5081,8 +6027,9 @@
         });
 
         // Signature controls
-        els.btnUploadSig.addEventListener('click', () => els.sigInput.click());
+        els.btnUploadSig.addEventListener('click', () => triggerProtectedFilePicker(els.sigInput));
         els.sigInput.addEventListener('change', async (e) => {
+          setTimeout(() => { filePickerActive = false; }, 600);
           const f = e.target.files && e.target.files[0];
           e.target.value = '';
           if (!f) return;
@@ -5283,8 +6230,9 @@
           onSettingChanged();
         });
 
-        els.btnUploadFont.addEventListener('click', () => els.fontInput.click());
+        els.btnUploadFont.addEventListener('click', () => triggerProtectedFilePicker(els.fontInput));
         els.fontInput.addEventListener('change', async (e) => {
+          setTimeout(() => { filePickerActive = false; }, 600);
           const f = e.target.files && e.target.files[0];
           e.target.value = '';
           if (!f) return;
@@ -5586,8 +6534,8 @@
           els.shareFallbackModal.classList.remove('open');
         });
 
-        // Auth UI events
-        els.btnGoogleSignIn.addEventListener('click', async () => {
+        // Auth, Lock Screen, Security Vault & PWA events
+        async function startGoogleSignIn(useSessionOnly) {
           if (location.protocol === 'file:') {
             showToast('การเข้าสู่ระบบ Google ต้องเปิดผ่านเว็บ (https://truecopy-3rh.pages.dev/ หรือ localhost)', 4000);
             return;
@@ -5596,8 +6544,10 @@
             showToast('กำลังโหลดระบบเชื่อมต่อ Firebase กรุณาลองใหม่อีกครั้ง');
             return;
           }
+          securityConfig.sessionOnly = Boolean(useSessionOnly);
+          saveSecurityConfig();
           try {
-            await window.TrueCopyCloud.signInWithGoogle();
+            await window.TrueCopyCloud.signInWithGoogle(securityConfig.sessionOnly);
           } catch (err) {
             if (err && err.code === 'auth/popup-closed-by-user') return;
             if (err && err.code === 'auth/unauthorized-domain') {
@@ -5607,14 +6557,313 @@
             console.error('Sign in error:', err);
             showToast(`เข้าสู่ระบบไม่สำเร็จ: ${err?.message || err?.code || 'กรุณาลองใหม่'}`);
           }
+        }
+
+        async function performSignOutAndWipe(askConfirm = false) {
+          if (askConfirm && !confirm('ต้องการล้างข้อมูลลายเซ็น เทมเพลต และประวัติออกจากเครื่องนี้ แล้วออกจากระบบหรือไม่?\n(ข้อมูลที่ซิงก์บน Cloud ยังอยู่ปลอดภัย)')) {
+            return;
+          }
+          offlineUnlocked = false;
+          wipeLocalSensitiveData(true);
+          if (window.TrueCopyCloud) {
+            try {
+              await window.TrueCopyCloud.signOutUser();
+            } catch (err) {
+              console.warn('Sign out note:', err);
+            }
+          }
+          syncAuthUi();
+          if (location.protocol !== 'file:') {
+            lockAppNow('ออกจากระบบและล้างข้อมูลในเครื่องเรียบร้อย', 'signin');
+          } else {
+            await unlockAndHydrateWorkspace();
+          }
+          showToast('ออกจากระบบและล้างข้อมูลในเครื่องเรียบร้อย 🔒');
+        }
+
+        async function savePinAndActivate(newPinRaw, confirmPinRaw, autoLockMins = null) {
+          const pin = String(newPinRaw || '').trim();
+          const confirmPin = String(confirmPinRaw || '').trim();
+          if (pin.length < 4 || pin.length > 12) {
+            return { ok: false, error: 'รหัส PIN ต้องมีความยาว 4–12 ตัวอักษรหรือตัวเลข' };
+          }
+          if (pin !== confirmPin) {
+            return { ok: false, error: 'รหัส PIN ทั้ง 2 ช่องไม่ตรงกัน' };
+          }
+          const newSalt = generateSaltBase64();
+          const { pinHash, vaultKey } = await derivePinSecrets(pin, newSalt);
+          securityConfig.pinHash = pinHash;
+          securityConfig.pinSalt = newSalt;
+          securityConfig.skippedSetup = false;
+          if (autoLockMins !== null && Number.isFinite(Number(autoLockMins))) {
+            securityConfig.autoLockMinutes = Number(autoLockMins);
+          }
+          vaultCryptoKey = vaultKey;
+          saveSecurityConfig();
+          await saveSavedSignatures();
+          syncDefaultSettingsToCloud();
+          return { ok: true };
+        }
+
+        els.btnGoogleSignIn.addEventListener('click', () => startGoogleSignIn(securityConfig.sessionOnly));
+        els.btnLockGoogleSignIn.addEventListener('click', () => startGoogleSignIn(els.chkLockSessionOnly.checked));
+        els.chkLockSessionOnly.addEventListener('change', () => {
+          securityConfig.sessionOnly = els.chkLockSessionOnly.checked;
+          if (els.chkSecSessionOnly) els.chkSecSessionOnly.checked = securityConfig.sessionOnly;
+          saveSecurityConfig();
         });
 
-        els.btnSignOut.addEventListener('click', async () => {
-          if (window.TrueCopyCloud) {
-            await window.TrueCopyCloud.signOutUser();
-            showToast('ออกจากระบบแล้ว (ข้อมูลยังใช้งานต่อบนเครื่องนี้ได้)');
+        els.btnLockOfflinePin.addEventListener('click', () => {
+          setLockView('pin-unlock', 'ปลดล็อกใช้งานแบบออฟไลน์ด้วย PIN');
+        });
+
+        els.btnSignOut.addEventListener('click', () => performSignOutAndWipe(true));
+        els.btnWipeAndSignOut.addEventListener('click', () => performSignOutAndWipe(true));
+        els.btnLockSignOutWipe.addEventListener('click', () => performSignOutAndWipe(true));
+
+        // First-time / Reset PIN Setup view
+        const submitSetupPin = async () => {
+          try {
+            const res = await savePinAndActivate(
+              els.inputSetupPin.value,
+              els.inputSetupPinConfirm.value,
+              els.selectSetupAutoLock.value
+            );
+            if (!res.ok) {
+              showToast(res.error);
+              return;
+            }
+            els.inputSetupPin.value = '';
+            els.inputSetupPinConfirm.value = '';
+            await unlockAndHydrateWorkspace();
+            showToast('ตั้งรหัส PIN และเข้ารหัสลายเซ็นเรียบร้อย 🔒');
+          } catch (err) {
+            showToast(err?.message || 'ไม่สามารถตั้งรหัส PIN ได้');
+          }
+        };
+        els.btnSaveSetupPin.addEventListener('click', submitSetupPin);
+        els.inputSetupPinConfirm.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            submitSetupPin();
           }
         });
+
+        els.btnSkipSetupPin.addEventListener('click', async () => {
+          securityConfig.skippedSetup = true;
+          securityConfig.pinHash = null;
+          securityConfig.pinSalt = null;
+          vaultCryptoKey = null;
+          saveSecurityConfig();
+          syncDefaultSettingsToCloud();
+          await unlockAndHydrateWorkspace();
+          showToast('เข้าใช้งานโดยไม่ตั้ง PIN (ตั้งค่าได้ทุกเมื่อที่ปุ่ม 🛡️ ความปลอดภัย)');
+        });
+
+        // PIN Unlock view
+        els.btnToggleUnlockPin.addEventListener('click', () => {
+          const isPw = els.inputUnlockPin.type === 'password';
+          els.inputUnlockPin.type = isPw ? 'text' : 'password';
+          els.btnToggleUnlockPin.textContent = isPw ? 'ซ่อน' : 'แสดง';
+        });
+        els.btnUnlockPin.addEventListener('click', () => tryUnlockWithPin(els.inputUnlockPin.value));
+        els.inputUnlockPin.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            tryUnlockWithPin(els.inputUnlockPin.value);
+          }
+        });
+
+        els.btnLockForgotPin.addEventListener('click', async () => {
+          if (!window.TrueCopyCloud || location.protocol === 'file:') {
+            showToast('ฟีเจอร์นี้ต้องใช้งานผ่านเว็บและเชื่อมต่ออินเทอร์เน็ต');
+            return;
+          }
+          if (!confirm('ระบบจะให้ยืนยันตัวตนด้วยบัญชี Google อีกครั้ง เพื่อล้าง PIN เดิมและตั้งรหัส PIN ใหม่\n(ข้อมูลลายเซ็นที่ซิงก์บน Cloud จะโหลดกลับมาให้อัตโนมัติ)')) {
+            return;
+          }
+          try {
+            await window.TrueCopyCloud.reauthWithGoogle();
+            try { localStorage.removeItem(SAVED_SIGS_KEY); } catch (e) {}
+            try { localStorage.removeItem(LOCKOUT_KEY); } catch (e) {}
+            securityConfig.pinHash = null;
+            securityConfig.pinSalt = null;
+            securityConfig.skippedSetup = false;
+            failedPinAttempts = 0;
+            vaultCryptoKey = null;
+            saveSecurityConfig();
+            syncDefaultSettingsToCloud();
+            setLockView('pin-setup');
+            showToast('ยืนยันบัญชี Google สำเร็จ กรุณาตั้งรหัส PIN ใหม่');
+          } catch (err) {
+            if (err && err.code === 'auth/popup-closed-by-user') return;
+            setLockError(err?.message || 'ยืนยันบัญชี Google ไม่สำเร็จ');
+          }
+        });
+
+        // Security Modal controls
+        const clearSecurityModalInputs = () => {
+          els.inputSecCurrentPin.value = '';
+          els.inputSecNewPin.value = '';
+          els.inputSecConfirmPin.value = '';
+        };
+        els.btnOpenSecurity.addEventListener('click', () => {
+          clearSecurityModalInputs();
+          syncSecurityUi();
+          els.securityModal.classList.add('open');
+        });
+        els.btnCloseSecurity.addEventListener('click', () => {
+          clearSecurityModalInputs();
+          els.securityModal.classList.remove('open');
+        });
+        els.securityModal.addEventListener('click', (e) => {
+          if (e.target === els.securityModal) {
+            clearSecurityModalInputs();
+            els.securityModal.classList.remove('open');
+          }
+        });
+
+        els.btnSecSavePin.addEventListener('click', async () => {
+          try {
+            if (securityConfig.pinHash && securityConfig.pinSalt) {
+              const cur = els.inputSecCurrentPin.value.trim();
+              if (!cur) {
+                showToast('กรุณากรอกรหัส PIN ปัจจุบันก่อนเปลี่ยนรหัส');
+                return;
+              }
+              const check = await derivePinSecrets(cur, securityConfig.pinSalt);
+              if (check.pinHash !== securityConfig.pinHash) {
+                showToast('รหัส PIN ปัจจุบันไม่ถูกต้อง');
+                return;
+              }
+            }
+            const res = await savePinAndActivate(els.inputSecNewPin.value, els.inputSecConfirmPin.value);
+            if (!res.ok) {
+              showToast(res.error);
+              return;
+            }
+            clearSecurityModalInputs();
+            syncSecurityUi();
+            syncAuthUi();
+            resetIdleTimer();
+            showToast('บันทึกรหัส PIN และเข้ารหัสลายเซ็นเรียบร้อย 🔒');
+          } catch (err) {
+            showToast(err?.message || 'ไม่สามารถบันทึกรหัส PIN ได้');
+          }
+        });
+
+        els.btnSecRemovePin.addEventListener('click', async () => {
+          try {
+            if (!securityConfig.pinHash || !securityConfig.pinSalt) return;
+            const cur = els.inputSecCurrentPin.value.trim();
+            if (!cur) {
+              showToast('กรุณากรอกรหัส PIN ปัจจุบันเพื่อยืนยันการยกเลิก');
+              return;
+            }
+            const check = await derivePinSecrets(cur, securityConfig.pinSalt);
+            if (check.pinHash !== securityConfig.pinHash) {
+              showToast('รหัส PIN ปัจจุบันไม่ถูกต้อง');
+              return;
+            }
+            if (!confirm('ต้องการยกเลิกการล็อกด้วยรหัส PIN หรือไม่? ลายเซ็นในเครื่องจะเปลี่ยนเป็นจัดเก็บแบบไม่เข้ารหัส')) {
+              return;
+            }
+            securityConfig.pinHash = null;
+            securityConfig.pinSalt = null;
+            securityConfig.skippedSetup = true;
+            vaultCryptoKey = null;
+            saveSecurityConfig();
+            await saveSavedSignatures();
+            syncDefaultSettingsToCloud();
+            clearSecurityModalInputs();
+            syncSecurityUi();
+            syncAuthUi();
+            clearTimeout(idleTimer);
+            showToast('ยกเลิกการล็อกด้วยรหัส PIN แล้ว');
+          } catch (err) {
+            showToast(err?.message || 'เกิดข้อผิดพลาดในการยกเลิก PIN');
+          }
+        });
+
+        els.selectSecAutoLock.addEventListener('change', () => {
+          securityConfig.autoLockMinutes = Number(els.selectSecAutoLock.value) || 0;
+          saveSecurityConfig();
+          syncDefaultSettingsToCloud();
+          syncSecurityUi();
+          resetIdleTimer();
+          showToast(
+            securityConfig.autoLockMinutes > 0
+              ? `ตั้งล็อกอัตโนมัติใน ${securityConfig.autoLockMinutes} นาทีแล้ว`
+              : 'ปิดการล็อกอัตโนมัติเมื่อไม่ได้ใช้งานแล้ว'
+          );
+        });
+
+        els.chkSecLockOnTabLeave.addEventListener('change', () => {
+          securityConfig.lockOnTabLeave = els.chkSecLockOnTabLeave.checked;
+          saveSecurityConfig();
+          syncDefaultSettingsToCloud();
+        });
+
+        els.chkSecSessionOnly.addEventListener('change', () => {
+          securityConfig.sessionOnly = els.chkSecSessionOnly.checked;
+          if (els.chkLockSessionOnly) els.chkLockSessionOnly.checked = securityConfig.sessionOnly;
+          saveSecurityConfig();
+          showToast('บันทึกค่าแล้ว (จะมีผลในการเข้าสู่ระบบครั้งถัดไป)');
+        });
+
+        els.btnLockNow.addEventListener('click', () => lockAppNow('ล็อกหน้าจอเพื่อความปลอดภัยของลายเซ็น'));
+        els.btnSecLockNow.addEventListener('click', () => lockAppNow('ล็อกหน้าจอเพื่อความปลอดภัยของลายเซ็น'));
+
+        els.btnInstallPwa.addEventListener('click', async () => {
+          if (!deferredInstallPrompt) return;
+          try {
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+          } catch (err) {}
+          deferredInstallPrompt = null;
+          els.btnInstallPwa.style.display = 'none';
+        });
+
+        // Global Auto-Lock, Tab-Leave & Hotkey listeners
+        const markUserActivity = () => {
+          const now = Date.now();
+          if (now - lastActivityTick < 1000) return;
+          lastActivityTick = now;
+          if (!isAppLocked) resetIdleTimer();
+        };
+        ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach((ev) => {
+          window.addEventListener(ev, markUserActivity, { passive: true });
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            hiddenSince = Date.now();
+          } else {
+            const awayMs = hiddenSince ? (Date.now() - hiddenSince) : 0;
+            hiddenSince = null;
+            if (!isAppLocked && securityConfig.pinHash && securityConfig.lockOnTabLeave && !filePickerActive && awayMs >= 60000) {
+              lockAppNow('ล็อกอัตโนมัติหลังจากสลับออกจากหน้าจอ');
+            }
+          }
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key && e.key.toLowerCase() === 'l') {
+            if (!isAppLocked && securityConfig.pinHash) {
+              e.preventDefault();
+              lockAppNow('ล็อกหน้าจอด้วยคีย์ลัด (Ctrl+Shift+L)');
+            }
+          }
+        });
+
+        const refreshOfflineBtn = () => {
+          if (isAppLocked && els.lockViewSignIn && els.lockViewSignIn.style.display === 'block' && els.btnLockOfflinePin) {
+            const canOfflinePin = navigator.onLine === false && Boolean(securityConfig.pinHash && securityConfig.pinSalt);
+            els.btnLockOfflinePin.style.display = canOfflinePin ? 'block' : 'none';
+          }
+        };
+        window.addEventListener('online', refreshOfflineBtn);
+        window.addEventListener('offline', refreshOfflineBtn);
 
         // Template Manager events
         els.selectTemplate.addEventListener('change', (e) => {
@@ -5709,47 +6958,31 @@
       // 12. Boot Application
       // =========================================================================
       async function init() {
-        // Migrate any existing signature into the memorized signature library
-        if (savedSignatures.length === 0 && settings.cleanSigDataUrl) {
-          addSavedSignature(
-            'ลายเซ็นเดิม',
-            settings.rawSigDataUrl || settings.cleanSigDataUrl,
-            settings.cleanSigDataUrl,
-            settings.sigThreshold,
-            settings.tintSignature
-          );
-          saveSettings();
-        } else if (settings.activeSigId) {
-          const activeSig = savedSignatures.find(s => s.id === settings.activeSigId);
-          if (activeSig) {
-            settings.rawSigDataUrl = activeSig.rawDataUrl;
-            settings.cleanSigDataUrl = activeSig.cleanDataUrl;
-          }
-        }
-
-        if (defaultTemplateId && savedTemplates.some(t => t.id === defaultTemplateId)) {
-          await applyTemplate(defaultTemplateId, true);
-        }
-
-        renderSavedSignatures();
-        renderTemplateSelect();
-        updateHistoryBadge();
-        syncControlsFromSettings();
-        syncAuthUi();
         wireEvents();
+        initPwaSupport();
+        syncSecurityUi();
+        syncAuthUi();
 
-        bindCloudAuth();
-        window.addEventListener('truecopy-cloud-ready', bindCloudAuth);
+        if (location.protocol !== 'file:') {
+          // Owner Sign-In & PIN Gate: keep workspace hidden until verified
+          setLockView('checking');
+          bindCloudAuth();
+          window.addEventListener('truecopy-cloud-ready', bindCloudAuth);
 
-        if (settings.cleanSigDataUrl) {
-          try {
-            cachedSignatureImg = await loadImageFromSrc(settings.cleanSigDataUrl);
-          } catch (e) {
-            cachedSignatureImg = null;
+          const fallbackDelay = navigator.onLine === false ? 700 : 3200;
+          setTimeout(() => {
+            if (!authResolvedOnce && isAppLocked) {
+              setLockView('signin');
+            }
+          }, fallbackDelay);
+        } else {
+          // Local file:// mode
+          if (securityConfig.pinHash && securityConfig.pinSalt) {
+            setLockView('pin-unlock', 'กรุณากรอกรหัส PIN เพื่อเปิดใช้งานไฟล์ในเครื่อง');
+          } else {
+            await unlockAndHydrateWorkspace();
           }
         }
-
-        cachedStampCanvas = await buildStampCanvas();
       }
 
       init();
