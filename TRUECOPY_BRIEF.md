@@ -2,7 +2,7 @@
 
 > Everything agreed so far, so an AI coding assistant can continue the work.
 > Full plan with architecture diagram: https://claude.ai/artifact/BStkv3cjUG4jd6gNLKNJwY
-> Last updated: 2026-11-18
+> Last updated: 2026-11-19
 
 ---
 
@@ -265,6 +265,22 @@ service firebase.storage {
 
 - All interface text is in Thai.
 - The layout must work on both phones and computers.
+
+### Responsive layout rules (mobile/iPad fix, 2026-11-19)
+
+Bug fixed: on phones the header buttons (`flex-shrink: 0`) were wider than the screen, so the whole page grew wider and Chrome zoomed out. The TC badge slid under the sign-in pill, the "ประมวลผลและสร้างไฟล์ PDF" button was cut off, and the bottom tab bar disappeared. Keep these rules when adding header or toolbar buttons:
+
+| Width | Behaviour (CSS in `index.html`, block "Responsive header") |
+| --- | --- |
+| > 1024px (desktop, iPad landscape) | 3-column workspace, full button labels |
+| ≤ 1024px (iPad portrait) | Panels become slide-in sheets + bottom tab bar. Brand title only takes the leftover space (ellipsis). `.header-actions` may shrink and scroll sideways but **never widens the page**. Generate button shows the short label `สร้าง PDF` (`.gen-label-short`), and the security/lock/install labels are hidden |
+| ≤ 719px (phones) | Brand text, history label and the sign-in name (`.auth-pill-name`) hidden, so they're icon-only. Preview toolbar is 2 rows: page nav + zoom, then the adjust-mode toggles |
+| ≤ 479px | ก่อนหน้า/ถัดไป words hidden (`.nav-label`), arrows only |
+| ≤ 380px | TC brand badge hidden so all 6 header actions fit from 360px wide. At 320px the header scrolls sideways as a fallback |
+
+- When adding a header button, wrap its text in a label span that is hidden on small screens and give it a `title`, so phones show an icon-only button.
+- Tested worst case (signed in + PIN lock + install button all visible) in headless Chrome at 320/360/375/390/412/430, 768, 820, 1024 and 1180 px. The page width never exceeded the screen width.
+- `sw.js` serves HTML network-first, so layout fixes reach installed PWAs without bumping `CACHE_NAME`.
 
 ---
 

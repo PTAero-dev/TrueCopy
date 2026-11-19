@@ -1399,11 +1399,146 @@
       color: #92400e;
     }
 
-    @media (max-width: 719px) {
-      .btn-history-label,
+    /* Responsive header: never let the action buttons widen the page */
+    .gen-label-short {
+      display: none;
+    }
+
+    .auth-pill-name {
+      display: inline-block;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: bottom;
+    }
+
+    @media (max-width: 1024px) {
+      .app-header {
+        padding: 0 12px;
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+      }
+
+      /* Brand title only takes leftover space (ellipsis); actions win */
+      .brand {
+        flex: 1 1 0;
+      }
+
+      .header-actions {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .header-actions::-webkit-scrollbar {
+        display: none;
+      }
+
+      .header-actions > * {
+        flex-shrink: 0;
+      }
+
       .btn-sec-label,
       .btn-lock-label {
         display: none;
+      }
+
+      .gen-label-full {
+        display: none;
+      }
+
+      .gen-label-short {
+        display: inline;
+      }
+
+      .auth-pill-name {
+        max-width: 90px;
+      }
+    }
+
+    @media (max-width: 719px) {
+      .app-header {
+        gap: 8px;
+      }
+
+      .brand {
+        flex: 0 0 auto;
+      }
+
+      .header-actions {
+        gap: 4px;
+      }
+
+      .brand-text,
+      .btn-history-label,
+      .auth-pill-name {
+        display: none;
+      }
+
+      .brand-badge {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+      }
+
+      .auth-user-box {
+        padding: 2px 4px 2px 8px;
+      }
+
+      .header-actions .btn-sm {
+        padding: 5px 6px;
+      }
+
+      .btn-generate {
+        padding-left: 10px;
+        padding-right: 10px;
+        white-space: nowrap;
+      }
+
+      /* Preview toolbar: 2 compact rows instead of 3 */
+      .preview-toolbar {
+        justify-content: center;
+      }
+
+      .toolbar-group {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .page-indicator {
+        min-width: 70px;
+      }
+
+      /* Row 1: page nav + zoom · Row 2: adjust-mode toggles */
+      .preview-toolbar > .toolbar-group:nth-child(2) {
+        order: 2;
+      }
+
+      .preview-toolbar > .toolbar-group:nth-child(3) {
+        order: 1;
+      }
+    }
+
+    @media (max-width: 479px) {
+      .nav-label {
+        display: none;
+      }
+
+      .seg-btn {
+        padding: 5px 7px;
+        font-size: 11.5px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .brand {
+        display: none;
+      }
+
+      .header-actions {
+        margin-left: auto;
       }
     }
 
@@ -1592,7 +1727,7 @@
       <button id="btnInstallPwa" class="btn btn-soft btn-sm" type="button" style="display:none;" title="ติดตั้งแอป TrueCopy ลงบนเครื่อง">📲 <span class="btn-sec-label">ติดตั้งแอป</span></button>
       <button id="btnAddFilesHeader" class="btn btn-hide-sm" type="button">+ เพิ่มไฟล์</button>
       <button id="btnResetDefaults" class="btn btn-hide-sm" type="button" title="คืนค่าตราประทับเริ่มต้น">รีเซ็ตค่าเริ่มต้น</button>
-      <button id="btnGenerate" class="btn btn-primary" type="button" disabled>ประมวลผลและสร้างไฟล์ PDF</button>
+      <button id="btnGenerate" class="btn btn-primary btn-generate" type="button" disabled title="ประมวลผลและสร้างไฟล์ PDF"><span class="gen-label-full">ประมวลผลและสร้างไฟล์ PDF</span><span class="gen-label-short">สร้าง PDF</span></button>
     </div>
   </header>
 
@@ -1631,9 +1766,9 @@
     <section class="preview-stage">
       <div class="preview-toolbar">
         <div class="toolbar-group">
-          <button id="btnPrevPage" class="btn btn-sm" type="button" disabled>◀ ก่อนหน้า</button>
+          <button id="btnPrevPage" class="btn btn-sm" type="button" disabled title="หน้าก่อนหน้า">◀<span class="nav-label"> ก่อนหน้า</span></button>
           <span id="pageIndicator" class="page-indicator">หน้า 0 / 0</span>
-          <button id="btnNextPage" class="btn btn-sm" type="button" disabled>ถัดไป ▶</button>
+          <button id="btnNextPage" class="btn btn-sm" type="button" disabled title="หน้าถัดไป"><span class="nav-label">ถัดไป </span>▶</button>
         </div>
         <div class="toolbar-group">
           <div class="seg-toggle" role="group" aria-label="โหมดปรับตำแหน่งตราประทับ">
@@ -4105,7 +4240,12 @@
           els.btnGoogleSignIn.style.display = 'none';
           els.authUserBox.style.display = 'flex';
           const shortName = cloudUser.email ? cloudUser.email.split('@')[0] : 'Cloud';
-          els.authUserPill.textContent = `☁️ ${shortName}`;
+          els.authUserPill.textContent = '☁️ ';
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'auth-pill-name';
+          nameSpan.textContent = shortName;
+          els.authUserPill.appendChild(nameSpan);
+          els.authUserPill.title = cloudUser.email || shortName;
           els.sigStorageNote.textContent = securityConfig.pinHash
             ? '🔒 ลายเซ็นเข้ารหัส AES-256 และซิงก์บน Cloud แล้ว'
             : '☁️ ซิงก์ลายเซ็นบน Cloud แล้ว (ใช้ได้ทุกเครื่อง)';
