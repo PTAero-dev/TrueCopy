@@ -57,13 +57,12 @@
 | Color and font | Default blue `#0D33BF`; choose color and Thai font | 1 |
 | Ink opacity & "Real Ink" blend | Opacity slider (default 85%) and multiply blend mode so numbers underneath stay readable | 1 |
 | Lines above and below | Frame the restricted-use line; on/off; dashed or solid | 1 |
-| Signature | Placed under the certification text; optional printed signer name in parentheses below e.g. `(ชื่อ-นามสกุล)` and option to tint signature to match stamp color (phase 1: from a file; phase 2: stored in Firestore) | 1 |
-| Position, size & angle sliders | Simple sliders to nudge horizontal/vertical position, size, and angle across all pages | 1 |
+| Signature | Placed under the certification text; optional printed signer name `(ชื่อ-นามสกุล)` and option to tint signature to match stamp color; upload photo or draw on screen; memorized locally in browser (`localStorage`, synced via Firestore in phase 2) | 1 |
+| Direct hand move, rotate & resize + per-page overrides | Drag to move, drag `↻` handle to rotate, drag `⤢` handle or 2-finger pinch/twist to resize/rotate on mobile/iPad/desktop without opening tabs; apply to all pages or per page | 1 |
+| Remove / restore PDF pages | Exclude unwanted pages from uploaded multi-page PDFs before generating, and restore anytime | 1 |
 | Flatten pages | Prevents removing the stamp or extracting the signature (on by default; user can turn it off) | 1 |
 | Preview, download & share | See every page before generating; download per file or all as ZIP; **Share button (`แชร์ไฟล์`)** to send certified PDFs directly via **LINE, WhatsApp, or Email** using the device's native share menu | 1 |
-| Signature library | Upload a signature photo with smooth background removal + "match stamp color" toggle, or draw on screen; stored directly in Firestore | 2 |
-| Text templates | Save text + color + font + position; reuse | 2 |
-| Interactive drag / per-page position | Drag, rotate, resize directly on the page preview with mouse/finger and override per page | 3 |
+| Cloud signature & template sync | Sync memorized signatures and text templates across devices via Google sign-in + Firestore | 2 |
 | Certification date | Auto date; Buddhist Era (พ.ศ.) or Gregorian; optional Thai numerals | 3 |
 | Anti-forgery watermark | Faint text repeated across the page | 3 |
 | History | Record what was certified, for whom, and when | 3 |
@@ -236,9 +235,9 @@ service firebase.storage {
 
 ## 8. Development phases
 
-1. **Phase 1 — Local stamping (no Firebase yet):** multi-file upload, restricted-use line + certification text + dashed lines, color/font choice (Sarabun/Niramit), ink opacity + Real Ink blend, signature from a file (with smooth background cleanup, match-stamp-color toggle, and optional `(ชื่อ-นามสกุล)` line), position/size/angle sliders, flatten toggle (on by default), preview, individual + ZIP download, and **Share button (`แชร์ไฟล์` — LINE / WhatsApp / Email)**. Keep defaults in `localStorage` (wrapped in try/catch).
-2. **Phase 2 — Connect Firebase:** Google sign-in, move templates and signatures to Firestore (free Spark plan, no credit card needed), write security rules, build the signature library and template manager screens.
-3. **Phase 3 — Extra features:** interactive drag/rotate/resize with per-page overrides, Buddhist Era date, watermark, history.
+1. **Phase 1 — Local stamping (no Firebase yet):** multi-file upload, restricted-use line + certification text + dashed lines, color/font choice (Sarabun/Niramit), ink opacity + Real Ink blend, signature photo upload or on-screen drawing pad + memorized local signature library, optional `(ชื่อ-นามสกุล)` line, direct hand move/rotate/resize (handles + 2-finger pinch/twist) with per-page overrides, PDF page removal/restore, flatten toggle (on by default), preview, individual + ZIP download, and **Share button (`แชร์ไฟล์` — LINE / WhatsApp / Email)**. Keep defaults and signatures in `localStorage` (wrapped in try/catch).
+2. **Phase 2 — Connect Firebase:** Google sign-in, sync memorized signatures and templates across devices in Firestore (free Spark plan, no credit card needed), write security rules, build template manager screens.
+3. **Phase 3 — Extra features:** Buddhist Era date, anti-forgery watermark, history.
 4. **Phase 4 — Publish:** deploy on Cloudflare (`*.pages.dev`), set Authorized domains and App Check, make it a PWA (a small `manifest.json` and `sw.js` can sit beside `index.html` on Cloudflare Pages while keeping all app code inside the single HTML file).
 
 ### Phase 1 acceptance checklist

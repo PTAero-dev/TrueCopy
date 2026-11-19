@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>TrueCopy — รับรองสำเนาถูกต้อง</title>
 
   <!-- Google Fonts: Sarabun & Niramit -->
@@ -211,6 +211,7 @@
       display: grid;
       grid-template-columns: 280px 1fr 350px;
       height: calc(100vh - var(--header-h));
+      height: calc(100dvh - var(--header-h));
       overflow: hidden;
     }
 
@@ -366,6 +367,11 @@
       color: var(--warning);
     }
 
+    .badge-danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
     .file-card-actions {
       display: flex;
       gap: 6px;
@@ -403,10 +409,63 @@
       border-radius: 999px;
       box-shadow: var(--shadow-sm);
       display: none;
+      z-index: 2;
     }
 
     .thumb-item.has-override .thumb-pin {
       display: inline-block;
+    }
+
+    .thumb-del-btn {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(15, 23, 42, 0.72);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 3;
+      transition: background 0.12s ease;
+    }
+
+    .thumb-del-btn:hover {
+      background: var(--danger);
+    }
+
+    .thumb-item.is-excluded {
+      opacity: 0.5;
+      border-style: dashed;
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .thumb-item.is-excluded canvas {
+      filter: grayscale(1);
+    }
+
+    .thumb-item.is-excluded .thumb-del-btn {
+      background: var(--success);
+    }
+
+    .thumb-excluded-tag {
+      display: none;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--danger);
+      margin-top: 2px;
+    }
+
+    .thumb-item.is-excluded .thumb-excluded-tag {
+      display: block;
     }
 
     .thumb-item:hover {
@@ -497,13 +556,29 @@
       gap: 6px;
     }
 
+    .excluded-banner {
+      background: var(--warning-soft);
+      border-bottom: 1px solid #fde68a;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
     .preview-viewport {
       flex: 1;
       overflow: auto;
       padding: 20px;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
 
     .preview-empty {
@@ -541,6 +616,10 @@
       border-radius: 2px;
       line-height: 0;
       transform-origin: top center;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      flex-shrink: 0;
     }
 
     #previewCanvas {
@@ -553,6 +632,219 @@
 
     #previewCanvas.dragging {
       cursor: grabbing;
+    }
+
+    .stamp-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .stamp-overlay.handles-hidden {
+      display: none;
+    }
+
+    .stamp-box {
+      position: absolute;
+      border: 1.5px dashed rgba(13, 51, 191, 0.55);
+      border-radius: 6px;
+      background: rgba(13, 51, 191, 0.03);
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: none;
+      box-sizing: border-box;
+    }
+
+    .stamp-box:active {
+      cursor: grabbing;
+    }
+
+    .stamp-rotate-stem {
+      position: absolute;
+      left: 50%;
+      top: -26px;
+      width: 2px;
+      height: 26px;
+      background: rgba(13, 51, 191, 0.65);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .stamp-handle {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: var(--primary);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.28);
+      pointer-events: auto;
+      touch-action: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .stamp-handle:active {
+      transform: translate(-50%, -50%) scale(1.1);
+      background: var(--primary-hover);
+    }
+
+    .stamp-handle-rotate {
+      left: 50%;
+      top: -36px;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+    }
+
+    .stamp-handle-resize {
+      right: 0;
+      bottom: 0;
+      transform: translate(50%, 50%);
+      cursor: nwse-resize;
+      background: #0f172a;
+    }
+
+    .stamp-handle-resize:active {
+      transform: translate(50%, 50%) scale(1.1);
+    }
+
+    .gesture-hud {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      line-height: 1.2;
+      padding: 6px 12px;
+      border-radius: 999px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.16s ease;
+      white-space: nowrap;
+      z-index: 15;
+    }
+
+    .gesture-hud.visible {
+      opacity: 1;
+    }
+
+    .gesture-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.82);
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+
+    .saved-sig-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .saved-sig-card {
+      position: relative;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      text-align: center;
+    }
+
+    .saved-sig-card:hover {
+      border-color: #94a3b8;
+    }
+
+    .saved-sig-card.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: inset 0 0 0 1px var(--primary);
+    }
+
+    .saved-sig-thumb {
+      height: 46px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      background-image:
+        linear-gradient(45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f1f5f9 75%),
+        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+    }
+
+    .saved-sig-thumb img {
+      max-width: 100%;
+      max-height: 38px;
+      object-fit: contain;
+    }
+
+    .saved-sig-name {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .saved-sig-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(15, 23, 42, 0.65);
+      color: #fff;
+      font-size: 11px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .saved-sig-del:hover {
+      background: var(--danger);
+    }
+
+    .draw-pad-wrap {
+      border: 2px dashed var(--border-strong);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    #sigDrawCanvas {
+      display: block;
+      width: 100%;
+      height: 180px;
+      touch-action: none;
+      cursor: crosshair;
     }
 
     .seg-toggle {
@@ -872,7 +1164,8 @@
     @media (max-width: 1024px) {
       .workspace {
         grid-template-columns: 1fr;
-        height: calc(100vh - var(--header-h) - 58px);
+        height: calc(100vh - var(--header-h) - 58px - env(safe-area-inset-bottom));
+        height: calc(100dvh - var(--header-h) - 58px - env(safe-area-inset-bottom));
         position: relative;
       }
 
@@ -889,7 +1182,7 @@
         position: fixed;
         left: 0;
         right: 0;
-        bottom: 58px;
+        bottom: calc(58px + env(safe-area-inset-bottom));
         top: var(--header-h);
         z-index: 40;
         transform: translateY(105%);
@@ -903,7 +1196,7 @@
       }
 
       .panel-right {
-        top: 14%;
+        top: 12%;
         border-top-left-radius: 16px;
         border-top-right-radius: 16px;
         box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.2);
@@ -916,7 +1209,8 @@
       .mobile-bottom-bar {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        height: 58px;
+        height: calc(58px + env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
         background: var(--surface);
         border-top: 1px solid var(--border);
         position: fixed;
@@ -945,8 +1239,44 @@
         background: var(--primary-soft);
       }
 
+      .preview-toolbar {
+        padding: 6px 10px;
+        gap: 6px;
+      }
+
       .preview-viewport {
-        padding: 12px;
+        padding: 18px 12px 36px;
+      }
+
+      .stamp-handle {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+    }
+
+    @media (min-width: 720px) and (max-width: 1024px) {
+      .panel-left {
+        width: 340px;
+        right: auto;
+        border-right: 1px solid var(--border);
+        box-shadow: 8px 0 24px rgba(15, 23, 42, 0.16);
+        transform: translateX(-105%);
+      }
+
+      .panel-right {
+        width: 400px;
+        left: auto;
+        top: var(--header-h);
+        border-radius: 0;
+        border-left: 1px solid var(--border);
+        box-shadow: -8px 0 24px rgba(15, 23, 42, 0.16);
+        transform: translateX(105%);
+      }
+
+      .panel-left.mobile-open,
+      .panel-right.mobile-open {
+        transform: translateX(0);
       }
     }
   </style>
@@ -995,7 +1325,10 @@
         <div id="thumbSection" style="display:none;">
           <div class="section-label">
             <span>หน้าทั้งหมดของไฟล์ที่เลือก</span>
-            <span id="thumbCountBadge"></span>
+            <span style="display:flex;align-items:center;gap:6px;">
+              <button id="btnRestoreAllPages" class="btn btn-xs btn-soft" type="button" style="display:none;">↩ กู้คืนทั้งหมด</button>
+              <span id="thumbCountBadge"></span>
+            </span>
           </div>
           <div id="thumbGrid" class="thumb-grid"></div>
         </div>
@@ -1016,6 +1349,8 @@
             <button id="btnModeThisPage" class="seg-btn" type="button">📌 ปรับเฉพาะหน้านี้</button>
           </div>
           <button id="btnToolbarResetPage" class="btn btn-xs" type="button" style="display:none;">รีเซ็ตหน้านี้</button>
+          <button id="btnDeletePage" class="btn btn-xs" type="button" style="display:none;" title="ลบหน้านี้ออกจากไฟล์ PDF">🗑️ ลบหน้านี้</button>
+          <button id="btnToggleHandles" class="btn btn-xs btn-soft" type="button" title="แสดง/ซ่อนกรอบจับหมุนและย่อ-ขยาย">✋ กรอบจับมือ</button>
         </div>
         <div class="toolbar-group">
           <span id="pageInfoBadge" class="badge" style="display:none;"></span>
@@ -1039,6 +1374,12 @@
         </div>
       </div>
 
+      <!-- Excluded Page Warning Banner -->
+      <div id="excludedBanner" class="excluded-banner" style="display:none;">
+        <span>⚠️ หน้านี้ถูกลบออกแล้ว และจะไม่ถูกรวมในไฟล์ PDF ผลลัพธ์</span>
+        <button id="btnBannerRestorePage" class="btn btn-xs btn-primary" type="button">↩ กู้คืนหน้านี้</button>
+      </div>
+
       <div class="preview-viewport">
         <div id="previewEmpty" class="preview-empty">
           <div class="preview-empty-icon">🔏</div>
@@ -1052,7 +1393,16 @@
 
         <div id="canvasPaperWrap" class="canvas-paper-wrap" style="display:none;">
           <canvas id="previewCanvas"></canvas>
+          <div id="stampOverlay" class="stamp-overlay">
+            <div id="stampBox" class="stamp-box">
+              <div class="stamp-rotate-stem"></div>
+              <button id="handleRotate" class="stamp-handle stamp-handle-rotate" type="button" title="ลากเพื่อหมุนตราประทับ" aria-label="หมุนตราประทับ">↻</button>
+              <button id="handleResize" class="stamp-handle stamp-handle-resize" type="button" title="ลากเพื่อย่อ-ขยายตราประทับ" aria-label="ย่อขยายตราประทับ">⤢</button>
+            </div>
+          </div>
+          <div id="gestureHud" class="gesture-hud"></div>
         </div>
+        <div id="gestureHint" class="gesture-hint" style="display:none;">👆 แตะลากเพื่อย้าย · ลากปุ่ม ↻ หมุน · ลาก ⤢ หรือใช้ 2 นิ้ว ย่อ-ขยาย/หมุน</div>
       </div>
     </section>
 
@@ -1106,12 +1456,23 @@
         <div class="setting-card">
           <div class="setting-title">
             <span>3. ลายเซ็นและชื่อตัวบรรจง</span>
-            <button id="btnRemoveSig" class="btn btn-danger-ghost btn-xs" type="button" style="display:none;">ลบลายเซ็น</button>
+            <button id="btnRemoveSig" class="btn btn-danger-ghost btn-xs" type="button" style="display:none;">ไม่ใส่ลายเซ็น</button>
           </div>
 
-          <div class="field">
-            <button id="btnUploadSig" class="btn btn-soft" style="width:100%;" type="button">✍️ อัปโหลดรูปลายเซ็น (PNG / JPG)</button>
-            <div class="helper-text">ถ่ายรูปเซ็นชื่อบนกระดาษขาวได้ ระบบจะตัดพื้นหลังสีขาวให้แบบขอบเนียนอัตโนมัติ</div>
+          <div class="grid-2 field">
+            <button id="btnUploadSig" class="btn btn-soft btn-sm" type="button">📷 อัปโหลดรูป / ถ่ายรูป</button>
+            <button id="btnDrawSig" class="btn btn-soft btn-sm" type="button">✍️ เซ็นด้วยนิ้ว / ปากกา</button>
+          </div>
+          <div class="helper-text" style="margin-bottom:8px;">
+            ถ่ายรูปเซ็นชื่อบนกระดาษขาวหรือเซ็นบนหน้าจอได้ทันที ระบบตัดพื้นหลังสีขาวให้แบบขอบเนียนอัตโนมัติ
+          </div>
+
+          <div id="savedSigSection" style="display:none;margin-bottom:10px;padding-top:8px;border-top:1px dashed var(--border);">
+            <div class="field-label" style="margin-bottom:2px;">
+              <span>ลายเซ็นที่บันทึกไว้ (<span id="savedSigCount">0</span>)</span>
+            </div>
+            <div class="helper-text" style="margin-top:0;">💾 บันทึกลายเซ็นไว้ในเครื่องนี้อัตโนมัติ (ใช้งานครั้งหน้าได้ทันที)</div>
+            <div id="savedSigGrid" class="saved-sig-grid"></div>
           </div>
 
           <div id="sigControlsWrap" style="display:none;">
@@ -1353,6 +1714,28 @@
     </div>
   </div>
 
+  <!-- Draw Signature Modal -->
+  <div id="drawSigModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="drawSigTitle">
+    <div class="modal-card" style="max-width:520px;">
+      <h3 id="drawSigTitle" class="modal-title">✍️ เซ็นชื่อบนหน้าจอ</h3>
+      <p class="modal-desc">ใช้นิ้ว ปากกา Apple Pencil หรือเมาส์เซ็นชื่อในกรอบด้านล่าง</p>
+      <div class="draw-pad-wrap">
+        <canvas id="sigDrawCanvas" width="640" height="240"></canvas>
+      </div>
+      <div class="field">
+        <label class="field-label" for="sigDrawName">ชื่อเรียกสำหรับจดจำ (ไม่บังคับ)</label>
+        <input id="sigDrawName" class="input" type="text" placeholder="เช่น ลายเซ็นจริง, ลายเซ็นย่อ" />
+      </div>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button id="btnClearDraw" class="btn" type="button">ล้างกระดาน</button>
+        <div style="display:flex;gap:8px;">
+          <button id="btnCancelDraw" class="btn" type="button">ยกเลิก</button>
+          <button id="btnSaveDraw" class="btn btn-primary" type="button">💾 บันทึกและใช้งาน</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
@@ -1384,6 +1767,7 @@
       // 2. State & Default Settings
       // =========================================================================
       const STORAGE_KEY = 'truecopy_phase1_settings_v1';
+      const SAVED_SIGS_KEY = 'truecopy_saved_signatures_v1';
 
       const DEFAULT_SETTINGS = {
         purpose: 'Refinance',
@@ -1405,6 +1789,7 @@
         flatten: true,
         showSignerName: false,
         signerName: '',
+        activeSigId: null,
         rawSigDataUrl: null,
         cleanSigDataUrl: null,
         sigThreshold: 200,
@@ -1413,6 +1798,7 @@
       };
 
       let settings = loadSettings();
+      let savedSignatures = loadSavedSignatures();
       let customFontCounter = 0;
 
       /**
@@ -1422,7 +1808,8 @@
        *   password (string|null), isPasswordProtected (bool),
        *   pdfDocProxy (PDFDocumentProxy|null), imageElement (HTMLImageElement|null),
        *   pageCount, pageCache (Map<pageNum, { canvas, widthPt, heightPt, rotation }>),
-       *   thumbRendered (Set<pageNum>),
+       *   pageOverrides (Map<pageNum, { posX, posY, angle, stampScale }>),
+       *   excludedPages (Set<pageNum>),
        *   outputBytes (Uint8Array|null), outputName (string|null)
        * }
        */
@@ -1431,6 +1818,7 @@
       let activePageNum = 1;
       let viewZoom = 1.0;
       let editThisPageOnly = false;
+      let showHandles = true;
 
       // Offscreen cached stamp canvas (regenerated whenever stamp settings change)
       let cachedStampCanvas = null;
@@ -1473,6 +1861,7 @@
         thumbSection: $('thumbSection'),
         thumbGrid: $('thumbGrid'),
         thumbCountBadge: $('thumbCountBadge'),
+        btnRestoreAllPages: $('btnRestoreAllPages'),
 
         btnAddFilesHeader: $('btnAddFilesHeader'),
         btnResetDefaults: $('btnResetDefaults'),
@@ -1486,6 +1875,8 @@
         btnZoomOut: $('btnZoomOut'),
         btnZoomIn: $('btnZoomIn'),
         zoomLabel: $('zoomLabel'),
+        btnDeletePage: $('btnDeletePage'),
+        btnToggleHandles: $('btnToggleHandles'),
 
         readyBanner: $('readyBanner'),
         readyBannerSub: $('readyBannerSub'),
@@ -1493,10 +1884,18 @@
         btnShareCurrent: $('btnShareCurrent'),
         btnDownloadZip: $('btnDownloadZip'),
         btnShareAll: $('btnShareAll'),
+        excludedBanner: $('excludedBanner'),
+        btnBannerRestorePage: $('btnBannerRestorePage'),
 
         previewEmpty: $('previewEmpty'),
         canvasPaperWrap: $('canvasPaperWrap'),
         previewCanvas: $('previewCanvas'),
+        stampOverlay: $('stampOverlay'),
+        stampBox: $('stampBox'),
+        handleRotate: $('handleRotate'),
+        handleResize: $('handleResize'),
+        gestureHud: $('gestureHud'),
+        gestureHint: $('gestureHint'),
 
         // Settings controls
         inputPurpose: $('inputPurpose'),
@@ -1508,7 +1907,11 @@
         inputCertifyText: $('inputCertifyText'),
 
         btnUploadSig: $('btnUploadSig'),
+        btnDrawSig: $('btnDrawSig'),
         btnRemoveSig: $('btnRemoveSig'),
+        savedSigSection: $('savedSigSection'),
+        savedSigCount: $('savedSigCount'),
+        savedSigGrid: $('savedSigGrid'),
         sigControlsWrap: $('sigControlsWrap'),
         sigPreviewImg: $('sigPreviewImg'),
         rangeSigThreshold: $('rangeSigThreshold'),
@@ -1581,6 +1984,13 @@
         btnOpenEmailClient: $('btnOpenEmailClient'),
         btnCloseShareFb: $('btnCloseShareFb'),
 
+        drawSigModal: $('drawSigModal'),
+        sigDrawCanvas: $('sigDrawCanvas'),
+        sigDrawName: $('sigDrawName'),
+        btnClearDraw: $('btnClearDraw'),
+        btnCancelDraw: $('btnCancelDraw'),
+        btnSaveDraw: $('btnSaveDraw'),
+
         toast: $('toast')
       };
 
@@ -1609,6 +2019,133 @@
         } catch (err) {
           // Ignore storage quota or private-mode errors safely
         }
+      }
+
+      function loadSavedSignatures() {
+        try {
+          const raw = localStorage.getItem(SAVED_SIGS_KEY);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr : [];
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveSavedSignatures() {
+        try {
+          localStorage.setItem(SAVED_SIGS_KEY, JSON.stringify(savedSignatures));
+          return true;
+        } catch (err) {
+          showToast('พื้นที่บันทึกในเบราว์เซอร์เต็ม กรุณาลบลายเซ็นเก่าออกบางอัน');
+          return false;
+        }
+      }
+
+      function renderSavedSignatures() {
+        if (!els.savedSigSection || !els.savedSigGrid) return;
+        els.savedSigCount.textContent = String(savedSignatures.length);
+        if (savedSignatures.length === 0) {
+          els.savedSigSection.style.display = 'none';
+          els.savedSigGrid.innerHTML = '';
+          return;
+        }
+        els.savedSigSection.style.display = 'block';
+        els.savedSigGrid.innerHTML = '';
+
+        for (const sig of savedSignatures) {
+          const card = document.createElement('div');
+          card.className = `saved-sig-card ${sig.id === settings.activeSigId ? 'active' : ''}`;
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'saved-sig-del';
+          delBtn.title = 'ลบลายเซ็นนี้ถาวร';
+          delBtn.textContent = '✕';
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteSavedSignature(sig.id);
+          });
+
+          const thumb = document.createElement('div');
+          thumb.className = 'saved-sig-thumb';
+          const img = document.createElement('img');
+          img.src = sig.cleanDataUrl;
+          img.alt = sig.name;
+          thumb.appendChild(img);
+
+          const nameEl = document.createElement('div');
+          nameEl.className = 'saved-sig-name';
+          nameEl.textContent = sig.name;
+
+          card.appendChild(delBtn);
+          card.appendChild(thumb);
+          card.appendChild(nameEl);
+
+          card.addEventListener('click', () => selectSavedSignature(sig.id));
+          els.savedSigGrid.appendChild(card);
+        }
+      }
+
+      async function selectSavedSignature(sigId) {
+        const sig = savedSignatures.find(s => s.id === sigId);
+        if (!sig) return;
+        settings.activeSigId = sig.id;
+        settings.rawSigDataUrl = sig.rawDataUrl;
+        settings.sigThreshold = Number(sig.threshold) || 200;
+        settings.tintSignature = Boolean(sig.tintSignature);
+        await processSignatureDataUrl(settings.rawSigDataUrl);
+        sig.cleanDataUrl = settings.cleanSigDataUrl;
+        saveSavedSignatures();
+        invalidateOutputs();
+        syncControlsFromSettings();
+        saveSettings();
+        renderSavedSignatures();
+        await refreshStampAndPreview();
+        showToast(`เลือกลายเซ็น "${sig.name}" แล้ว`);
+      }
+
+      async function deleteSavedSignature(sigId) {
+        const idx = savedSignatures.findIndex(s => s.id === sigId);
+        if (idx === -1) return;
+        savedSignatures.splice(idx, 1);
+        saveSavedSignatures();
+        if (settings.activeSigId === sigId) {
+          if (savedSignatures.length > 0) {
+            await selectSavedSignature(savedSignatures[0].id);
+            return;
+          }
+          settings.activeSigId = null;
+          settings.rawSigDataUrl = null;
+          settings.cleanSigDataUrl = null;
+          cachedSignatureImg = null;
+          invalidateOutputs();
+          syncControlsFromSettings();
+          saveSettings();
+          await refreshStampAndPreview();
+        }
+        renderSavedSignatures();
+        showToast('ลบลายเซ็นที่บันทึกไว้แล้ว');
+      }
+
+      function addSavedSignature(name, rawDataUrl, cleanDataUrl, threshold, tintSignature) {
+        if (savedSignatures.length >= 10) {
+          savedSignatures.pop(); // keep up to 10 most recent signatures
+        }
+        const entry = {
+          id: `sig_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          name: name || `ลายเซ็นที่ ${savedSignatures.length + 1}`,
+          rawDataUrl,
+          cleanDataUrl,
+          threshold,
+          tintSignature,
+          createdAt: Date.now()
+        };
+        savedSignatures.unshift(entry);
+        settings.activeSigId = entry.id;
+        saveSavedSignatures();
+        renderSavedSignatures();
+        return entry;
       }
 
       let toastTimer = null;
@@ -2090,6 +2627,7 @@
                 pageCount: result.pdfProxy.numPages,
                 pageCache: new Map(),
                 pageOverrides: new Map(),
+                excludedPages: new Set(),
                 outputBytes: null,
                 outputName: null
               };
@@ -2116,6 +2654,7 @@
                 pageCount: 1,
                 pageCache: new Map(),
                 pageOverrides: new Map(),
+                excludedPages: new Set(),
                 outputBytes: null,
                 outputName: null
               };
@@ -2140,10 +2679,88 @@
       }
 
       // =========================================================================
-      // 8. Preview & Thumbnails Rendering
+      // 8. Preview, Page Removal & Thumbnails Rendering
       // =========================================================================
       function getActiveFile() {
         return files.find(f => f.id === activeFileId) || null;
+      }
+
+      function getActivePageNumbers(fileObj) {
+        if (!fileObj) return [];
+        const res = [];
+        for (let p = 1; p <= fileObj.pageCount; p++) {
+          if (!fileObj.excludedPages || !fileObj.excludedPages.has(p)) {
+            res.push(p);
+          }
+        }
+        return res;
+      }
+
+      async function toggleExcludePage(fileObj, pageNum) {
+        if (!fileObj || fileObj.pageCount <= 1) {
+          showToast('ไฟล์นี้มีเพียง 1 หน้า ไม่สามารถลบหน้าสุดท้ายได้');
+          return;
+        }
+        const isCurrentlyExcluded = fileObj.excludedPages.has(pageNum);
+        if (isCurrentlyExcluded) {
+          fileObj.excludedPages.delete(pageNum);
+          showToast(`กู้คืนหน้า ${pageNum} เรียบร้อย`);
+        } else {
+          if (fileObj.pageCount - fileObj.excludedPages.size <= 1) {
+            showToast('ต้องเหลืออย่างน้อย 1 หน้าในไฟล์ PDF');
+            return;
+          }
+          fileObj.excludedPages.add(pageNum);
+          showToast(`ลบหน้า ${pageNum} ออกจากไฟล์แล้ว (กด ↩ เพื่อกู้คืนได้)`);
+          if (activePageNum === pageNum) {
+            const activePages = getActivePageNumbers(fileObj);
+            const nextP = activePages.find(p => p > pageNum);
+            const prevP = [...activePages].reverse().find(p => p < pageNum);
+            activePageNum = nextP || prevP || activePages[0] || 1;
+          }
+        }
+        invalidateOutputs();
+        renderFileList();
+        await renderThumbnails();
+        await renderActivePagePreview();
+      }
+
+      async function restoreAllExcludedPages(fileObj) {
+        if (!fileObj || fileObj.excludedPages.size === 0) return;
+        fileObj.excludedPages.clear();
+        invalidateOutputs();
+        renderFileList();
+        await renderThumbnails();
+        await renderActivePagePreview();
+        showToast('กู้คืนทุกหน้าที่ลบเรียบร้อย');
+      }
+
+      let hudTimer = null;
+      function showGestureHud(placement) {
+        if (!els.gestureHud || !placement) return;
+        const pct = Math.round(Number(placement.stampScale) * 100);
+        const ang = Math.round(Number(placement.angle));
+        els.gestureHud.textContent = `↻ ${ang}° · ขนาด ${pct}%`;
+        els.gestureHud.classList.add('visible');
+        clearTimeout(hudTimer);
+        hudTimer = setTimeout(() => {
+          els.gestureHud.classList.remove('visible');
+        }, 900);
+      }
+
+      function syncStampOverlay(pageW, pageH, stampCanvas, placement) {
+        if (!els.stampOverlay || !els.stampBox || !stampCanvas || !pageW || !pageH) return;
+        els.stampOverlay.classList.toggle('handles-hidden', !showHandles);
+        els.btnToggleHandles.classList.toggle('btn-soft', showHandles);
+        if (!showHandles) return;
+
+        const wPct = Number(placement.stampScale) * 100;
+        const hPct = Number(placement.stampScale) * (pageW / pageH) * (stampCanvas.height / stampCanvas.width) * 100;
+        els.stampBox.style.left = `${Number(placement.posX) * 100}%`;
+        els.stampBox.style.top = `${Number(placement.posY) * 100}%`;
+        els.stampBox.style.width = `${wPct}%`;
+        els.stampBox.style.height = `${hPct}%`;
+        els.stampBox.style.transform = `translate(-50%, -50%) rotate(${-Number(placement.angle)}deg)`;
       }
 
       async function getPreviewPageBitmap(fileObj, pageNum) {
@@ -2202,6 +2819,9 @@
         if (!fileObj) {
           els.previewEmpty.style.display = 'block';
           els.canvasPaperWrap.style.display = 'none';
+          els.gestureHint.style.display = 'none';
+          els.excludedBanner.style.display = 'none';
+          els.btnDeletePage.style.display = 'none';
           els.pageIndicator.textContent = 'หน้า 0 / 0';
           els.pageInfoBadge.style.display = 'none';
           els.btnPrevPage.disabled = true;
@@ -2212,14 +2832,29 @@
 
         els.previewEmpty.style.display = 'none';
         els.canvasPaperWrap.style.display = 'block';
+        els.gestureHint.style.display = 'block';
         els.btnGenerate.disabled = false;
 
         if (activePageNum < 1) activePageNum = 1;
         if (activePageNum > fileObj.pageCount) activePageNum = fileObj.pageCount;
 
-        els.pageIndicator.textContent = `หน้า ${activePageNum} / ${fileObj.pageCount}`;
+        const isExcluded = fileObj.excludedPages && fileObj.excludedPages.has(activePageNum);
+        const activeCount = fileObj.pageCount - (fileObj.excludedPages ? fileObj.excludedPages.size : 0);
+        els.pageIndicator.textContent = fileObj.excludedPages && fileObj.excludedPages.size > 0
+          ? `หน้า ${activePageNum} / ${fileObj.pageCount} (ใช้ ${activeCount})`
+          : `หน้า ${activePageNum} / ${fileObj.pageCount}`;
+
         els.btnPrevPage.disabled = activePageNum <= 1;
         els.btnNextPage.disabled = activePageNum >= fileObj.pageCount;
+
+        if (fileObj.pageCount > 1) {
+          els.btnDeletePage.style.display = 'inline-flex';
+          els.btnDeletePage.textContent = isExcluded ? '↩ กู้คืนหน้านี้' : '🗑️ ลบหน้านี้';
+          els.btnDeletePage.className = isExcluded ? 'btn btn-xs btn-success' : 'btn btn-xs';
+        } else {
+          els.btnDeletePage.style.display = 'none';
+        }
+        els.excludedBanner.style.display = isExcluded ? 'flex' : 'none';
 
         const pageData = await getPreviewPageBitmap(fileObj, activePageNum);
 
@@ -2248,6 +2883,7 @@
         const maxFitW = Math.min(760, outC.width);
         outC.style.width = `${Math.round(maxFitW * viewZoom)}px`;
 
+        syncStampOverlay(outC.width, outC.height, cachedStampCanvas, placement);
         syncPlacementControls();
         updateThumbnailSelection();
       }
@@ -2261,15 +2897,34 @@
         }
 
         els.thumbSection.style.display = 'block';
-        els.thumbCountBadge.textContent = `${fileObj.pageCount} หน้า`;
+        const excludedCount = fileObj.excludedPages ? fileObj.excludedPages.size : 0;
+        const activeCount = fileObj.pageCount - excludedCount;
+        els.thumbCountBadge.textContent = excludedCount > 0
+          ? `${activeCount}/${fileObj.pageCount} หน้า`
+          : `${fileObj.pageCount} หน้า`;
+        els.btnRestoreAllPages.style.display = excludedCount > 0 ? 'inline-flex' : 'none';
         els.thumbGrid.innerHTML = '';
 
         const renderFileId = fileObj.id;
         for (let p = 1; p <= fileObj.pageCount; p++) {
           const item = document.createElement('div');
           const hasOv = fileObj.pageOverrides && fileObj.pageOverrides.has(p);
-          item.className = `thumb-item ${p === activePageNum ? 'active' : ''} ${hasOv ? 'has-override' : ''}`;
+          const isExcl = fileObj.excludedPages && fileObj.excludedPages.has(p);
+          item.className = `thumb-item ${p === activePageNum ? 'active' : ''} ${hasOv ? 'has-override' : ''} ${isExcl ? 'is-excluded' : ''}`;
           item.dataset.page = String(p);
+
+          if (fileObj.pageCount > 1) {
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'thumb-del-btn';
+            delBtn.title = isExcl ? 'กู้คืนหน้านี้' : 'ลบหน้านี้ออกจาก PDF';
+            delBtn.textContent = isExcl ? '↩' : '✕';
+            delBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              toggleExcludePage(fileObj, p);
+            });
+            item.appendChild(delBtn);
+          }
 
           const pin = document.createElement('span');
           pin.className = 'thumb-pin';
@@ -2281,9 +2936,14 @@
           lbl.className = 'thumb-label';
           lbl.textContent = `หน้า ${p}`;
 
+          const exclTag = document.createElement('div');
+          exclTag.className = 'thumb-excluded-tag';
+          exclTag.textContent = 'ลบออกแล้ว';
+
           item.appendChild(pin);
           item.appendChild(c);
           item.appendChild(lbl);
+          item.appendChild(exclTag);
           item.addEventListener('click', async () => {
             activePageNum = p;
             await renderActivePagePreview();
@@ -2326,6 +2986,8 @@
           el.classList.toggle('active', p === activePageNum);
           const hasOv = Boolean(fileObj && fileObj.pageOverrides && fileObj.pageOverrides.has(p));
           el.classList.toggle('has-override', hasOv);
+          const isExcl = Boolean(fileObj && fileObj.excludedPages && fileObj.excludedPages.has(p));
+          el.classList.toggle('is-excluded', isExcl);
         });
       }
 
@@ -2361,10 +3023,20 @@
           const meta = document.createElement('div');
           meta.className = 'file-meta';
 
+          const exclCount = f.excludedPages ? f.excludedPages.size : 0;
+          const activeCount = f.pageCount - exclCount;
+
           const pageBadge = document.createElement('span');
           pageBadge.className = 'badge';
-          pageBadge.textContent = `${f.pageCount} หน้า`;
+          pageBadge.textContent = exclCount > 0 ? `${activeCount}/${f.pageCount} หน้า` : `${f.pageCount} หน้า`;
           meta.appendChild(pageBadge);
+
+          if (exclCount > 0) {
+            const exclBadge = document.createElement('span');
+            exclBadge.className = 'badge badge-danger';
+            exclBadge.textContent = `ลบ ${exclCount} หน้า`;
+            meta.appendChild(exclBadge);
+          }
 
           if (f.isPasswordProtected) {
             const lockBadge = document.createElement('span');
@@ -2413,7 +3085,7 @@
           card.addEventListener('click', async () => {
             if (activeFileId === f.id) return;
             activeFileId = f.id;
-            activePageNum = 1;
+            activePageNum = getActivePageNumbers(f)[0] || 1;
             renderFileList();
             await renderThumbnails();
             await renderActivePagePreview();
@@ -2519,7 +3191,11 @@
             pageCanvas.height = 0;
             onPageProgress(1, 1);
           } else {
+            const activeTotal = Math.max(1, fileObj.pageCount - (fileObj.excludedPages ? fileObj.excludedPages.size : 0));
+            let doneCount = 0;
             for (let p = 1; p <= fileObj.pageCount; p++) {
+              if (fileObj.excludedPages && fileObj.excludedPages.has(p)) continue;
+
               const page = await fileObj.pdfDocProxy.getPage(p);
               const vp1 = page.getViewport({ scale: 1 });
               const maxSidePt = Math.max(vp1.width, vp1.height);
@@ -2552,7 +3228,8 @@
               // Release canvas memory immediately for mobile stability
               pageCanvas.width = 0;
               pageCanvas.height = 0;
-              onPageProgress(p, fileObj.pageCount);
+              doneCount++;
+              onPageProgress(doneCount, activeTotal);
               await new Promise(r => setTimeout(r, 8));
             }
           }
@@ -2571,8 +3248,12 @@
 
           const pdfPages = pdfDoc.getPages();
           const aspect = stampCanvas.height / stampCanvas.width;
+          const activeTotal = Math.max(1, pdfPages.length - (fileObj.excludedPages ? fileObj.excludedPages.size : 0));
+          let doneCount = 0;
 
           for (let i = 0; i < pdfPages.length; i++) {
+            if (fileObj.excludedPages && fileObj.excludedPages.has(i + 1)) continue;
+
             const pdfPage = pdfPages[i];
             const box = pdfPage.getCropBox() || pdfPage.getMediaBox();
             const rawW = box.width;
@@ -2627,8 +3308,18 @@
             }
 
             pdfPage.drawImage(embeddedStamp, drawOpts);
-            onPageProgress(i + 1, pdfPages.length);
+            doneCount++;
+            onPageProgress(doneCount, activeTotal);
             await new Promise(r => setTimeout(r, 6));
+          }
+
+          // Remove excluded pages from the PDF in reverse index order
+          if (fileObj.excludedPages && fileObj.excludedPages.size > 0) {
+            for (let i = pdfPages.length - 1; i >= 0; i--) {
+              if (fileObj.excludedPages.has(i + 1)) {
+                pdfDoc.removePage(i);
+              }
+            }
           }
 
           return await pdfDoc.save();
@@ -2644,7 +3335,8 @@
 
         try {
           const stampCanvas = await buildStampCanvas();
-          const totalPagesAll = files.reduce((acc, f) => acc + f.pageCount, 0);
+          const getActiveCount = (f) => f.kind === 'image' ? 1 : Math.max(1, f.pageCount - (f.excludedPages ? f.excludedPages.size : 0));
+          const totalPagesAll = files.reduce((acc, f) => acc + getActiveCount(f), 0);
           let processedPagesAll = 0;
 
           for (let i = 0; i < files.length; i++) {
@@ -2659,7 +3351,7 @@
               els.progPercent.textContent = `${pct}%`;
             });
 
-            processedPagesAll += f.pageCount;
+            processedPagesAll += getActiveCount(f);
             f.outputBytes = outBytes;
             f.outputName = buildOutputFileName(f.name);
           }
@@ -2925,6 +3617,16 @@
         if (reprocessSig && settings.rawSigDataUrl) {
           processSignatureDataUrl(settings.rawSigDataUrl).then(() => {
             if (settings.cleanSigDataUrl) els.sigPreviewImg.src = settings.cleanSigDataUrl;
+            if (settings.activeSigId) {
+              const activeSig = savedSignatures.find(s => s.id === settings.activeSigId);
+              if (activeSig) {
+                activeSig.cleanDataUrl = settings.cleanSigDataUrl;
+                activeSig.threshold = settings.sigThreshold;
+                activeSig.tintSignature = settings.tintSignature;
+                saveSavedSignatures();
+                renderSavedSignatures();
+              }
+            }
             refreshStampAndPreview();
           });
         } else {
@@ -2975,18 +3677,53 @@
           }
         });
 
-        // Page navigation & zoom
+        // Page navigation, deletion & zoom
         els.btnPrevPage.addEventListener('click', async () => {
-          if (activePageNum > 1) {
+          const f = getActiveFile();
+          if (!f) return;
+          const activePages = getActivePageNumbers(f);
+          const prevActive = [...activePages].reverse().find(p => p < activePageNum);
+          if (prevActive) {
+            activePageNum = prevActive;
+            await renderActivePagePreview();
+          } else if (activePageNum > 1) {
             activePageNum--;
             await renderActivePagePreview();
           }
         });
         els.btnNextPage.addEventListener('click', async () => {
           const f = getActiveFile();
-          if (f && activePageNum < f.pageCount) {
+          if (!f) return;
+          const activePages = getActivePageNumbers(f);
+          const nextActive = activePages.find(p => p > activePageNum);
+          if (nextActive) {
+            activePageNum = nextActive;
+            await renderActivePagePreview();
+          } else if (activePageNum < f.pageCount) {
             activePageNum++;
             await renderActivePagePreview();
+          }
+        });
+        els.btnDeletePage.addEventListener('click', () => {
+          const f = getActiveFile();
+          if (f) toggleExcludePage(f, activePageNum);
+        });
+        els.btnBannerRestorePage.addEventListener('click', () => {
+          const f = getActiveFile();
+          if (f) toggleExcludePage(f, activePageNum);
+        });
+        els.btnRestoreAllPages.addEventListener('click', () => {
+          const f = getActiveFile();
+          if (f) restoreAllExcludedPages(f);
+        });
+        els.btnToggleHandles.addEventListener('click', () => {
+          showHandles = !showHandles;
+          const f = getActiveFile();
+          if (f && cachedStampCanvas) {
+            syncStampOverlay(els.previewCanvas.width, els.previewCanvas.height, cachedStampCanvas, getEffectivePlacement(f, activePageNum));
+          } else {
+            els.stampOverlay.classList.toggle('handles-hidden', !showHandles);
+            els.btnToggleHandles.classList.toggle('btn-soft', showHandles);
           }
         });
         els.btnZoomOut.addEventListener('click', () => {
@@ -3036,7 +3773,7 @@
           const objUrl = URL.createObjectURL(f);
           try {
             const img = await loadImageFromSrc(objUrl);
-            const maxDim = 1000;
+            const maxDim = 700;
             let w = img.naturalWidth || img.width;
             let h = img.naturalHeight || img.height;
             if (w > maxDim || h > maxDim) {
@@ -3048,14 +3785,17 @@
             c.width = w;
             c.height = h;
             c.getContext('2d').drawImage(img, 0, 0, w, h);
-            settings.rawSigDataUrl = c.toDataURL('image/png');
+            const mimeOut = f.type === 'image/png' ? 'image/png' : 'image/jpeg';
+            settings.rawSigDataUrl = c.toDataURL(mimeOut, 0.90);
 
             await processSignatureDataUrl(settings.rawSigDataUrl);
+            const baseName = f.name.replace(/\.[^.]+$/, '') || `ลายเซ็นที่ ${savedSignatures.length + 1}`;
+            addSavedSignature(baseName, settings.rawSigDataUrl, settings.cleanSigDataUrl, settings.sigThreshold, settings.tintSignature);
             invalidateOutputs();
             syncControlsFromSettings();
             saveSettings();
             await refreshStampAndPreview();
-            showToast('เพิ่มลายเซ็นและลบพื้นหลังเรียบร้อย');
+            showToast('บันทึกลายเซ็นไว้ในเครื่องเรียบร้อย');
           } catch (err) {
             showToast('ไม่สามารถอ่านไฟล์รูปลายเซ็นได้');
           } finally {
@@ -3064,11 +3804,103 @@
         });
 
         els.btnRemoveSig.addEventListener('click', () => {
+          settings.activeSigId = null;
           settings.rawSigDataUrl = null;
           settings.cleanSigDataUrl = null;
           cachedSignatureImg = null;
           syncControlsFromSettings();
+          renderSavedSignatures();
           onSettingChanged();
+        });
+
+        // Draw signature modal (mouse, touch & Apple Pencil)
+        let drawHasInk = false;
+        let drawPointerId = null;
+        let lastDrawPt = null;
+        const drawCtx = els.sigDrawCanvas.getContext('2d');
+
+        function clearDrawCanvas() {
+          drawCtx.clearRect(0, 0, els.sigDrawCanvas.width, els.sigDrawCanvas.height);
+          drawHasInk = false;
+        }
+
+        els.btnDrawSig.addEventListener('click', () => {
+          clearDrawCanvas();
+          els.sigDrawName.value = '';
+          els.drawSigModal.classList.add('open');
+        });
+        els.btnClearDraw.addEventListener('click', clearDrawCanvas);
+        els.btnCancelDraw.addEventListener('click', () => {
+          els.drawSigModal.classList.remove('open');
+        });
+
+        function getDrawCanvasPoint(e) {
+          const rect = els.sigDrawCanvas.getBoundingClientRect();
+          return {
+            x: (e.clientX - rect.left) * (els.sigDrawCanvas.width / Math.max(1, rect.width)),
+            y: (e.clientY - rect.top) * (els.sigDrawCanvas.height / Math.max(1, rect.height))
+          };
+        }
+
+        els.sigDrawCanvas.addEventListener('pointerdown', (e) => {
+          if (e.button > 0) return;
+          e.preventDefault();
+          drawPointerId = e.pointerId;
+          try { els.sigDrawCanvas.setPointerCapture(e.pointerId); } catch (err) {}
+          const pt = getDrawCanvasPoint(e);
+          lastDrawPt = pt;
+          drawCtx.strokeStyle = settings.color || '#0D33BF';
+          drawCtx.fillStyle = settings.color || '#0D33BF';
+          drawCtx.lineCap = 'round';
+          drawCtx.lineJoin = 'round';
+          const pressure = (typeof e.pressure === 'number' && e.pressure > 0) ? e.pressure : 0.5;
+          drawCtx.lineWidth = 3.5 + pressure * 2.5;
+          drawCtx.beginPath();
+          drawCtx.arc(pt.x, pt.y, drawCtx.lineWidth / 2, 0, Math.PI * 2);
+          drawCtx.fill();
+          drawHasInk = true;
+        });
+
+        els.sigDrawCanvas.addEventListener('pointermove', (e) => {
+          if (drawPointerId !== e.pointerId || !lastDrawPt) return;
+          e.preventDefault();
+          const pt = getDrawCanvasPoint(e);
+          const pressure = (typeof e.pressure === 'number' && e.pressure > 0) ? e.pressure : 0.5;
+          drawCtx.lineWidth = 3.5 + pressure * 2.5;
+          drawCtx.beginPath();
+          drawCtx.moveTo(lastDrawPt.x, lastDrawPt.y);
+          drawCtx.lineTo(pt.x, pt.y);
+          drawCtx.stroke();
+          lastDrawPt = pt;
+          drawHasInk = true;
+        });
+
+        const endDrawStroke = (e) => {
+          if (drawPointerId !== e.pointerId) return;
+          drawPointerId = null;
+          lastDrawPt = null;
+          try { els.sigDrawCanvas.releasePointerCapture(e.pointerId); } catch (err) {}
+        };
+        els.sigDrawCanvas.addEventListener('pointerup', endDrawStroke);
+        els.sigDrawCanvas.addEventListener('pointercancel', endDrawStroke);
+
+        els.btnSaveDraw.addEventListener('click', async () => {
+          if (!drawHasInk) {
+            showToast('กรุณาเซ็นชื่อในกรอบก่อนบันทึก');
+            return;
+          }
+          const rawDrawUrl = els.sigDrawCanvas.toDataURL('image/png');
+          settings.sigThreshold = 240;
+          settings.rawSigDataUrl = rawDrawUrl;
+          await processSignatureDataUrl(rawDrawUrl);
+          const sigName = els.sigDrawName.value.trim() || `ลายเซ็นที่ ${savedSignatures.length + 1}`;
+          addSavedSignature(sigName, rawDrawUrl, settings.cleanSigDataUrl, settings.sigThreshold, settings.tintSignature);
+          els.drawSigModal.classList.remove('open');
+          invalidateOutputs();
+          syncControlsFromSettings();
+          saveSettings();
+          await refreshStampAndPreview();
+          showToast(`บันทึกลายเซ็น "${sigName}" เรียบร้อย`);
         });
 
         els.rangeSigThreshold.addEventListener('input', () => {
@@ -3170,44 +4002,151 @@
         els.btnResetThisPage.addEventListener('click', resetThisPagePlacement);
         els.btnApplyPageToAll.addEventListener('click', applyPagePlacementToAll);
 
-        // Direct drag-on-preview (mouse & touch)
-        let dragState = null;
-        els.previewCanvas.addEventListener('pointerdown', (e) => {
+        // Direct hand move, rotate handle, resize handle & 2-finger pinch/twist on preview
+        const activePointers = new Map();
+        let gestureState = null;
+
+        function clampNum(v, min, max) {
+          return Math.min(max, Math.max(min, v));
+        }
+
+        function startPinchGesture(fileObj) {
+          const pts = Array.from(activePointers.values());
+          if (pts.length < 2) return;
+          const p1 = pts[0];
+          const p2 = pts[1];
+          const pl = getEffectivePlacement(fileObj, activePageNum);
+          gestureState = {
+            mode: 'pinch',
+            midX: (p1.clientX + p2.clientX) / 2,
+            midY: (p1.clientY + p2.clientY) / 2,
+            dist: Math.max(20, Math.hypot(p2.clientX - p1.clientX, p2.clientY - p1.clientY)),
+            ang: (Math.atan2(p2.clientY - p1.clientY, p2.clientX - p1.clientX) * 180) / Math.PI,
+            initX: pl.posX,
+            initY: pl.posY,
+            initScale: pl.stampScale,
+            initAngle: pl.angle
+          };
+        }
+
+        els.canvasPaperWrap.addEventListener('pointerdown', (e) => {
           const fileObj = getActiveFile();
           if (!fileObj || e.button > 0) return;
-          const rect = els.previewCanvas.getBoundingClientRect();
+          e.preventDefault();
+
+          const rect = els.canvasPaperWrap.getBoundingClientRect();
           if (rect.width <= 0 || rect.height <= 0) return;
+
+          activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+          try { els.canvasPaperWrap.setPointerCapture(e.pointerId); } catch (err) {}
+
+          if (activePointers.size >= 2) {
+            startPinchGesture(fileObj);
+            return;
+          }
+
           const pl = getEffectivePlacement(fileObj, activePageNum);
-          dragState = {
-            pointerId: e.pointerId,
-            startPx: (e.clientX - rect.left) / rect.width,
-            startPy: (e.clientY - rect.top) / rect.height,
-            initX: pl.posX,
-            initY: pl.posY
-          };
-          els.previewCanvas.classList.add('dragging');
-          try { els.previewCanvas.setPointerCapture(e.pointerId); } catch (err) {}
+          const cx = rect.left + pl.posX * rect.width;
+          const cy = rect.top + pl.posY * rect.height;
+
+          if (e.target === els.handleRotate || els.handleRotate.contains(e.target)) {
+            gestureState = {
+              mode: 'rotate',
+              pointerId: e.pointerId,
+              cx,
+              cy,
+              startVecAng: (Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI,
+              initAngle: pl.angle
+            };
+          } else if (e.target === els.handleResize || els.handleResize.contains(e.target)) {
+            gestureState = {
+              mode: 'resize',
+              pointerId: e.pointerId,
+              cx,
+              cy,
+              startDist: Math.max(20, Math.hypot(e.clientX - cx, e.clientY - cy)),
+              initScale: pl.stampScale
+            };
+          } else {
+            gestureState = {
+              mode: 'move',
+              pointerId: e.pointerId,
+              startPx: (e.clientX - rect.left) / rect.width,
+              startPy: (e.clientY - rect.top) / rect.height,
+              initX: pl.posX,
+              initY: pl.posY
+            };
+            els.previewCanvas.classList.add('dragging');
+          }
         });
 
-        els.previewCanvas.addEventListener('pointermove', (e) => {
-          if (!dragState || e.pointerId !== dragState.pointerId) return;
-          const rect = els.previewCanvas.getBoundingClientRect();
-          if (rect.width <= 0 || rect.height <= 0) return;
-          const curPx = (e.clientX - rect.left) / rect.width;
-          const curPy = (e.clientY - rect.top) / rect.height;
-          const newX = Math.min(0.95, Math.max(0.05, Math.round((dragState.initX + (curPx - dragState.startPx)) * 100) / 100));
-          const newY = Math.min(0.95, Math.max(0.05, Math.round((dragState.initY + (curPy - dragState.startPy)) * 100) / 100));
-          updatePlacementField({ posX: newX, posY: newY });
+        els.canvasPaperWrap.addEventListener('pointermove', (e) => {
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+          if (!gestureState) return;
+
+          const fileObj = getActiveFile();
+          const rect = els.canvasPaperWrap.getBoundingClientRect();
+          if (!fileObj || rect.width <= 0 || rect.height <= 0) return;
+
+          if (gestureState.mode === 'pinch' && activePointers.size >= 2) {
+            const pts = Array.from(activePointers.values());
+            const p1 = pts[0];
+            const p2 = pts[1];
+            const curMidX = (p1.clientX + p2.clientX) / 2;
+            const curMidY = (p1.clientY + p2.clientY) / 2;
+            const curDist = Math.max(20, Math.hypot(p2.clientX - p1.clientX, p2.clientY - p1.clientY));
+            const curAng = (Math.atan2(p2.clientY - p1.clientY, p2.clientX - p1.clientX) * 180) / Math.PI;
+
+            const newX = clampNum(Math.round((gestureState.initX + (curMidX - gestureState.midX) / rect.width) * 100) / 100, 0.05, 0.95);
+            const newY = clampNum(Math.round((gestureState.initY + (curMidY - gestureState.midY) / rect.height) * 100) / 100, 0.05, 0.95);
+            const newScale = clampNum(Math.round(gestureState.initScale * (curDist / gestureState.dist) * 100) / 100, 0.30, 1.15);
+            const deltaAng = ((curAng - gestureState.ang + 540) % 360) - 180;
+            let newAngle = clampNum(Math.round(gestureState.initAngle - deltaAng), -90, 90);
+            if (Math.abs(newAngle) <= 2) newAngle = 0;
+            else if (Math.abs(newAngle - 35) <= 2) newAngle = 35;
+
+            const patch = { posX: newX, posY: newY, stampScale: newScale, angle: newAngle };
+            updatePlacementField(patch);
+            showGestureHud(patch);
+          } else if (gestureState.mode === 'move' && e.pointerId === gestureState.pointerId) {
+            const curPx = (e.clientX - rect.left) / rect.width;
+            const curPy = (e.clientY - rect.top) / rect.height;
+            const newX = clampNum(Math.round((gestureState.initX + (curPx - gestureState.startPx)) * 100) / 100, 0.05, 0.95);
+            const newY = clampNum(Math.round((gestureState.initY + (curPy - gestureState.startPy)) * 100) / 100, 0.05, 0.95);
+            updatePlacementField({ posX: newX, posY: newY });
+            showGestureHud(getEffectivePlacement(fileObj, activePageNum));
+          } else if (gestureState.mode === 'rotate' && e.pointerId === gestureState.pointerId) {
+            const curVecAng = (Math.atan2(e.clientY - gestureState.cy, e.clientX - gestureState.cx) * 180) / Math.PI;
+            const deltaCss = ((curVecAng - gestureState.startVecAng + 540) % 360) - 180;
+            let newAngle = clampNum(Math.round(gestureState.initAngle - deltaCss), -90, 90);
+            if (Math.abs(newAngle) <= 2) newAngle = 0;
+            else if (Math.abs(newAngle - 35) <= 2) newAngle = 35;
+            updatePlacementField({ angle: newAngle });
+            showGestureHud(getEffectivePlacement(fileObj, activePageNum));
+          } else if (gestureState.mode === 'resize' && e.pointerId === gestureState.pointerId) {
+            const curDist = Math.max(20, Math.hypot(e.clientX - gestureState.cx, e.clientY - gestureState.cy));
+            const newScale = clampNum(Math.round(gestureState.initScale * (curDist / gestureState.startDist) * 100) / 100, 0.30, 1.15);
+            updatePlacementField({ stampScale: newScale });
+            showGestureHud(getEffectivePlacement(fileObj, activePageNum));
+          }
         });
 
-        const endDrag = (e) => {
-          if (!dragState || e.pointerId !== dragState.pointerId) return;
-          dragState = null;
-          els.previewCanvas.classList.remove('dragging');
-          try { els.previewCanvas.releasePointerCapture(e.pointerId); } catch (err) {}
+        const endPointerGesture = (e) => {
+          activePointers.delete(e.pointerId);
+          try { els.canvasPaperWrap.releasePointerCapture(e.pointerId); } catch (err) {}
+          if (gestureState && gestureState.mode === 'pinch' && activePointers.size < 2) {
+            gestureState = null;
+          } else if (gestureState && gestureState.pointerId === e.pointerId) {
+            gestureState = null;
+          }
+          if (activePointers.size === 0) {
+            gestureState = null;
+            els.previewCanvas.classList.remove('dragging');
+          }
         };
-        els.previewCanvas.addEventListener('pointerup', endDrag);
-        els.previewCanvas.addEventListener('pointercancel', endDrag);
+        els.canvasPaperWrap.addEventListener('pointerup', endPointerGesture);
+        els.canvasPaperWrap.addEventListener('pointercancel', endPointerGesture);
 
         // Position & Size sliders
         els.rangeStampScale.addEventListener('input', () => {
@@ -3242,10 +4181,12 @@
 
         // Reset defaults
         els.btnResetDefaults.addEventListener('click', async () => {
+          const keepActiveSigId = settings.activeSigId;
           const keepRawSig = settings.rawSigDataUrl;
           const keepCleanSig = settings.cleanSigDataUrl;
           settings = {
             ...DEFAULT_SETTINGS,
+            activeSigId: keepActiveSigId,
             rawSigDataUrl: keepRawSig,
             cleanSigDataUrl: keepCleanSig
           };
@@ -3306,6 +4247,25 @@
       // 12. Boot Application
       // =========================================================================
       async function init() {
+        // Migrate any existing signature into the memorized signature library
+        if (savedSignatures.length === 0 && settings.cleanSigDataUrl) {
+          addSavedSignature(
+            'ลายเซ็นเดิม',
+            settings.rawSigDataUrl || settings.cleanSigDataUrl,
+            settings.cleanSigDataUrl,
+            settings.sigThreshold,
+            settings.tintSignature
+          );
+          saveSettings();
+        } else if (settings.activeSigId) {
+          const activeSig = savedSignatures.find(s => s.id === settings.activeSigId);
+          if (activeSig) {
+            settings.rawSigDataUrl = activeSig.rawDataUrl;
+            settings.cleanSigDataUrl = activeSig.cleanDataUrl;
+          }
+        }
+
+        renderSavedSignatures();
         syncControlsFromSettings();
         wireEvents();
 
