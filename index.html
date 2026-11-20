@@ -2635,6 +2635,7 @@
           <button id="btnShareCurrent" class="btn btn-primary btn-sm" type="button" data-i18n="btnShareCurrent">📤 แชร์ไฟล์ (LINE / WhatsApp / Email)</button>
           <button id="btnDownloadZip" class="btn btn-soft btn-sm" type="button" style="display:none;" data-i18n="btnDownloadZip">📦 ดาวน์โหลดทั้งหมด (.ZIP)</button>
           <button id="btnShareAll" class="btn btn-soft btn-sm" type="button" style="display:none;" data-i18n="btnShareAll">📤 แชร์ทุกไฟล์</button>
+          <button id="btnSendCertifyToEditor" class="btn btn-soft btn-sm" type="button" data-i18n="btnSendToPdfEditor">📄 ส่งไปแก้ไข / วาด PDF</button>
         </div>
       </div>
 
@@ -3925,7 +3926,7 @@
           lblWatermarkText: 'ข้อความลายน้ำ',
           lblWatermarkOpacity: 'ความจางของลายน้ำ',
           edBtnAddFiles: '+ เพิ่มไฟล์ PDF / รูป',
-          edBtnImportCertify: '📥 ดึงจากหน้ารับรองสำเนา',
+          edBtnImportCertify: '📥 ดึงไฟล์รับรองสำเนาเข้ามา',
           edBtnSelectAll: 'เลือกทั้งหมด',
           edBtnDeselectAll: 'ยกเลิกเลือก',
           edBtnRotateSelected: '↻ หมุนที่เลือก 90°',
@@ -4223,7 +4224,9 @@
           edMergedDefaultName: 'รวมเอกสาร_{n}ไฟล์.pdf',
           edEditedSuffix: '_แก้ไขแล้ว.pdf',
           toastEdAddedPages: 'เพิ่ม {count} หน้าเข้ากระดานแก้ไข PDF แล้ว',
-          toastEdImportedCertify: 'ดึง {count} หน้าจากหน้ารับรองสำเนาเข้ามาเรียบร้อย 📥',
+          toastEdImportedCertify: 'ดึงเอกสารที่รับรองสำเนาแล้ว {count} หน้าเข้ากระดานแก้ไข PDF เรียบร้อย 📥',
+          btnSendToPdfEditor: '📄 ส่งไปแก้ไข / วาด PDF',
+          progPreparingCertifiedImport: 'กำลังประทับตรารับรองสำเนาก่อนส่งเข้า PDF Editor ({idx}/{total}): {name} (หน้า {p}/{pTotal})',
           edSelectionRatio: 'เลือก {sel} / {total} หน้า',
           edBuildAllBtn: '📄 บันทึก / รวมทั้งหมด ({total} หน้า)',
           edBuildSelectedBtn: '✂️ แยกเฉพาะหน้าที่เลือก ({sel} หน้า)',
@@ -4402,7 +4405,7 @@
           lblWatermarkText: 'Watermark Text',
           lblWatermarkOpacity: 'Watermark Opacity',
           edBtnAddFiles: '+ Add PDF / Images',
-          edBtnImportCertify: '📥 Import from Certify',
+          edBtnImportCertify: '📥 Import Certified Copy',
           edBtnSelectAll: 'Select All',
           edBtnDeselectAll: 'Deselect',
           edBtnRotateSelected: '↻ Rotate Selected 90°',
@@ -4700,7 +4703,9 @@
           edMergedDefaultName: 'Merged_{n}files.pdf',
           edEditedSuffix: '_edited.pdf',
           toastEdAddedPages: 'Added {count} page(s) to PDF Editor',
-          toastEdImportedCertify: 'Imported {count} page(s) from Certified Copy 📥',
+          toastEdImportedCertify: 'Imported {count} certified page(s) into PDF Editor 📥',
+          btnSendToPdfEditor: '📄 Open in PDF Editor',
+          progPreparingCertifiedImport: 'Stamping certified copy for PDF Editor ({idx}/{total}): {name} (Page {p}/{pTotal})',
           edSelectionRatio: 'Selected {sel} / {total} pg',
           edBuildAllBtn: '📄 Export / Merge All ({total} pg)',
           edBuildSelectedBtn: '✂️ Extract Selected ({sel} pg)',
@@ -5055,6 +5060,7 @@
         btnShareCurrent: $('btnShareCurrent'),
         btnDownloadZip: $('btnDownloadZip'),
         btnShareAll: $('btnShareAll'),
+        btnSendCertifyToEditor: $('btnSendCertifyToEditor'),
         excludedBanner: $('excludedBanner'),
         btnBannerRestorePage: $('btnBannerRestorePage'),
 
@@ -8240,6 +8246,9 @@
           if (src.objUrl) {
             try { URL.revokeObjectURL(src.objUrl); } catch (e) {}
           }
+          if (src.ownsPdfProxy && src.pdfDocProxy) {
+            try { src.pdfDocProxy.destroy(); } catch (e) {}
+          }
         });
         editorSources.clear();
         editorPages = [];
@@ -8454,65 +8463,123 @@
         }
       }
 
+      async function openPdfBytesSilently(pdfBytes) {
+        try {
+          return await pdfjsLib.getDocument({ data: pdfBytes.slice() }).promise;
+        } catch (err) {
+          if (err && /worker/i.test(String(err.message || ''))) {
+            return await pdfjsLib.getDocument({ data: pdfBytes.slice(), disableWorker: true }).promise;
+          }
+          throw err;
+        }
+      }
+
       async function importFilesFromCertifyToEditor() {
         if (files.length === 0) return;
+
+        const filesToStamp = files.filter(f => !f.outputBytes);
+        if (filesToStamp.length > 0) {
+          els.progressModal.classList.add('open');
+          els.progFill.style.width = '0%';
+          els.progPercent.textContent = '0%';
+          els.progDesc.textContent = t('progDescDefault');
+
+          try {
+            const stampCanvas = await buildStampCanvas();
+            const getActiveCount = (f) => f.kind === 'image' ? 1 : Math.max(1, f.pageCount - (f.excludedPages ? f.excludedPages.size : 0));
+            const totalPagesAll = filesToStamp.reduce((acc, f) => acc + getActiveCount(f), 0);
+            let processedPagesAll = 0;
+
+            for (let i = 0; i < filesToStamp.length; i++) {
+              const f = filesToStamp[i];
+              const baseDone = processedPagesAll;
+              const outBytes = await generateStampedPdfForFile(f, stampCanvas, (p, pTotal) => {
+                const currentAll = baseDone + p;
+                const pct = Math.round((currentAll / Math.max(1, totalPagesAll)) * 100);
+                els.progDesc.textContent = t('progPreparingCertifiedImport', {
+                  idx: i + 1,
+                  total: filesToStamp.length,
+                  name: f.name,
+                  p,
+                  pTotal
+                });
+                els.progFill.style.width = `${pct}%`;
+                els.progPercent.textContent = `${pct}%`;
+              });
+              processedPagesAll += getActiveCount(f);
+              f.outputBytes = outBytes;
+              f.outputName = buildOutputFileName(f.name);
+            }
+
+            renderFileList();
+            updateReadyBanner();
+          } catch (err) {
+            console.error(err);
+            showToast(t('toastPdfBuildError', { msg: err.message || err }));
+            return;
+          } finally {
+            els.progressModal.classList.remove('open');
+          }
+        }
+
         pushEditorUndo();
         let addedPages = 0;
 
         for (const f of files) {
+          if (!f.outputBytes) continue;
           const srcId = `edimp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-          const rawCopy = f.rawBytes.slice();
-          let objUrl = null;
-          let imgEl = f.imageElement || null;
-          if (f.kind === 'image' && rawCopy.byteLength > 0) {
-            const blob = new Blob([rawCopy], { type: f.mimeType || 'image/jpeg' });
-            objUrl = URL.createObjectURL(blob);
-            imgEl = await loadImageFromSrc(objUrl);
-          }
+          const certifiedBytes = f.outputBytes.slice();
+          const certName = f.outputName || buildOutputFileName(f.name);
 
-          const srcObj = {
-            id: srcId,
-            name: f.name,
-            kind: f.kind,
-            mimeType: f.mimeType,
-            rawBytes: rawCopy,
-            byteLength: rawCopy.byteLength,
-            isPasswordProtected: f.isPasswordProtected,
-            pdfDocProxy: f.pdfDocProxy,
-            imageElement: imgEl,
-            objUrl,
-            pageCount: f.pageCount
-          };
-          editorSources.set(srcId, srcObj);
+          try {
+            const pdfProxy = await openPdfBytesSilently(certifiedBytes);
+            const srcObj = {
+              id: srcId,
+              name: certName,
+              kind: 'pdf',
+              mimeType: 'application/pdf',
+              rawBytes: certifiedBytes,
+              byteLength: certifiedBytes.byteLength,
+              isPasswordProtected: false,
+              pdfDocProxy: pdfProxy,
+              ownsPdfProxy: true,
+              imageElement: null,
+              objUrl: null,
+              pageCount: pdfProxy.numPages
+            };
+            editorSources.set(srcId, srcObj);
 
-          for (let p = 1; p <= f.pageCount; p++) {
-            if (f.excludedPages && f.excludedPages.has(p)) continue;
-            const cached = f.pageCache && f.pageCache.get(p);
-            let thumbUrl = null;
-            if (cached && cached.canvas) {
-              try {
-                thumbUrl = cached.canvas.toDataURL('image/jpeg', 0.65);
-              } catch (e) {}
+            for (let p = 1; p <= pdfProxy.numPages; p++) {
+              editorPages.push({
+                id: `edpg_${srcId}_${p}_${Math.random().toString(36).slice(2, 5)}`,
+                sourceId: srcId,
+                sourceName: certName,
+                pageNum: p,
+                rotationDelta: 0,
+                selected: false,
+                thumbDataUrl: null,
+                annotatedThumbDataUrl: null,
+                annotations: [],
+                widthPt: 595,
+                heightPt: 842
+              });
+              addedPages++;
             }
-            editorPages.push({
-              id: `edpg_${srcId}_${p}_${Math.random().toString(36).slice(2, 5)}`,
-              sourceId: srcId,
-              sourceName: f.name,
-              pageNum: p,
-              rotationDelta: 0,
-              selected: false,
-              thumbDataUrl: thumbUrl,
-              annotatedThumbDataUrl: null,
-              annotations: [],
-              widthPt: cached ? cached.widthPt : 595,
-              heightPt: cached ? cached.heightPt : 842
-            });
-            addedPages++;
+          } catch (err) {
+            console.error(err);
+            showToast(t('toastOpenFileError', { name: certName, msg: err.message || t('errFileDamaged') }));
           }
         }
 
         if (addedPages > 0) {
           invalidateEditorOutput();
+          if (els.inputEditorOutputName && !els.inputEditorOutputName.value.trim()) {
+            const firstSrc = editorSources.values().next().value;
+            const base = firstSrc ? firstSrc.name.replace(/\.[^.]+$/, '') : t('defaultDocName');
+            els.inputEditorOutputName.value = editorSources.size > 1
+              ? t('edMergedDefaultName', { n: editorSources.size })
+              : `${base}${t('edEditedSuffix')}`;
+          }
           renderEditorBoard();
           showToast(t('toastEdImportedCertify', { count: addedPages }));
           generateMissingEditorThumbs();
@@ -10706,6 +10773,11 @@
         els.btnShareCurrent.addEventListener('click', () => shareFiles([getActiveFile()]));
         els.btnDownloadZip.addEventListener('click', downloadAllAsZip);
         els.btnShareAll.addEventListener('click', () => shareFiles(files.filter(f => Boolean(f.outputBytes))));
+        els.btnSendCertifyToEditor?.addEventListener('click', async () => {
+          if (files.length === 0) return;
+          await importFilesFromCertifyToEditor();
+          setAppMode('pdf-editor');
+        });
 
         // Password toggle
         els.btnTogglePw.addEventListener('click', () => {
