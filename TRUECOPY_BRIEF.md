@@ -2,7 +2,7 @@
 
 > Everything agreed so far, so an AI coding assistant can continue the work.
 > Full plan with architecture diagram: https://claude.ai/artifact/BStkv3cjUG4jd6gNLKNJwY
-> Last updated: 2026-11-19
+> Last updated: 2026-11-20 (full UI/UX redesign shipped. Read **section 11** first, it supersedes the old screen notes)
 
 ---
 
@@ -43,7 +43,8 @@
 | Flatten pages to images | **On by default**; the user can turn it off |
 | Hosting | **Cloudflare Pages** (`https://truecopy-3rh.pages.dev/`) |
 | Accounts | Google / Firebase / Cloudflare: `taxicashflow@gmail.com` (Firebase Project: `truecopy-cert-th`, Region: `asia-southeast1` Spark plan · Cloudflare Account ID: `6cf13c91bf3d927563c99ece990518ea`) · GitHub: `PTAero-dev` (`PTAero-dev/TrueCopy`) |
-| Fonts the user likes | **Thai Niramit (Niramit)** or **Thai Sarabun (Sarabun)** — see section 5 |
+| Fonts the user likes | **Thai Niramit (Niramit)** or **Thai Sarabun (Sarabun)**, plus the bundled **TH SarabunPSK Italic** (added 2026-11-20); see section 5 |
+| Defaults chosen in the 2026-11-20 redesign | Stamp weight **Semi-bold (600)**, restricted-use org **ธนาคารกรุงไทย**, app style **Glass**. A one-time migration (`truecopy_migration_v2`) moved saved `fontWeight 700→600` and `org ธนาคาร CIMB THAI→ธนาคารกรุงไทย` in the current settings only (templates/history untouched) |
 
 ---
 
@@ -69,6 +70,8 @@
 | PDF Editor (`แก้ไข PDF`) | Merge multiple PDFs/photos, drag/tap organize pages, rotate, delete with undo, split/extract pages by click or range (`1, 3-5`), annotate any page with text, freehand pen, highlighter, lines, arrows, rectangles, circles/ellipses, and irreversible blur/pixelate/solid redact (rotation-synced & flattened into exported PDF), compress file size, normalize A4 page size, and send straight to Certify | 4+ |
 | Bilingual UI & Dark Theme | Toggle between Thai (`ไทย`) and English (`EN`) UI (with quick Thai/English stamp text presets) and switch cleanly between Light & Dark themes (`☀️`/`🌙`) | 4+ |
 | PWA | Installable on a phone | 4 |
+| Redesigned UI (2026-11-20) | Preview always on screen; tool tabs below (phone) / right (iPad, laptop); filmstrip of all pages; nav drawer (phone) / rail (wide); 4 app styles (Glass default, Ink & paper, Navy & gold, Graphite) + "app colour follows stamp ink"; see section 11 | 7 |
+| New in the redesign | Recently-used purpose/org chips, bank & purpose suggestions, 3×3 quick position grid, hold-eye-button to compare with original, page number on stamp (`หน้า 1/5`), pre-send check sheet, combine all outputs into one PDF, 3 file-name patterns, camera capture input, undo/redo for stamp settings, PIN keypad, "use this wording again" from history, share sheet (LINE / email / OneDrive / other apps / save), highlighter hold-to-snap (line / rectangle / circle / triangle), bundled TH SarabunPSK Italic | 7 |
 
 ---
 
@@ -105,7 +108,8 @@ The user likes **Thai Niramit** or **Thai Sarabun**.
 
 - Use the Google Fonts versions: they load from a CDN and use the open OFL license.
 - The original SIPA "TH" versions render smaller and need a larger size. If the user wants the original TH fonts, support uploading a `.ttf` file.
-- **Default:** Sarabun Bold, with Niramit as a choice in the font menu.
+- **Default:** Sarabun **Semi-bold (600)** since 2026-11-20 (was Bold), with Niramit and TH SarabunPSK Italic as choices.
+- **TH SarabunPSK Italic** is bundled as `fonts/THSarabunPSK-Italic.ttf` (SIPA/DIP licence: free to use and redistribute unmodified, may not be sold on its own; do not rename or modify the font file). It is declared with `@font-face` in `index.html` and cached by `sw.js`. SIPA fonts draw ~1.45× smaller than Google's Sarabun, so `FONT_SCALE` in the script enlarges them so the chosen point size matches. It has one weight; Semi-bold/Bold are browser-synthesised.
 - **Before every draw**, wait for the font to load, e.g. `await document.fonts.load('700 48px Sarabun')`. Otherwise the first stamp renders in a fallback font.
 
 ---
@@ -243,6 +247,7 @@ service firebase.storage {
 4. **Phase 4 — Publish & Security *(Implemented)*:** Cloudflare Pages PWA deployment (`manifest.json`, `sw.js`, `icon.svg`, `icon-192.png`, `icon-512.png`) with install prompt + offline shell caching, plus laptop/device protection (mandatory Google owner sign-in gate, session-only login option, synced 4–12 char PIN lock screen, AES-256-GCM PBKDF2 encrypted local signature vault, idle/tab-leave auto-lock, `Ctrl+Shift+L` lock shortcut, and complete local data wipe on sign-out). Note: Firebase Console **Authorized domains** and optional **App Check** (reCAPTCHA v3) are toggled in the Firebase web console.
 5. **PDF Editor & Annotate Studio *(Implemented)*:** Dedicated **📄 แก้ไข PDF** tab inside [index.html](index.html) supporting multi-PDF/image merge, drag-and-drop & mobile touch page reordering, 90° page rotation, page deletion with Undo, page extraction by click or range (`1, 3-5, 8`), a full-screen **Annotate, Draw & Blur Studio** per page (multiline Thai/English text boxes, freehand pen, multiply highlighter, straight lines, arrowheads, rectangles, ellipses/circles, and cross-browser pixel-destructive Blur/Mosaic/Solid Redact with per-page Undo/Redo and rotation sync, flattened cleanly on PDF export), file-size compression (`original`, `high`, `bank`, `small`), A4 page size normalization, and direct download, Web Share, or one-click transfer to **รับรองสำเนาถูกต้อง**.
 6. **Bilingual UI & Dark Theme *(Implemented)*:** Complete Thai (`ไทย`) / English (`EN`) live interface toggle (with quick `🇹🇭 ไทย` / `🇬🇧 EN` stamp text presets, English CE date support, and top-right lock-screen language/theme toggles), plus zero-flash Light/Dark theme switcher (`☀️`/`🌙`) persisted in `localStorage`.
+7. **Full UI/UX redesign *(Implemented 2026-11-20)*:** Prototyped first in `prototype/` (user tested it on phone/iPad and asked for changes), then rebuilt into the production `index.html` on top of the same engine (pdf.js / pdf-lib / Firebase / PIN vault). See section 11.
 
 ### Phase 1 acceptance checklist
 
@@ -259,36 +264,14 @@ service firebase.storage {
 
 ## 9. Screens
 
-| Screen | Contents |
-| --- | --- |
-| Sign in | A single "Sign in with Google" button (phase 2 onward) |
-| Workspace (main screen) | Left: file list + page thumbnails · Center: page preview with the stamp · Right: settings panel (template, text, color, font, opacity/Real Ink, position/angle, signature + printed name, date, watermark, flatten) · "Generate", "Download" (`ดาวน์โหลด`), and "Share" (`แชร์ไฟล์` — LINE / WhatsApp / Email) buttons. On a phone, the settings panel slides up from the bottom |
-| Signature library | Signature cards · photo upload + smooth background-removal slider + "match stamp color" toggle · draw-with-finger/mouse pad |
-| Template manager | Template list · editor with live stamp preview · set as default |
-| History | Date · file names · template · page count · download again |
+The screens and responsive rules were replaced by the 2026-11-20 redesign. **See section 11** for the current screens, layout breakpoints and rules.
 
-- All interface text is in Thai.
-- The layout must work on both phones and computers.
-
-### Responsive layout rules (mobile/iPad fix, 2026-11-19)
-
-Bug fixed: on phones the header buttons (`flex-shrink: 0`) were wider than the screen, so the whole page grew wider and Chrome zoomed out. The TC badge slid under the sign-in pill, the "ประมวลผลและสร้างไฟล์ PDF" button was cut off, and the bottom tab bar disappeared. Keep these rules when adding header or toolbar buttons:
-
-| Width | Behaviour (CSS in `index.html`, block "Responsive header") |
-| --- | --- |
-| > 1024px (desktop, iPad landscape) | 3-column workspace, full button labels |
-| ≤ 1024px (iPad portrait) | Panels become slide-in sheets + bottom tab bar. Brand title only takes the leftover space (ellipsis). `.header-actions` may shrink and scroll sideways but **never widens the page**. Generate button shows the short label `สร้าง PDF` (`.gen-label-short`), and the security/lock/install labels are hidden |
-| ≤ 719px (phones) | Brand text, history label and the sign-in name (`.auth-pill-name`) hidden, so they're icon-only. Preview toolbar is 2 rows: page nav + zoom, then the adjust-mode toggles |
-| ≤ 479px | ก่อนหน้า/ถัดไป words hidden (`.nav-label`), arrows only |
-| ≤ 380px | TC brand badge hidden so all 6 header actions fit from 360px wide. At 320px the header scrolls sideways as a fallback |
-
-- When adding a header button, wrap its text in a label span that is hidden on small screens and give it a `title`, so phones show an icon-only button.
-- Tested worst case (signed in + PIN lock + install button all visible) in headless Chrome at 320/360/375/390/412/430, 768, 820, 1024 and 1180 px. The page width never exceeded the screen width.
-- `sw.js` serves HTML network-first, so layout fixes reach installed PWAs without bumping `CACHE_NAME`.
+- All interface text is Thai by default, with a full English toggle.
+- `sw.js` serves HTML network-first, so layout fixes reach installed PWAs without bumping `CACHE_NAME`. Bump `CACHE_NAME` when adding new static files (it is `truecopy-shell-v6` since the redesign added `fonts/`).
 
 ### How to deploy (Cloudflare Pages)
 
-The Pages project `truecopy` is **not** connected to GitHub (direct upload), so `git push` does **not** deploy. After committing, copy **only the app files** (`index.html`, `manifest.json`, `sw.js`, `icon.svg`, `icon-192.png`, `icon-512.png`) into a temporary folder and run:
+The Pages project `truecopy` is **not** connected to GitHub (direct upload), so `git push` does **not** deploy. After committing, copy **only the app files** (`index.html`, `manifest.json`, `sw.js`, `icon.svg`, `icon-192.png`, `icon-512.png`, and the `fonts/` folder) into a temporary folder and run:
 
 `npx wrangler pages deploy <that-folder> --project-name truecopy --branch main --commit-hash <sha>`
 
@@ -303,3 +286,66 @@ Never deploy the project root. Until 2026-11-19 it was deployed that way, which 
 3. **Set the look:** color, font, opacity/Real Ink, size, angle, position, signature, optional printed name, date, watermark.
 4. **Preview:** check every page; adjust position sliders (or drag directly on the page from phase 3 onward) away from important spots such as amounts or official seals.
 5. **Generate, download & share:** automatic file name; download per file or as a ZIP, or tap **แชร์ไฟล์** to send directly via LINE, WhatsApp, or Email (history is saved from phase 3 on).
+
+---
+
+## 11. UI/UX redesign (2026-11-20) — read this before changing the interface
+
+### What happened
+
+1. The user asked for a complete UX/UI redesign that keeps every feature, works on laptop, iPad and phone, never lets text overlap, and on phones **never makes the user open and close sheets** to see the result of a setting.
+2. A clickable prototype was built in `prototype/` and published privately at https://claude.ai/artifact/EEVBtyN38ogXK2td83daqr. The user tested it and asked for: chip rows that wrap (no sideways scrolling that cuts items at the screen edge), default bank ธนาคารกรุงไทย, default weight Semi-bold, highlighter hold-to-snap shapes, a share sheet (LINE / email / OneDrive), a style switcher (chose **Glass** as default) and the bundled TH SarabunPSK Italic font.
+3. The approved design was rebuilt into the production `index.html` on top of the original engine and deployed.
+
+### Files
+
+| Path | Role |
+| --- | --- |
+| `index.html` | **The app** (single file: HTML + CSS + JS). Edit this file directly. |
+| `fonts/THSarabunPSK-Italic.ttf` | Bundled font (deploy it; cached by `sw.js`). |
+| `prototype/` | Design reference only, **not** the app. `prototype/src/*` + `node prototype/build.mjs` regenerate the prototype page (generated `prototype/index.html` / `truecopy-prototype.html` are git-ignored). Documents, sign-in, downloads and sharing there are simulated. |
+
+### Screens (production)
+
+| Screen (hash) | Contents |
+| --- | --- |
+| Lock (overlay) | Checking → Google sign-in gate (session-only switch, offline PIN button when offline) → first-time PIN setup / PIN unlock (typed field + on-screen keypad; letters allowed; lockout after 5 and 8 wrong tries), forgot-PIN (Google re-auth), sign out & wipe. Open at page load so the workspace never flashes. |
+| `#certify` | Header (menu on phones, title + file/page summary, undo/redo, **สร้าง PDF**). Preview stage with overlays: all pages / this page, hold-eye compare, handles toggle, zoom, prev/next, page pill; drag to move, ↻ handle rotates (snaps 0/±35/±90), ⤢ handle resizes, two fingers resize+rotate+move. Filmstrip of every page (vertical column ≥1280 px). Tool tabs: เอกสาร / ข้อความ / ลายเซ็น / หมึก / ตำแหน่ง / ป้องกัน. **สร้าง PDF** opens a sheet: pre-send check → progress → results (download, share, ZIP, share all, open in Edit PDF). |
+| `#edit-pdf` | Board of page cards (tap = select, press-and-hold / mouse drag = reorder, double-click = annotate), action bar (rotate, draw/text, extract, delete, clear), export options (quality presets, page size, file name) in a right column (wide) or sheet (phone). Annotate studio: select, text, pen, highlight (hold-to-snap), line, arrow, box, circle, blur/mosaic/redact; per-page undo/redo. |
+| `#history` | Grouped by day, search, "use this wording again", delete, clear all (cloud too). |
+| `#library` | Templates (live stamp previews, use / default / update / delete) and signatures (use / rename / delete, draw / upload). |
+| `#preferences` | Account (Google), security (PIN set/change/remove, auto-lock, lock on tab leave, session-only, lock now, wipe), appearance (language, light/dark/auto, app style, ink-coloured accent), app (install when the browser offers it, reset stamp, keyboard shortcuts), about. |
+
+### Layout rules (keep these)
+
+| Condition | Layout |
+| --- | --- |
+| default (phones, iPad portrait) | Stacked: header → preview → filmstrip → tool tabs → tool panel. Panel height is draggable on the tab bar (stored as a ratio of screen height in `truecopy_ui_v2.panelRatio`); tap the grip to collapse. Typing in the panel hides the filmstrip so the preview stays visible above the keyboard. 700–899 px wide: panel content in 2 columns. Navigation is a slide-in drawer. |
+| `orientation: landscape` and height ≤ 520 px (phones sideways) | Preview left, tools right. |
+| ≥ 900 px wide and ≥ 521 px tall | Nav rail (92 px) + preview + 340–380 px tool column. |
+| ≥ 1280 px | Adds the vertical filmstrip column on the left. |
+
+- **Never** use sideways-scrolling rows for chips, signature cards or toolbars. The user reported cut-off items as a bug ("หลุดขอบ"). Rows wrap (`.chips`, `.sig-row`, `.an-props`, `.an-dock`, `.ebar`). Only the page filmstrip and the preview scroll.
+- Text inputs use 16 px font (stops iOS zoom). Long single-line labels use ellipsis; everything else wraps.
+- Every colour is a CSS token; app styles override tokens on `:root[data-skin=…]` for light **and** dark. `--accent-2` is the secondary accent (gold in Navy & gold).
+- Tested with a script that flags any element outside its container or overflowing text, at 320/375/390/430 (phones), 844×390 (phone landscape), 820×1180 (iPad portrait), 1024/1180 (iPad landscape), 1366/1440 (laptop), in Thai and English, on every tab, sheet and the lock screen.
+
+### Code map (`index.html` script, numbered sections)
+
+0 helpers & storage keys · 1 language/theme/app style · 2 settings & state · 3 stamp wording · 4 signatures (vault-aware save) · 5 stamp rendering · 6 file loading (password PDFs) · 7 certify workspace (preview, filmstrip, controls, gestures, split, undo) · 8 create PDF (`generateFile`: flatten = render at ~184 DPI + JPEG 0.84; flatten off = pdf-lib vector + rotation-aware stamp/watermark, multiply blend) · 9 history · 10 library · 11 Edit PDF (`edBuild`: original quality copies vector pages; otherwise render at preset DPI, burn in annotations, rotate) · 12 annotate studio & shape recognition · 13 signature pad/upload · 14 crypto vault, lock screen, Google auth (`handleCloudAuthState`, `unlockAndHydrate`, `syncCloudDataAfterUnlock`) · 15 modals/toast/password · 15b share sheet · 16 actions (`onAction` switch) · 17 wiring · 18 boot. The Firebase module (`window.TrueCopyCloud`) is the unchanged module from before.
+
+### Data compatibility (do not break)
+
+- Same `localStorage` keys as before: `truecopy_phase1_settings_v1` (settings; `activeSigId` is the selected signature), `truecopy_saved_signatures_v1` (array `{id,name,rawDataUrl,cleanDataUrl,threshold,tintSignature,createdAt}` or the AES-GCM vault `{encrypted:true,iv,ct}` when a PIN is set), `truecopy_saved_templates_v1` (flat template objects), `truecopy_default_template_id_v1`, `truecopy_history_v1`, `truecopy_security_v1`, `truecopy_lockout_until_v1`, `truecopy_theme_v1`, `truecopy_lang_v1`. New: `truecopy_ui_v2` (tab, panel ratio, app style, ink accent, export options, last share target) and `truecopy_migration_v2`.
+- Firestore payloads are whitelisted by the Firebase module (`toTemplatePayload` etc.), so new local-only fields (`showPageNo`, history `purpose/org/templateLine`) never reach the cloud; the Firestore rules were not changed.
+- `cleanDataUrl` is now stored untinted; the ink colour is applied when the stamp is drawn.
+
+### Sharing (what is real)
+
+LINE, email, OneDrive and "other apps" all open the **device share sheet** (`navigator.share({ files })`) with the PDF and the message attached; the user taps the app there (a web page cannot pick the target app itself). Without file sharing (most desktop browsers) the file downloads and the sheet explains how to attach it (email also gets a `mailto:` button). **Direct OneDrive upload is not implemented**: it would need Microsoft sign-in (MSAL) and a free Azure app registration; ask the user before setting that up.
+
+### How it was tested
+
+A local test copy of the app with `window.TrueCopyCloud` replaced by an in-memory stand-in (same function names; never deployed) was used to run the real code: old-format data carry-over, PDF + image upload, flatten on/off output (page sizes incl. a /Rotate 90 page, blue ink present, vector text kept when flatten is off), combine into one PDF, Edit PDF rotate/annotate/export (bank and original quality), PIN set → vault encrypted → lock → wrong PIN → unlock, reload → account PIN unlock, draw signature, save template, sign out & wipe → sign in → cloud restore, share sheet (native and download fallback). Real Google sign-in and real Firestore were **not** exercised before deploy. The module is unchanged, but the first real sign-in after deploy is the live check. Not yet verified on a physical iPhone/iPad (watch the on-screen keyboard behaviour while typing in the tool panel).
+
+Note: pdf.js draws pages using animation frames, so in a hidden/background tab rendering and PDF creation pause until the tab is visible again (same as the previous version).

@@ -1,0 +1,833 @@
+<title>TrueCopy Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Niramit:wght@400;600;700&family=Sarabun:wght@400;600;700&display=swap">
+<style>
+/*__FONTS__*/
+/*__STYLES__*/
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-stamp" viewBox="0 0 24 24"><path d="M9.5 3h5v4.5c0 1 .4 1.9 1.1 2.6L18 12.5H6l2.4-2.4c.7-.7 1.1-1.6 1.1-2.6z"/><path d="M5 12.5h14V17H5zM5 20.5h14"/></symbol>
+  <symbol id="i-fileedit" viewBox="0 0 24 24"><path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M13.5 3 19 8.5M13.5 3v5.5H19M19 8.5V11"/><path d="m13 21 .8-3.2 5.4-5.4a1.6 1.6 0 0 1 2.3 2.3l-5.4 5.4z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-library" viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 3v8l2.5-1.6L14 11V3"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.6A8.3 8.3 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10.5" rx="2.2"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/></symbol>
+  <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10.5" rx="2.2"/><path d="M8 10.5V7.8a4 4 0 0 1 7.7-1.5"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+  <symbol id="i-files" viewBox="0 0 24 24"><path d="M15 3H9a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7z"/><path d="M15 3v4h4M4 8v11a2 2 0 0 0 2 2h9"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-type" viewBox="0 0 24 24"><path d="M5 7V5h14v2M12 5v14M9 19h6"/></symbol>
+  <symbol id="i-sign" viewBox="0 0 24 24"><path d="M3 17c2.6 0 3.6-7.5 6.2-7.5 1.9 0 .4 6.5 3 6.5 1.6 0 2.1-3 3.6-3 1.2 0 1.5 1.6 3.7 1.6"/><path d="M3 21h18"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 19.5 6v5.6c0 4.4-3.1 8-7.5 9.4-4.4-1.4-7.5-5-7.5-9.4V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10.5V4.5a1.5 1.5 0 0 1 3 0v6M14 10.5V6a1.5 1.5 0 0 1 3 0v8a7 7 0 0 1-7 7h-.4a6 6 0 0 1-4.7-2.3l-1.4-1.8a1.5 1.5 0 0 1 2.3-1.9L8 15.3"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="m14 7 3 3"/></symbol>
+  <symbol id="i-marker" viewBox="0 0 24 24"><path d="m15 4 5 5-8.5 8.5H7v-4.5z"/><path d="M4 21h9"/></symbol>
+  <symbol id="i-line" viewBox="0 0 24 24"><path d="M5 19 19 5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M10 5h9v9"/></symbol>
+  <symbol id="i-square" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/></symbol>
+  <symbol id="i-circle" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8.5" ry="7.5"/></symbol>
+  <symbol id="i-mosaic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/><path d="M13 4h7v7h-7zM4 13h7v7H4z" opacity=".45"/></symbol>
+  <symbol id="i-pointer" viewBox="0 0 24 24"><path d="m5 3 14 7-6.2 1.8L11 18z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.6 1.5 3.75 3.75 0 0 1-.5 7.5z"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.8"/><circle cx="6" cy="18" r="2.8"/><path d="M8.3 7.7 20 19M8.3 16.3 20 5"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4.5" rx="1"/><path d="M5 8.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5M10 12.5h4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 4 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 4a2 2 0 0 0-3.4 0z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-slash" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-bold" viewBox="0 0 24 24"><path d="M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10 3 8 21M16 3l-2 18"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></symbol>
+  <symbol id="i-listcheck" viewBox="0 0 24 24"><path d="M4 6h11M4 12h9M4 18h6M15 17l2.2 2.2L21.5 15"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M12 8v6M9.5 11.5 12 14l2.5-2.5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7L20 8.5"/><path d="M20 3.5v5h-5"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l2.5 2.5M15 8l2 2"/></symbol>
+  <symbol id="i-font" viewBox="0 0 24 24"><path d="M4 20 10 4h1l6 16M6.5 14h8"/><path d="M17 20h4"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 4c4.97 0 9 3.13 9 7s-4.03 7-9 7c-.9 0-1.77-.1-2.6-.3L5 20l1.1-3.6C4.2 15.1 3 13.2 3 11c0-3.87 4.03-7 9-7z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-backspace" viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m12.5 9.5 5 5M17.5 9.5l-5 5"/></symbol>
+</svg>
+
+<div id="app" class="app" data-view="certify">
+
+  <!-- ===================== NAVIGATION (rail on wide screens, drawer on phones) ===================== -->
+  <nav id="nav" class="nav" aria-label="เมนูหลัก" data-en-title="Main menu">
+    <div class="nav-brand">
+      <span class="mark" aria-hidden="true">TC</span>
+      <span class="nav-brand-text"><b>TrueCopy</b><small data-en="Certified true copy">รับรองสำเนาถูกต้อง</small></span>
+      <button class="icon-btn nav-close only-drawer" type="button" data-action="close-nav" aria-label="ปิดเมนู" data-en-title="Close menu"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <span class="badge badge-warn proto-pill" data-en="Prototype">ต้นแบบ</span>
+    <div class="nav-items">
+      <a class="nav-item" href="#certify" data-nav="certify"><svg class="i"><use href="#i-stamp"/></svg><span class="nav-text"><span class="nav-label" data-en="Certify">รับรองสำเนา</span><span class="nav-desc" data-en="Stamp and sign every page">ประทับตราและลายเซ็นทุกหน้า</span></span></a>
+      <a class="nav-item" href="#edit-pdf" data-nav="edit-pdf"><svg class="i"><use href="#i-fileedit"/></svg><span class="nav-text"><span class="nav-label" data-en="Edit PDF">แก้ไข PDF</span><span class="nav-desc" data-en="Merge, reorder, draw, blur">รวม จัดเรียง วาด เบลอ</span></span><span class="badge nav-count tnum" id="navEdCount">0</span></a>
+      <a class="nav-item" href="#history" data-nav="history"><svg class="i"><use href="#i-history"/></svg><span class="nav-text"><span class="nav-label" data-en="History">ประวัติ</span><span class="nav-desc" data-en="What you certified, and when">เอกสารที่เคยรับรองแล้ว</span></span><span class="badge nav-count tnum" id="navHistCount">0</span></a>
+      <a class="nav-item" href="#library" data-nav="library"><svg class="i"><use href="#i-library"/></svg><span class="nav-text"><span class="nav-label" data-en="Library">คลัง</span><span class="nav-desc" data-en="Templates and signatures">เทมเพลตและลายเซ็น</span></span></a>
+      <a class="nav-item" href="#preferences" data-nav="preferences"><svg class="i"><use href="#i-sliders"/></svg><span class="nav-text"><span class="nav-label" data-en="Settings">ตั้งค่า</span><span class="nav-desc" data-en="Account, PIN, language, theme">บัญชี PIN ภาษา ธีม</span></span></a>
+    </div>
+    <div class="nav-foot">
+      <button class="nav-item" type="button" data-action="toggle-lang"><svg class="i"><use href="#i-globe"/></svg><span class="nav-text"><span class="nav-label" id="navLangLabel">English</span><span class="nav-desc" data-en="Switch interface language">สลับภาษาของแอป</span></span></button>
+      <button class="nav-item" type="button" data-action="toggle-theme"><svg class="i" id="navThemeIcon"><use href="#i-moon"/></svg><span class="nav-text"><span class="nav-label" id="navThemeLabel">โหมดมืด</span><span class="nav-desc" data-en="Light or dark">สว่างหรือมืด</span></span></button>
+      <button class="nav-item" type="button" data-action="lock-now"><svg class="i"><use href="#i-lock"/></svg><span class="nav-text"><span class="nav-label" data-en="Lock">ล็อก</span><span class="nav-desc" data-en="Ctrl + Shift + L">Ctrl + Shift + L</span></span></button>
+      <a class="nav-item" href="#preferences" data-nav-account><span class="avatar" aria-hidden="true">G</span><span class="nav-text"><span class="nav-label" id="navAccountLabel" data-en="Synced">ซิงก์แล้ว</span><span class="nav-desc" data-en="Google account">บัญชี Google</span></span></a>
+    </div>
+  </nav>
+  <div class="scrim" data-action="close-nav"></div>
+
+  <main class="main">
+
+    <!-- ===================== CERTIFY ===================== -->
+    <section class="view view-certify" id="viewCertify" aria-label="รับรองสำเนา">
+      <header class="vhead">
+        <button class="icon-btn only-drawer" type="button" data-action="open-nav" aria-label="เมนู" data-en-title="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div class="vhead-title">
+          <h1 data-en="Certify copies">รับรองสำเนา</h1>
+          <p id="certSummary">—</p>
+        </div>
+        <div class="vhead-actions">
+          <button class="icon-btn" type="button" id="btnUndo" aria-label="ย้อนกลับ" data-en-title="Undo" title="ย้อนกลับ (Ctrl+Z)" disabled><svg class="i"><use href="#i-undo"/></svg></button>
+          <button class="icon-btn hide-xs" type="button" id="btnRedo" aria-label="ทำซ้ำ" data-en-title="Redo" title="ทำซ้ำ (Ctrl+Y)" disabled><svg class="i"><use href="#i-redo"/></svg></button>
+          <button class="btn btn-primary" type="button" id="btnGenerate"><svg class="i" id="genIcon"><use href="#i-stamp"/></svg><span id="genLabel">สร้าง PDF</span></button>
+        </div>
+      </header>
+
+      <div class="stage fit" id="stage">
+        <div class="stage-scroll" id="stageScroll">
+          <div class="paper" id="paper">
+            <canvas id="pv" aria-label="ตัวอย่างเอกสารพร้อมตราประทับ"></canvas>
+            <div class="stamp-box" id="stampBox" tabindex="0" role="application" aria-label="ตราประทับ ลากเพื่อย้าย ใช้ปุ่มลูกศรเพื่อเลื่อน" hidden>
+              <button class="h h-rot" type="button" tabindex="-1" aria-label="หมุน"><svg class="i"><use href="#i-rotate"/></svg></button>
+              <button class="h h-size" type="button" tabindex="-1" aria-label="ย่อขยาย"><svg class="i"><use href="#i-fit"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="ov ov-tl">
+          <div class="seg-mini glass" role="group" aria-label="ขอบเขตการปรับตำแหน่ง">
+            <button type="button" data-scope="all" aria-pressed="true"><svg class="i i-sm"><use href="#i-layers"/></svg><span data-en="All pages">ทุกหน้า</span></button>
+            <button type="button" data-scope="page" aria-pressed="false"><svg class="i i-sm"><use href="#i-file"/></svg><span data-en="This page">หน้านี้</span></button>
+          </div>
+        </div>
+        <div class="ov ov-tr">
+          <button class="ov-btn" type="button" id="btnCompare" aria-label="กดค้างเพื่อดูต้นฉบับ" data-en-title="Hold to see the original" title="กดค้างเพื่อดูต้นฉบับ"><svg class="i"><use href="#i-eye"/></svg></button>
+          <button class="ov-btn" type="button" id="btnHandles" aria-pressed="true" aria-label="กรอบจับหมุนและย่อขยาย" data-en-title="Move/rotate handles" title="กรอบจับหมุนและย่อขยาย"><svg class="i"><use href="#i-hand"/></svg></button>
+          <button class="ov-btn ov-zoom" type="button" id="btnZoom" aria-label="ซูม" data-en-title="Zoom" title="ซูม"><svg class="i i-sm"><use href="#i-zoom"/></svg><span id="zoomLabel">พอดี</span></button>
+        </div>
+        <div class="ov ov-ml"><button class="ov-btn" type="button" id="btnPrev" aria-label="หน้าก่อนหน้า" data-en-title="Previous page"><svg class="i"><use href="#i-left"/></svg></button></div>
+        <div class="ov ov-mr"><button class="ov-btn" type="button" id="btnNext" aria-label="หน้าถัดไป" data-en-title="Next page"><svg class="i"><use href="#i-right"/></svg></button></div>
+        <div class="ov ov-bc"><div class="page-pill glass" id="pagePill">—</div></div>
+        <div class="ov ov-banner" id="exclBanner" hidden>
+          <div class="glass"><svg class="i i-sm"><use href="#i-slash"/></svg><span data-en="This page is removed from the output">หน้านี้ถูกนำออกจากไฟล์ผลลัพธ์</span><button class="btn btn-sm btn-primary" type="button" data-action="toggle-exclude"><span data-en="Restore">กู้คืน</span></button></div>
+        </div>
+        <div class="hud" id="hud"></div>
+        <div class="empty" id="emptyState" hidden>
+          <div class="empty-card">
+            <span class="mark" aria-hidden="true">TC</span>
+            <h2 data-en="Add a document to start">เพิ่มเอกสารเพื่อเริ่มต้น</h2>
+            <p data-en="PDF (including password-protected), JPG or PNG. Files stay on this device.">PDF (รวมไฟล์ที่มีรหัสผ่าน) JPG หรือ PNG ไฟล์ไม่ถูกส่งออกจากเครื่องนี้</p>
+            <div class="btn-row" style="width:100%">
+              <button class="btn btn-primary" type="button" data-action="pick-files"><svg class="i"><use href="#i-plus"/></svg><span data-en="Choose files">เลือกไฟล์</span></button>
+              <button class="btn" type="button" data-action="load-samples"><span data-en="Load sample">โหลดตัวอย่าง</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="strip" id="strip" aria-label="หน้าเอกสารทั้งหมด"></div>
+
+      <div class="tooltabs" id="tooltabs" role="tablist" aria-label="เครื่องมือตราประทับ">
+        <button class="grip" type="button" id="grip" aria-label="ลากเพื่อปรับขนาดแผงเครื่องมือ แตะเพื่อย่อหรือขยาย" data-en-title="Drag to resize the tool panel, tap to collapse"></button>
+        <button class="tab" type="button" role="tab" data-tab="docs"><svg class="i"><use href="#i-files"/></svg><span class="tab-label" data-en="Files">เอกสาร</span></button>
+        <button class="tab" type="button" role="tab" data-tab="text" aria-selected="true"><svg class="i"><use href="#i-type"/></svg><span class="tab-label" data-en="Text">ข้อความ</span></button>
+        <button class="tab" type="button" role="tab" data-tab="sign"><svg class="i"><use href="#i-sign"/></svg><span class="tab-label" data-en="Sign">ลายเซ็น</span><span class="tab-dot" id="signDot" hidden></span></button>
+        <button class="tab" type="button" role="tab" data-tab="ink"><svg class="i"><use href="#i-drop"/></svg><span class="tab-label" data-en="Ink">หมึก</span></button>
+        <button class="tab" type="button" role="tab" data-tab="place"><svg class="i"><use href="#i-move"/></svg><span class="tab-label" data-en="Position">ตำแหน่ง</span></button>
+        <button class="tab" type="button" role="tab" data-tab="protect"><svg class="i"><use href="#i-shield"/></svg><span class="tab-label" data-en="Protect">ป้องกัน</span></button>
+      </div>
+
+      <div class="toolpanel" id="toolpanel">
+
+        <!-- Files -->
+        <div class="pane" data-pane="docs" role="tabpanel">
+          <div class="pane-inner">
+            <button class="drop-card span-2" type="button" data-action="pick-files">
+              <span class="drop-ico"><svg class="i i-lg"><use href="#i-upload"/></svg></span>
+              <span class="drop-text"><b data-en="Add documents">เพิ่มเอกสาร</b><small data-en="PDF, JPG, PNG · several at once · drag & drop or paste">PDF, JPG, PNG · หลายไฟล์พร้อมกัน · ลากมาวางหรือวาง (Ctrl+V)</small></span>
+            </button>
+            <div class="btn-row span-2">
+              <button class="btn btn-sm" type="button" data-action="camera"><svg class="i i-sm"><use href="#i-camera"/></svg><span data-en="Photograph a page">ถ่ายรูปเอกสาร</span><span class="new" data-en="New">ใหม่</span></button>
+              <button class="btn btn-sm btn-ghost" type="button" data-action="demo-locked"><svg class="i i-sm"><use href="#i-lock"/></svg><span data-en="Try a locked PDF">ลองไฟล์มีรหัสผ่าน</span></button>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Files in this set">ไฟล์ในชุดนี้</span><span class="badge tnum" id="docsCount">0</span></div>
+              <div class="file-list" id="fileList"></div>
+            </div>
+            <div class="group" id="pageGroup">
+              <div class="group-title"><span data-en="Selected page">หน้าที่เลือก</span></div>
+              <div class="card">
+                <div class="row">
+                  <div class="row-text"><b id="curPageTitle">—</b><small data-en="Removed pages are left out of the certified file. You can restore them any time.">หน้าที่นำออกจะไม่อยู่ในไฟล์ที่รับรอง กู้คืนได้ตลอด</small></div>
+                  <button class="btn btn-sm btn-danger" type="button" data-action="toggle-exclude" id="btnExclude"><span data-en="Remove page">นำหน้านี้ออก</span></button>
+                </div>
+                <button class="btn btn-sm btn-ghost" type="button" data-action="restore-all" id="btnRestoreAll" hidden><svg class="i i-sm"><use href="#i-refresh"/></svg><span data-en="Restore all removed pages">กู้คืนทุกหน้าที่นำออก</span></button>
+              </div>
+            </div>
+            <a class="link-card span-2" href="#edit-pdf"><svg class="i"><use href="#i-fileedit"/></svg><span data-en="Need to merge, reorder, rotate or draw on pages? Open Edit PDF">ต้องการรวม จัดเรียง หมุน หรือวาดบนหน้า? ไปที่แก้ไข PDF</span><svg class="i"><use href="#i-right"/></svg></a>
+          </div>
+        </div>
+
+        <!-- Text -->
+        <div class="pane active" data-pane="text" role="tabpanel">
+          <div class="pane-inner">
+            <div class="group span-2" id="recentGroup">
+              <div class="group-title"><span><span data-en="Recently used">ใช้ล่าสุด</span><span class="new" data-en="New">ใหม่</span></span></div>
+              <div class="chips" id="recentChips"></div>
+            </div>
+            <div class="group span-2">
+              <div class="group-title"><span data-en="Template">เทมเพลต</span><a class="btn btn-sm btn-ghost" href="#library" style="min-height:30px"><span data-en="Manage">จัดการ</span></a></div>
+              <div class="chips" id="tplChips"></div>
+              <div class="card" id="tplSaveForm" hidden>
+                <label class="label" for="inTplName" data-en="Save current look as a template">บันทึกการตั้งค่าปัจจุบันเป็นเทมเพลต</label>
+                <div class="input-row">
+                  <input class="input" id="inTplName" type="text" maxlength="80" placeholder="เช่น Refinance ธนาคาร" data-en-ph="e.g. Bank refinance">
+                  <button class="btn btn-primary" type="button" data-action="tpl-save"><span data-en="Save">บันทึก</span></button>
+                </div>
+                <button class="btn btn-sm btn-ghost" type="button" data-action="tpl-cancel"><span data-en="Cancel">ยกเลิก</span></button>
+              </div>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Restricted-use line">ข้อความจำกัดวัตถุประสงค์</span></div>
+              <div class="field">
+                <label class="label" for="inPurpose"><span data-en="Purpose / transaction">ธุรกรรม / เรื่อง</span><code>{purpose}</code></label>
+                <input class="input" id="inPurpose" type="text" data-s="purpose" list="dlPurpose" placeholder="เช่น Refinance" data-en-ph="e.g. Refinance" autocomplete="off">
+              </div>
+              <div class="field">
+                <label class="label" for="inOrg"><span data-en="Organisation / bank">หน่วยงาน / ธนาคาร</span><code>{org}</code></label>
+                <input class="input" id="inOrg" type="text" data-s="org" list="dlOrg" placeholder="เช่น ธนาคารกรุงไทย" data-en-ph="e.g. Krungthai Bank" autocomplete="off">
+              </div>
+              <div class="resolved" id="resolvedLine" aria-live="polite" style="color:var(--accent-fg)"></div>
+              <details class="details">
+                <summary><svg class="i i-sm"><use href="#i-type"/></svg><span data-en="Edit wording &amp; language">แก้รูปแบบข้อความและภาษา</span><svg class="i i-sm chev"><use href="#i-right"/></svg></summary>
+                <div class="details-body">
+                  <div class="field">
+                    <label class="label" for="inTplLine" data-en="Line pattern">รูปแบบข้อความ</label>
+                    <input class="input" id="inTplLine" type="text" data-s="templateLine" maxlength="400">
+                    <div class="chips wrap">
+                      <button class="chip chip-dashed" type="button" data-insert="{purpose}"><svg class="i i-sm"><use href="#i-plus"/></svg>{purpose}</button>
+                      <button class="chip chip-dashed" type="button" data-insert="{org}"><svg class="i i-sm"><use href="#i-plus"/></svg>{org}</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <span class="label" data-en="Stamp language preset">ชุดข้อความสำเร็จรูป</span>
+                    <div class="seg" id="presetSeg">
+                      <button type="button" data-preset="th" aria-pressed="false">ไทย</button>
+                      <button type="button" data-preset="en" aria-pressed="false">English</button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Certification">ข้อความรับรอง</span></div>
+              <input class="input" id="inCertify" type="text" data-s="certifyText" maxlength="120" aria-label="ข้อความรับรอง">
+              <div class="row">
+                <div class="row-text"><b data-en="Lines above &amp; below">เส้นขีดคร่อมบน-ล่าง</b></div>
+                <input class="switch" type="checkbox" id="chkLines" data-s="showLines" aria-label="เส้นขีดคร่อมบน-ล่าง">
+              </div>
+              <div class="seg" data-s="lineStyle" data-show-if="showLines">
+                <button type="button" data-v="dashed"><span data-en="Dashed - - -">เส้นประ - - -</span></button>
+                <button type="button" data-v="solid"><span data-en="Solid ───">เส้นทึบ ───</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signature -->
+        <div class="pane" data-pane="sign" role="tabpanel">
+          <div class="pane-inner">
+            <div class="group span-2">
+              <div class="group-title"><span data-en="Signature">ลายเซ็น</span><span class="badge" id="sigSyncNote" data-en="Synced">ซิงก์แล้ว</span></div>
+              <div class="sig-row" id="sigRow"></div>
+            </div>
+            <div class="group" id="sigAdjust">
+              <div class="group-title"><span data-en="Adjust signature">ปรับลายเซ็น</span></div>
+              <div class="range-field" id="thresholdField">
+                <div class="range-head"><label class="label" for="rgThreshold" data-en="Remove white background">ลบพื้นหลังสีขาว</label><output class="val" data-out="sigThreshold" data-fmt="raw"></output></div>
+                <input type="range" id="rgThreshold" min="100" max="245" step="1" data-s="sigThreshold">
+              </div>
+              <div class="range-field">
+                <div class="range-head"><label class="label" for="rgSigScale" data-en="Signature size">ขนาดลายเซ็น</label><output class="val" data-out="sigScale" data-fmt="pct"></output></div>
+                <input type="range" id="rgSigScale" min="40" max="180" step="5" data-scale="100" data-s="sigScale">
+              </div>
+              <div class="row">
+                <div class="row-text"><b data-en="Match stamp ink colour">ใช้สีเดียวกับหมึกตราประทับ</b></div>
+                <input class="switch" type="checkbox" id="chkTint" data-s="tintSignature" aria-label="ใช้สีเดียวกับหมึก">
+              </div>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Under the signature">ใต้ลายเซ็น</span></div>
+              <div class="row">
+                <div class="row-text"><b data-en="Printed name in brackets">ชื่อ-นามสกุลในวงเล็บ</b></div>
+                <input class="switch" type="checkbox" id="chkSigner" data-s="showSignerName" aria-label="แสดงชื่อ">
+              </div>
+              <input class="input" id="inSigner" type="text" data-s="signerName" data-show-if="showSignerName" maxlength="80" placeholder="เช่น นายสมชาย ใจดี" data-en-ph="e.g. Somchai Jaidee">
+              <hr class="divider">
+              <div class="row">
+                <div class="row-text"><b><svg class="i i-sm"><use href="#i-calendar"/></svg><span data-en="Certification date">วันที่รับรอง</span></b></div>
+                <input class="switch" type="checkbox" id="chkDate" data-s="showDate" aria-label="แสดงวันที่">
+              </div>
+              <div class="card" data-show-if="showDate">
+                <div class="input-row">
+                  <input class="input" id="inDate" type="date" data-s="dateValue" aria-label="วันที่">
+                  <button class="btn btn-sm" type="button" data-action="date-today"><span data-en="Today">วันนี้</span></button>
+                </div>
+                <div class="seg" data-s="dateEra">
+                  <button type="button" data-v="BE"><span data-en="B.E. (Thai)">พ.ศ.</span></button>
+                  <button type="button" data-v="CE"><span data-en="A.D.">ค.ศ.</span></button>
+                </div>
+                <select class="select" id="selDateFmt" data-s="dateFormat" aria-label="รูปแบบวันที่">
+                  <option value="long" data-en="Full (19 November 2026)">เต็ม (19 พฤศจิกายน พ.ศ. 2569)</option>
+                  <option value="short" data-en="Short (19 Nov 2026)">ย่อ (19 พ.ย. 2569)</option>
+                  <option value="numeric" data-en="Numbers (19/11/2026)">ตัวเลข (19/11/2569)</option>
+                </select>
+                <div class="row">
+                  <div class="row-text"><b data-en="Thai digits (๐-๙)">ตัวเลขไทย (๐-๙)</b></div>
+                  <input class="switch" type="checkbox" id="chkThaiDigits" data-s="useThaiDigits" aria-label="ตัวเลขไทย">
+                </div>
+                <div class="resolved" id="datePreview" style="font-size:15px;color:var(--accent-fg)"></div>
+              </div>
+              <hr class="divider">
+              <div class="row">
+                <div class="row-text"><b><svg class="i i-sm"><use href="#i-hash"/></svg><span data-en="Page number on stamp">เลขหน้าบนตรา</span><span class="new" data-en="New">ใหม่</span></b><small data-en="Adds “Page 1/5” so pages can’t be swapped or dropped unnoticed.">เพิ่ม “หน้า 1/5” ป้องกันการสลับหรือดึงหน้าออก</small></div>
+                <input class="switch" type="checkbox" id="chkPageNo" data-s="showPageNo" aria-label="เลขหน้าบนตรา">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ink -->
+        <div class="pane" data-pane="ink" role="tabpanel">
+          <div class="pane-inner">
+            <div class="group">
+              <div class="group-title"><span data-en="Ink colour">สีหมึก</span><span class="hex" data-out="color" data-fmt="raw"></span></div>
+              <div class="swatches" id="swatches">
+                <button class="swatch" type="button" data-color="#0D33BF" style="background:#0D33BF" aria-label="น้ำเงินปากกา" data-en-title="Ballpoint blue"></button>
+                <button class="swatch" type="button" data-color="#1D4ED8" style="background:#1D4ED8" aria-label="น้ำเงินสว่าง" data-en-title="Bright blue"></button>
+                <button class="swatch" type="button" data-color="#0F172A" style="background:#0F172A" aria-label="ดำ" data-en-title="Black"></button>
+                <button class="swatch" type="button" data-color="#B91C1C" style="background:#B91C1C" aria-label="แดงประทับตรา" data-en-title="Stamp red"></button>
+                <label class="color-pick" title="เลือกสีเอง"><svg class="i i-sm"><use href="#i-plus"/></svg><input type="color" id="inColor" data-s="color" aria-label="เลือกสีเอง"></label>
+              </div>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Thai font">ฟอนต์</span><button class="btn btn-sm btn-ghost" type="button" data-action="pick-font" style="min-height:30px"><svg class="i i-sm"><use href="#i-upload"/></svg><span data-en="Upload .ttf">อัปโหลด .ttf</span></button></div>
+              <div class="font-cards" id="fontCards"></div>
+              <div class="seg" data-s="fontWeight">
+                <button type="button" data-v="400"><span data-en="Regular">ปกติ</span></button>
+                <button type="button" data-v="600"><span data-en="Semi-bold">กึ่งหนา</span></button>
+                <button type="button" data-v="700"><span data-en="Bold">หนา</span></button>
+              </div>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Size &amp; strength">ขนาดและความเข้ม</span></div>
+              <div class="range-field">
+                <div class="range-head"><label class="label" for="rgFontSize" data-en="Text size">ขนาดตัวอักษร</label><output class="val" data-out="fontSize" data-fmt="pt"></output></div>
+                <input type="range" id="rgFontSize" min="16" max="42" step="1" data-s="fontSize">
+              </div>
+              <div class="range-field">
+                <div class="range-head"><label class="label" for="rgOpacity" data-en="Ink opacity">ความเข้มหมึก</label><output class="val" data-out="opacity" data-fmt="pct"></output></div>
+                <input type="range" id="rgOpacity" min="20" max="100" step="1" data-scale="100" data-s="opacity">
+              </div>
+              <div class="row">
+                <div class="row-text"><b data-en="Real Ink (multiply)">หมึกซึมกระดาษ (Real Ink)</b><small data-en="Numbers under the stamp stay readable.">ตัวเลขใต้ตรายังอ่านได้ชัด</small></div>
+                <input class="switch" type="checkbox" id="chkMultiply" data-s="multiplyInk" aria-label="Real Ink">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Position -->
+        <div class="pane" data-pane="place" role="tabpanel">
+          <div class="pane-inner">
+            <div class="group span-2">
+              <div class="seg" role="group" aria-label="ขอบเขต">
+                <button type="button" data-scope="all" aria-pressed="true"><svg class="i i-sm"><use href="#i-layers"/></svg><span data-en="All pages">ปรับทุกหน้า</span></button>
+                <button type="button" data-scope="page" aria-pressed="false"><svg class="i i-sm"><use href="#i-file"/></svg><span data-en="This page only">เฉพาะหน้านี้</span></button>
+              </div>
+              <div class="status-note" id="scopeNote">
+                <span id="scopeText">—</span>
+                <button class="btn btn-sm" type="button" data-action="reset-page" id="btnResetPage" hidden><span data-en="Reset this page">รีเซ็ตหน้านี้</span></button>
+                <button class="btn btn-sm btn-soft" type="button" data-action="apply-all" id="btnApplyAll" hidden><span data-en="Use on all pages">ใช้กับทุกหน้า</span></button>
+              </div>
+            </div>
+            <div class="group">
+              <div class="group-title"><span><span data-en="Quick position">ตำแหน่งด่วน</span><span class="new" data-en="New">ใหม่</span></span></div>
+              <div class="pos-wrap">
+                <div class="pos-grid" id="posGrid" role="group" aria-label="ตำแหน่งด่วน">
+                  <button type="button" data-pos="0.3,0.18" aria-label="บนซ้าย"></button><button type="button" data-pos="0.5,0.18" aria-label="บนกลาง"></button><button type="button" data-pos="0.7,0.18" aria-label="บนขวา"></button>
+                  <button type="button" data-pos="0.3,0.5" aria-label="กลางซ้าย"></button><button type="button" data-pos="0.5,0.5" aria-label="กึ่งกลาง"></button><button type="button" data-pos="0.7,0.5" aria-label="กลางขวา"></button>
+                  <button type="button" data-pos="0.3,0.82" aria-label="ล่างซ้าย"></button><button type="button" data-pos="0.5,0.82" aria-label="ล่างกลาง"></button><button type="button" data-pos="0.7,0.82" aria-label="ล่างขวา"></button>
+                </div>
+                <div class="pos-side">
+                  <span class="label" data-en="Angle presets">องศาสำเร็จรูป</span>
+                  <div class="chips wrap" id="angleChips">
+                    <button class="chip" type="button" data-angle="0">0°</button>
+                    <button class="chip" type="button" data-angle="35">35°</button>
+                    <button class="chip" type="button" data-angle="-35">−35°</button>
+                    <button class="chip" type="button" data-angle="90">90°</button>
+                  </div>
+                  <p class="hint" data-en="Tip: drag the stamp on the page. Use two fingers to resize and rotate.">เคล็ดลับ: ลากตราบนหน้าเอกสารได้เลย ใช้ 2 นิ้วเพื่อย่อขยายและหมุน</p>
+                </div>
+              </div>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Fine tune">ปรับละเอียด</span></div>
+              <div class="range-field">
+                <div class="range-head"><label class="label" for="rgAngle" data-en="Angle">องศา</label><output class="val" data-out-p="angle" data-fmt="deg"></output></div>
+                <input type="range" id="rgAngle" min="-90" max="90" step="1" data-p="angle">
+              </div>
+              <div class="range-field">
+                <div class="range-head"><label class="label" for="rgScale" data-en="Stamp width vs page">ความกว้างเทียบหน้า</label><output class="val" data-out-p="stampScale" data-fmt="pct"></output></div>
+                <input type="range" id="rgScale" min="30" max="115" step="1" data-scale="100" data-p="stampScale">
+              </div>
+              <div class="grid-2">
+                <div class="range-field">
+                  <div class="range-head"><label class="label" for="rgX" data-en="Horizontal">แนวนอน</label><output class="val" data-out-p="posX" data-fmt="pct"></output></div>
+                  <input type="range" id="rgX" min="2" max="98" step="1" data-scale="100" data-p="posX">
+                </div>
+                <div class="range-field">
+                  <div class="range-head"><label class="label" for="rgY" data-en="Vertical">แนวตั้ง</label><output class="val" data-out-p="posY" data-fmt="pct"></output></div>
+                  <input type="range" id="rgY" min="2" max="98" step="1" data-scale="100" data-p="posY">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Protect -->
+        <div class="pane" data-pane="protect" role="tabpanel">
+          <div class="pane-inner">
+            <div class="group">
+              <div class="group-title"><span data-en="Tamper protection">ป้องกันการแก้ไข</span></div>
+              <div class="card">
+                <div class="row">
+                  <div class="row-text"><b><span data-en="Flatten stamp into the page">รวมตราเป็นเนื้อเดียวกับหน้า (Flatten)</span><span class="badge badge-ok" data-en="Recommended">แนะนำ</span></b><small data-en="Stops anyone removing the stamp or lifting your signature in a PDF editor. Locked PDFs and photos are always flattened.">กันการลบตราหรือดึงลายเซ็นไปใช้ ไฟล์มีรหัสผ่านและรูปภาพจะ Flatten เสมอ</small></div>
+                  <input class="switch" type="checkbox" id="chkFlatten" data-s="flatten" aria-label="Flatten">
+                </div>
+              </div>
+            </div>
+            <div class="group">
+              <div class="group-title"><span data-en="Anti-forgery watermark">ลายน้ำกันปลอมแปลง</span></div>
+              <div class="card">
+                <div class="row">
+                  <div class="row-text"><b data-en="Faint diagonal text across the page">ข้อความจางเฉียงทั่วทั้งหน้า</b></div>
+                  <input class="switch" type="checkbox" id="chkWm" data-s="watermarkEnabled" aria-label="ลายน้ำ">
+                </div>
+                <div class="field" data-show-if="watermarkEnabled">
+                  <label class="label" for="inWm" data-en="Watermark text">ข้อความลายน้ำ</label>
+                  <input class="input" id="inWm" type="text" data-s="watermarkText" maxlength="200" placeholder="เว้นว่าง = ใช้ข้อความวัตถุประสงค์ + วันที่" data-en-ph="Blank = purpose line + date">
+                </div>
+                <div class="range-field" data-show-if="watermarkEnabled">
+                  <div class="range-head"><label class="label" for="rgWm" data-en="Watermark strength">ความเข้มลายน้ำ</label><output class="val" data-out="watermarkOpacity" data-fmt="pct"></output></div>
+                  <input type="range" id="rgWm" min="4" max="30" step="1" data-scale="100" data-s="watermarkOpacity">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== EDIT PDF ===================== -->
+    <section class="view view-editor" id="viewEditor" aria-label="แก้ไข PDF">
+      <header class="vhead">
+        <button class="icon-btn only-drawer" type="button" data-action="open-nav" aria-label="เมนู" data-en-title="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div class="vhead-title"><h1 data-en="Edit PDF">แก้ไข PDF</h1><p id="edSummary">—</p></div>
+        <div class="vhead-actions">
+          <button class="icon-btn" type="button" id="btnEdUndo" aria-label="ย้อนกลับ" data-en-title="Undo" disabled><svg class="i"><use href="#i-undo"/></svg></button>
+          <button class="btn btn-primary only-mobile-export" type="button" data-action="ed-open-export"><svg class="i"><use href="#i-download"/></svg><span data-en="Save PDF">บันทึก PDF</span></button>
+        </div>
+      </header>
+      <div class="etool">
+        <button class="btn btn-sm btn-primary" type="button" data-action="ed-add"><svg class="i i-sm"><use href="#i-plus"/></svg><span data-en="Add files">เพิ่มไฟล์</span></button>
+        <button class="btn btn-sm" type="button" data-action="ed-import"><svg class="i i-sm"><use href="#i-stamp"/></svg><span data-en="From Certify">ดึงจากหน้ารับรอง</span></button>
+        <span class="spacer"></span>
+        <button class="btn btn-sm btn-ghost" type="button" data-action="ed-select-all" id="btnEdSelAll"><span data-en="Select all">เลือกทั้งหมด</span></button>
+        <button class="btn btn-sm btn-ghost" type="button" data-action="ed-range-toggle"><svg class="i i-sm"><use href="#i-hash"/></svg><span data-en="By page no.">ตามเลขหน้า</span></button>
+        <div class="range-pop" id="rangePop" hidden>
+          <input class="input" id="inRange" type="text" inputmode="numeric" placeholder="เช่น 1, 3-5, 8" data-en-ph="e.g. 1, 3-5, 8" aria-label="ช่วงหน้า">
+          <button class="btn btn-soft" type="button" data-action="ed-range-apply"><span data-en="Select">เลือก</span></button>
+        </div>
+      </div>
+      <div class="board-wrap" id="boardWrap">
+        <div class="board" id="board"></div>
+        <div class="empty" id="edEmpty" hidden>
+          <div class="empty-card">
+            <svg class="i i-lg" style="color:var(--accent-fg)"><use href="#i-fileedit"/></svg>
+            <h2 data-en="Nothing on the board yet">ยังไม่มีหน้าเอกสาร</h2>
+            <p data-en="Add PDFs or photos to merge, reorder, rotate, split, draw on or blur.">เพิ่ม PDF หรือรูปภาพเพื่อรวม จัดเรียง หมุน แยก วาด หรือเบลอ</p>
+            <button class="btn btn-primary" type="button" data-action="ed-add"><svg class="i"><use href="#i-plus"/></svg><span data-en="Add files">เพิ่มไฟล์</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="ebar" id="ebar"></div>
+      <aside class="eside" id="eside" aria-label="ส่งออก">
+        <div class="eside-inner" id="esideInner"></div>
+      </aside>
+    </section>
+
+    <!-- ===================== HISTORY ===================== -->
+    <section class="view view-history" aria-label="ประวัติ">
+      <header class="vhead">
+        <button class="icon-btn only-drawer" type="button" data-action="open-nav" aria-label="เมนู" data-en-title="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div class="vhead-title"><h1 data-en="Certification history">ประวัติการรับรองสำเนา</h1><p data-en="Only file names, purpose and time are kept. Originals never leave this device.">เก็บเฉพาะชื่อไฟล์ วัตถุประสงค์ และเวลา เอกสารต้นฉบับไม่ถูกอัปโหลด</p></div>
+      </header>
+      <div class="page">
+        <div class="page-inner">
+          <div class="input-row">
+            <input class="input" id="inHistSearch" type="search" placeholder="ค้นหาชื่อไฟล์ วัตถุประสงค์ หรือธนาคาร" data-en-ph="Search file, purpose or bank" aria-label="ค้นหา">
+            <button class="btn btn-danger" type="button" data-action="hist-clear"><span data-en="Clear all">ล้างทั้งหมด</span></button>
+          </div>
+          <div class="list" id="histList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LIBRARY ===================== -->
+    <section class="view view-library" aria-label="คลัง">
+      <header class="vhead">
+        <button class="icon-btn only-drawer" type="button" data-action="open-nav" aria-label="เมนู" data-en-title="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div class="vhead-title"><h1 data-en="Library">คลังเทมเพลตและลายเซ็น</h1><p data-en="Synced across your devices with Google sign-in">ซิงก์ข้ามอุปกรณ์ด้วยบัญชี Google</p></div>
+      </header>
+      <div class="page">
+        <div class="page-inner">
+          <div class="seg" id="libSeg" style="max-width:420px">
+            <button type="button" data-lib="tpl" aria-pressed="true"><svg class="i i-sm"><use href="#i-stamp"/></svg><span data-en="Templates">เทมเพลต</span></button>
+            <button type="button" data-lib="sig" aria-pressed="false"><svg class="i i-sm"><use href="#i-sign"/></svg><span data-en="Signatures">ลายเซ็น</span></button>
+          </div>
+          <div id="libTpl" class="group">
+            <div class="card">
+              <label class="label" for="inLibTplName" data-en="Save the current stamp settings as a template">บันทึกการตั้งค่าตราปัจจุบันเป็นเทมเพลต</label>
+              <div class="input-row">
+                <input class="input" id="inLibTplName" type="text" maxlength="80" placeholder="ตั้งชื่อ เช่น Refinance ธนาคารกรุงไทย" data-en-ph="Name, e.g. Krungthai refinance">
+                <button class="btn btn-primary" type="button" data-action="lib-tpl-save"><svg class="i i-sm"><use href="#i-plus"/></svg><span data-en="Save">บันทึก</span></button>
+              </div>
+            </div>
+            <div class="tpl-grid" id="tplGrid"></div>
+          </div>
+          <div id="libSig" class="group" hidden>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button" data-action="sig-draw"><svg class="i i-sm"><use href="#i-pencil"/></svg><span data-en="Draw a signature">เซ็นบนหน้าจอ</span></button>
+              <button class="btn" type="button" data-action="sig-upload"><svg class="i i-sm"><use href="#i-camera"/></svg><span data-en="Upload or photograph">อัปโหลด / ถ่ายรูป</span></button>
+            </div>
+            <div class="sig-grid" id="sigGrid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section class="view view-prefs" aria-label="ตั้งค่า">
+      <header class="vhead">
+        <button class="icon-btn only-drawer" type="button" data-action="open-nav" aria-label="เมนู" data-en-title="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div class="vhead-title"><h1 data-en="Settings">ตั้งค่า</h1><p data-en="Account, security and appearance">บัญชี ความปลอดภัย และการแสดงผล</p></div>
+      </header>
+      <div class="page">
+        <div class="page-inner" id="prefsInner">
+          <div class="set-group">
+            <h2 data-en="Account">บัญชี</h2>
+            <div class="set-card">
+              <div class="set-row">
+                <span class="avatar" aria-hidden="true" style="width:40px;height:40px;font-size:16px">G</span>
+                <div class="row-text"><b id="accTitle" data-en="Signed in with Google">เข้าสู่ระบบด้วย Google แล้ว</b><small id="accSub" data-en="Signatures, templates and history sync across devices">ลายเซ็น เทมเพลต และประวัติซิงก์ข้ามอุปกรณ์</small></div>
+                <button class="btn btn-sm" type="button" data-action="acc-toggle" id="btnAcc"><svg class="i i-sm"><use href="#i-logout"/></svg><span data-en="Sign out">ออกจากระบบ</span></button>
+              </div>
+              <div class="set-row">
+                <span class="share-ico t-drive" aria-hidden="true" style="width:40px;height:40px;border-radius:12px"><svg class="i"><use href="#i-cloud"/></svg></span>
+                <div class="row-text"><b>OneDrive <span class="new" data-en="New">ใหม่</span></b><small id="odStatus"></small></div>
+                <button class="btn btn-sm" type="button" data-action="od-toggle" id="btnOd"></button>
+              </div>
+            </div>
+          </div>
+          <div class="set-group">
+            <h2 data-en="Security">ความปลอดภัย</h2>
+            <div class="set-card">
+              <div class="sec-banner" id="secBanner"></div>
+              <div class="set-row stack" id="pinForm" hidden>
+                <div class="field" id="pinCurWrap"><label class="label" for="inPinCur" data-en="Current PIN">PIN ปัจจุบัน</label><input class="input" id="inPinCur" type="password" inputmode="numeric" maxlength="12" autocomplete="off"></div>
+                <div class="grid-2">
+                  <div class="field"><label class="label" for="inPinNew" data-en="New PIN (4–12)">PIN ใหม่ (4–12 หลัก)</label><input class="input" id="inPinNew" type="password" inputmode="numeric" maxlength="12" autocomplete="off"></div>
+                  <div class="field"><label class="label" for="inPinNew2" data-en="Repeat new PIN">ยืนยัน PIN ใหม่</label><input class="input" id="inPinNew2" type="password" inputmode="numeric" maxlength="12" autocomplete="off"></div>
+                </div>
+                <div class="lock-err" id="pinErr" style="text-align:left"></div>
+                <div class="btn-row"><button class="btn btn-primary" type="button" data-action="pin-save"><span data-en="Save PIN">บันทึก PIN</span></button><button class="btn" type="button" data-action="pin-cancel"><span data-en="Cancel">ยกเลิก</span></button></div>
+              </div>
+              <div class="set-row">
+                <div class="row-text"><b data-en="Auto-lock when idle">ล็อกอัตโนมัติเมื่อไม่ได้ใช้งาน</b></div>
+                <select class="select" id="selAutoLock" aria-label="ล็อกอัตโนมัติ">
+                  <option value="0" data-en="Off">ปิด</option><option value="1" data-en="1 minute">1 นาที</option><option value="3" data-en="3 minutes">3 นาที</option>
+                  <option value="5" data-en="5 minutes (recommended)">5 นาที (แนะนำ)</option><option value="15" data-en="15 minutes">15 นาที</option><option value="30" data-en="30 minutes">30 นาที</option>
+                </select>
+              </div>
+              <div class="set-row">
+                <div class="row-text"><b data-en="Lock when I leave the tab">ล็อกเมื่อสลับแท็บหรือพับจอเกิน 1 นาที</b></div>
+                <input class="switch" type="checkbox" id="chkTabLeave" aria-label="ล็อกเมื่อสลับแท็บ">
+              </div>
+              <div class="set-row">
+                <div class="row-text"><b data-en="Remember sign-in for this tab only">จำการเข้าสู่ระบบเฉพาะแท็บนี้</b><small data-en="Closing the tab signs you out.">ปิดแท็บแล้วออกจากระบบอัตโนมัติ</small></div>
+                <input class="switch" type="checkbox" id="chkSessionOnly" aria-label="เฉพาะแท็บนี้">
+              </div>
+              <div class="set-row">
+                <div class="btn-row" style="flex:1">
+                  <button class="btn" type="button" data-action="lock-now"><svg class="i i-sm"><use href="#i-lock"/></svg><span data-en="Lock now">ล็อกหน้าจอทันที</span></button>
+                  <button class="btn btn-danger" type="button" data-action="wipe"><svg class="i i-sm"><use href="#i-trash"/></svg><span data-en="Wipe this device &amp; sign out">ล้างข้อมูลในเครื่องและออกจากระบบ</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="set-group">
+            <h2 data-en="Appearance">การแสดงผล</h2>
+            <div class="set-card">
+              <div class="set-row">
+                <div class="row-text"><b data-en="Language">ภาษา</b></div>
+                <div class="seg" id="langSeg"><button type="button" data-lang="th" aria-pressed="true">ไทย</button><button type="button" data-lang="en" aria-pressed="false">English</button></div>
+              </div>
+              <div class="set-row">
+                <div class="row-text"><b data-en="Theme">ธีม</b></div>
+                <div class="seg" id="themeSeg">
+                  <button type="button" data-theme-v="light"><svg class="i i-sm"><use href="#i-sun"/></svg><span data-en="Light">สว่าง</span></button>
+                  <button type="button" data-theme-v="dark"><svg class="i i-sm"><use href="#i-moon"/></svg><span data-en="Dark">มืด</span></button>
+                  <button type="button" data-theme-v="system"><span data-en="Auto">ตามเครื่อง</span></button>
+                </div>
+              </div>
+              <div class="set-row stack">
+                <div class="row-text"><b><span data-en="App style">สไตล์ของแอป</span><span class="new" data-en="New">ใหม่</span></b><small data-en="Try each one on your phone and iPad (light and dark), then tell me which to keep.">ลองแต่ละแบบบนมือถือและ iPad ทั้งโหมดสว่างและมืด แล้วบอกได้ว่าชอบแบบไหน</small></div>
+                <div class="skin-grid" id="skinGrid"></div>
+              </div>
+              <div class="set-row">
+                <div class="row-text"><b><span data-en="App colour follows stamp ink">สีของแอปตามสีหมึกตรา</span><span class="new" data-en="New">ใหม่</span></b><small data-en="Pick red ink and the buttons and tabs turn red too. Works with any style.">เลือกหมึกแดง ปุ่มและแถบต่างๆ ก็เป็นสีแดงตาม ใช้ร่วมกับสไตล์ไหนก็ได้</small></div>
+                <input class="switch" type="checkbox" id="chkInkAccent" aria-label="สีของแอปตามสีหมึกตรา">
+              </div>
+            </div>
+          </div>
+          <div class="set-group">
+            <h2 data-en="App">แอป</h2>
+            <div class="set-card">
+              <div class="set-row">
+                <div class="row-text"><b data-en="Install TrueCopy on this device">ติดตั้ง TrueCopy ลงเครื่อง</b><small data-en="Opens like an app and works offline">เปิดใช้เหมือนแอป ใช้งานออฟไลน์ได้</small></div>
+                <button class="btn btn-sm" type="button" data-action="install"><svg class="i i-sm"><use href="#i-phone"/></svg><span data-en="Install">ติดตั้ง</span></button>
+              </div>
+              <div class="set-row">
+                <div class="row-text"><b data-en="Reset stamp to default">คืนค่าตราประทับเริ่มต้น</b><small data-en="Text, ink, position and protection go back to the approved design.">ข้อความ หมึก ตำแหน่ง และการป้องกันกลับเป็นแบบที่อนุมัติไว้</small></div>
+                <button class="btn btn-sm" type="button" data-action="reset-defaults"><svg class="i i-sm"><use href="#i-refresh"/></svg><span data-en="Reset">รีเซ็ต</span></button>
+              </div>
+              <div class="set-row">
+                <div class="row-text"><b data-en="Keyboard shortcuts (laptop)">คีย์ลัด (โน้ตบุ๊ก)</b><small><span class="kbd-key">←</span> <span class="kbd-key">→</span> <span data-en="page">เปลี่ยนหน้า</span> · <span class="kbd-key">Ctrl</span>+<span class="kbd-key">Z</span> <span data-en="undo">ย้อนกลับ</span> · <span class="kbd-key">Ctrl</span>+<span class="kbd-key">Enter</span> <span data-en="create PDF">สร้าง PDF</span> · <span class="kbd-key">Ctrl</span>+<span class="kbd-key">Shift</span>+<span class="kbd-key">L</span> <span data-en="lock">ล็อก</span></small></div>
+              </div>
+            </div>
+          </div>
+          <div class="set-group">
+            <h2 data-en="About this prototype">เกี่ยวกับต้นแบบนี้</h2>
+            <div class="set-card">
+              <div class="set-row stack">
+                <ul class="about-list">
+                  <li data-en="The preview, stamp, signature pad, gestures, Edit PDF board and annotator all work for real with sample or your own files.">ตัวอย่างเอกสาร ตราประทับ แผ่นเซ็นชื่อ การลากหมุนย่อขยาย กระดานแก้ไข PDF และเครื่องมือวาด ใช้งานได้จริงกับไฟล์ตัวอย่างหรือไฟล์ของคุณ</li>
+                  <li data-en="Creating, downloading and sharing files, Google sign-in and cloud sync are simulated. The real app keeps its current engine.">การสร้างไฟล์ ดาวน์โหลด แชร์ เข้าสู่ระบบ Google และการซิงก์ เป็นการจำลอง แอปจริงจะใช้ระบบเดิมที่ทำงานอยู่</li>
+                  <li data-en="Items marked “New” are proposed features. Tell me which to keep.">รายการที่มีป้าย “ใหม่” คือฟีเจอร์ที่เสนอเพิ่ม บอกได้เลยว่าอยากเก็บอันไหน</li>
+                </ul>
+                <div class="btn-row">
+                  <button class="btn btn-sm" type="button" data-action="demo-signin"><span data-en="Preview sign-in screen">ดูหน้าเข้าสู่ระบบ</span></button>
+                  <button class="btn btn-sm" type="button" data-action="demo-reset"><span data-en="Reset prototype data">ล้างข้อมูลต้นแบบ</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===================== OVERLAYS ===================== -->
+<datalist id="dlPurpose"></datalist>
+<datalist id="dlOrg"></datalist>
+<input id="fileInput" type="file" accept=".pdf,image/jpeg,image/png,image/webp" multiple hidden>
+<input id="camInput" type="file" accept="image/*" capture="environment" hidden>
+<input id="edFileInput" type="file" accept=".pdf,image/jpeg,image/png,image/webp" multiple hidden>
+<input id="sigInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+<input id="fontInput" type="file" accept=".ttf,.otf,.woff,.woff2" hidden>
+
+<!-- Create PDF: pre-flight check → progress → result -->
+<div class="modal" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <span class="head-ico" id="exportIco"><svg class="i"><use href="#i-listcheck"/></svg></span>
+      <div class="head-text"><h2 id="exportTitle">—</h2><p id="exportSub"></p></div>
+      <button class="icon-btn" type="button" data-action="export-close" aria-label="ปิด" data-en-title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body" id="exportBody"></div>
+    <div class="modal-foot" id="exportFoot"></div>
+  </div>
+</div>
+
+<!-- Edit PDF export sheet (phones) -->
+<div class="modal" id="edExportModal" role="dialog" aria-modal="true" aria-labelledby="edExportTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span class="head-ico"><svg class="i"><use href="#i-download"/></svg></span>
+      <div class="head-text"><h2 id="edExportTitle" data-en="Save as PDF">บันทึกเป็น PDF</h2></div>
+      <button class="icon-btn" type="button" data-action="ed-close-export" aria-label="ปิด" data-en-title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body" id="edExportBody"></div>
+  </div>
+</div>
+
+<!-- Share: LINE / email / OneDrive / other apps / save (sits above the result sheets) -->
+<div class="modal" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span class="head-ico" id="shareIco"><svg class="i"><use href="#i-share"/></svg></span>
+      <div class="head-text"><h2 id="shareTitle">—</h2><p id="shareSub"></p></div>
+      <button class="icon-btn" type="button" data-action="share-close" aria-label="ปิด" data-en-title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body" id="shareBody"></div>
+    <div class="modal-foot" id="shareFoot"></div>
+  </div>
+</div>
+
+<!-- Password -->
+<div class="modal" id="pwModal" role="dialog" aria-modal="true" aria-labelledby="pwTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span class="head-ico"><svg class="i"><use href="#i-lock"/></svg></span>
+      <div class="head-text"><h2 id="pwTitle" data-en="This PDF is password-protected">ไฟล์นี้มีรหัสผ่าน</h2><p id="pwDesc"></p></div>
+    </div>
+    <div class="modal-body">
+      <div class="lock-err" id="pwErr" hidden data-en="Wrong password. Try again.">รหัสผ่านไม่ถูกต้อง ลองอีกครั้ง</div>
+      <div class="field">
+        <label class="label" for="inPw" data-en="PDF password">รหัสผ่านเปิดไฟล์ PDF</label>
+        <div class="input-row"><input class="input" id="inPw" type="password" autocomplete="off"><button class="btn btn-sm" type="button" data-action="pw-show"><span data-en="Show">แสดง</span></button></div>
+        <p class="hint" id="pwHint"></p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" data-action="pw-skip"><span data-en="Skip this file">ข้ามไฟล์นี้</span></button>
+      <button class="btn btn-primary" type="button" data-action="pw-ok"><svg class="i i-sm"><use href="#i-unlock"/></svg><span data-en="Unlock">ปลดล็อกและเปิด</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Draw signature -->
+<div class="modal" id="drawModal" role="dialog" aria-modal="true" aria-labelledby="drawTitle">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <span class="head-ico"><svg class="i"><use href="#i-pencil"/></svg></span>
+      <div class="head-text"><h2 id="drawTitle" data-en="Sign on screen">เซ็นชื่อบนหน้าจอ</h2><p data-en="Use a finger, Apple Pencil or mouse.">ใช้นิ้ว Apple Pencil หรือเมาส์</p></div>
+      <button class="icon-btn" type="button" data-action="draw-cancel" aria-label="ปิด" data-en-title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="pad-wrap"><canvas id="padCanvas"></canvas><div class="pad-line"></div><div class="pad-hint" data-en="Sign above the line">เซ็นเหนือเส้นนี้</div></div>
+      <div class="field">
+        <label class="label" for="inSigName" data-en="Name it (optional)">ตั้งชื่อเพื่อจดจำ (ไม่บังคับ)</label>
+        <input class="input" id="inSigName" type="text" maxlength="60" placeholder="เช่น ลายเซ็นเต็ม, ลายเซ็นย่อ" data-en-ph="e.g. Full signature, initials">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" data-action="draw-clear"><svg class="i i-sm"><use href="#i-refresh"/></svg><span data-en="Clear">ล้าง</span></button>
+      <button class="btn btn-primary" type="button" data-action="draw-save"><svg class="i i-sm"><use href="#i-check"/></svg><span data-en="Save &amp; use">บันทึกและใช้งาน</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic confirm -->
+<div class="modal" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span class="head-ico" id="cfIco"><svg class="i"><use href="#i-alert"/></svg></span>
+      <div class="head-text"><h2 id="cfTitle"></h2><p id="cfBody"></p></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="cfCancel"></button>
+      <button class="btn btn-primary" type="button" id="cfOk"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Annotate / draw / blur studio -->
+<div class="annot" id="annot" role="dialog" aria-modal="true" aria-label="วาดและเพิ่มข้อความ">
+  <div class="an-top">
+    <button class="icon-btn" type="button" data-action="an-close" aria-label="ปิด" data-en-title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    <div class="an-title">
+      <button class="icon-btn" type="button" data-action="an-prev" aria-label="หน้าก่อนหน้า"><svg class="i"><use href="#i-left"/></svg></button>
+      <span id="anTitle">—</span>
+      <button class="icon-btn" type="button" data-action="an-next" aria-label="หน้าถัดไป"><svg class="i"><use href="#i-right"/></svg></button>
+    </div>
+    <button class="icon-btn" type="button" id="btnAnUndo" data-action="an-undo" aria-label="ย้อนกลับ" data-en-title="Undo"><svg class="i"><use href="#i-undo"/></svg></button>
+    <button class="icon-btn" type="button" id="btnAnRedo" data-action="an-redo" aria-label="ทำซ้ำ" data-en-title="Redo"><svg class="i"><use href="#i-redo"/></svg></button>
+    <button class="btn btn-primary btn-sm" type="button" data-action="an-done"><svg class="i i-sm"><use href="#i-check"/></svg><span data-en="Done">เสร็จ</span></button>
+  </div>
+  <div class="an-stage" id="anStage"><canvas id="anCanvas"></canvas></div>
+  <div class="an-text" id="anTextBar" hidden>
+    <textarea class="textarea" id="anTextInput" rows="2" placeholder="พิมพ์ข้อความ (หลายบรรทัดได้)" data-en-ph="Type text (multi-line ok)"></textarea>
+    <button class="btn btn-primary btn-sm" type="button" data-action="an-text-ok"><span data-en="OK">ตกลง</span></button>
+    <button class="btn btn-sm" type="button" data-action="an-text-cancel"><span data-en="Cancel">ยกเลิก</span></button>
+  </div>
+  <div class="an-props" id="anProps"></div>
+  <div class="an-dock" id="anDock" role="toolbar" aria-label="เครื่องมือ">
+    <button class="tool" type="button" data-tool="select" aria-pressed="true"><svg class="i"><use href="#i-pointer"/></svg><span data-en="Select">เลือก</span></button>
+    <button class="tool" type="button" data-tool="text"><svg class="i"><use href="#i-type"/></svg><span data-en="Text">ข้อความ</span></button>
+    <button class="tool" type="button" data-tool="pen"><svg class="i"><use href="#i-pencil"/></svg><span data-en="Pen">ปากกา</span></button>
+    <button class="tool" type="button" data-tool="highlight"><svg class="i"><use href="#i-marker"/></svg><span data-en="Highlight">ไฮไลต์</span></button>
+    <button class="tool" type="button" data-tool="line"><svg class="i"><use href="#i-line"/></svg><span data-en="Line">เส้นตรง</span></button>
+    <button class="tool" type="button" data-tool="arrow"><svg class="i"><use href="#i-arrow"/></svg><span data-en="Arrow">ลูกศร</span></button>
+    <button class="tool" type="button" data-tool="rect"><svg class="i"><use href="#i-square"/></svg><span data-en="Box">สี่เหลี่ยม</span></button>
+    <button class="tool" type="button" data-tool="ellipse"><svg class="i"><use href="#i-circle"/></svg><span data-en="Circle">วงกลม</span></button>
+    <button class="tool" type="button" data-tool="blur"><svg class="i"><use href="#i-mosaic"/></svg><span data-en="Blur / redact">เบลอ / ปิดทับ</span></button>
+  </div>
+</div>
+
+<!-- Lock / sign-in screen -->
+<div class="lock" id="lock" role="dialog" aria-modal="true" aria-label="หน้าจอล็อก">
+  <div class="lock-prefs">
+    <button type="button" data-action="toggle-lang"><svg class="i i-sm"><use href="#i-globe"/></svg><span id="lockLangLabel">English</span></button>
+    <button type="button" data-action="toggle-theme"><svg class="i i-sm"><use href="#i-moon"/></svg></button>
+  </div>
+  <div class="lock-card" id="lockCard"></div>
+</div>
+
+<div class="dropzone-ov" id="dropOv"><div><svg class="i i-lg"><use href="#i-upload"/></svg><span data-en="Drop files to add them">วางไฟล์เพื่อเพิ่มเอกสาร</span></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button type="button" id="toastBtn" hidden></button></div>
+
+<script>
+//__SCRIPT__
+</script>

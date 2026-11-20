@@ -1,11 +1,12 @@
-const CACHE_NAME = 'truecopy-shell-v5';
+const CACHE_NAME = 'truecopy-shell-v6';
 const APP_SHELL_URLS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './icon.svg'
+  './icon.svg',
+  './fonts/THSarabunPSK-Italic.ttf'
 ];
 
 const BYPASS_URL_PATTERNS = [

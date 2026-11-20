@@ -3,3 +3,9 @@ Thumbs.db
 .wrangler/
 node_modules/
 .env*
+
+# prototype build outputs (regenerate with: node prototype/build.mjs)
+prototype/index.html
+prototype/truecopy-prototype.html
+# local preview config
+.claude/
