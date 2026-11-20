@@ -66,6 +66,7 @@
 | Certification date | Auto date; Buddhist Era (พ.ศ.) or Gregorian; optional Thai numerals | 3 |
 | Anti-forgery watermark | Faint text repeated across the page | 3 |
 | History | Record what was certified, for whom, and when | 3 |
+| PDF Editor (`แก้ไข PDF`) | Merge multiple PDFs/photos, drag/tap organize pages, rotate, delete with undo, split/extract pages by click or range (`1, 3-5`), compress file size, normalize A4 page size, and send straight to Certify | 4+ |
 | PWA | Installable on a phone | 4 |
 
 ---
@@ -239,6 +240,7 @@ service firebase.storage {
 2. **Phase 2 — Connect Firebase *(Implemented)*:** Google sign-in (`taxicashflow@gmail.com` only), sync memorized signatures and templates across devices in Firestore (`truecopy-cert-th`, `asia-southeast1`, free Spark plan, no credit card needed), strict owner-only `firestore.rules`, and Template Manager UI.
 3. **Phase 3 — Extra features *(Implemented)*:** Buddhist Era / Gregorian certification date (with optional Thai digits ๐-๙), diagonal anti-forgery watermark across preview & Flatten ON/OFF exports, and local + Firestore Certification History (`users/{uid}/history/{historyId}`).
 4. **Phase 4 — Publish & Security *(Implemented)*:** Cloudflare Pages PWA deployment (`manifest.json`, `sw.js`, `icon.svg`, `icon-192.png`, `icon-512.png`) with install prompt + offline shell caching, plus laptop/device protection (mandatory Google owner sign-in gate, session-only login option, synced 4–12 char PIN lock screen, AES-256-GCM PBKDF2 encrypted local signature vault, idle/tab-leave auto-lock, `Ctrl+Shift+L` lock shortcut, and complete local data wipe on sign-out). Note: Firebase Console **Authorized domains** and optional **App Check** (reCAPTCHA v3) are toggled in the Firebase web console.
+5. **PDF Editor Add-on *(Implemented)*:** Dedicated **📄 แก้ไข PDF** tab inside [index.html](index.html) supporting multi-PDF/image merge, drag-and-drop & mobile touch page reordering, 90° page rotation, page deletion with Undo, page extraction by click or range (`1, 3-5, 8`), file-size compression (`original`, `high`, `bank`, `small`), A4 page size normalization, and direct download, Web Share, or one-click transfer to **รับรองสำเนาถูกต้อง**.
 
 ### Phase 1 acceptance checklist
 

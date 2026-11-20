@@ -46,6 +46,7 @@
       --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
       --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.08);
       --header-h: 64px;
+      --mode-bar-h: 44px;
     }
 
     * {
@@ -217,8 +218,8 @@
     .workspace {
       display: grid;
       grid-template-columns: 280px 1fr 350px;
-      height: calc(100vh - var(--header-h));
-      height: calc(100dvh - var(--header-h));
+      height: calc(100vh - var(--header-h) - var(--mode-bar-h));
+      height: calc(100dvh - var(--header-h) - var(--mode-bar-h));
       overflow: hidden;
     }
 
@@ -1272,7 +1273,9 @@
     }
 
     body.app-locked .app-header,
+    body.app-locked .mode-bar,
     body.app-locked .workspace,
+    body.app-locked .pdf-editor-workspace,
     body.app-locked .mobile-bottom-bar {
       visibility: hidden !important;
       pointer-events: none !important;
@@ -1580,8 +1583,8 @@
     @media (max-width: 1024px) {
       .workspace {
         grid-template-columns: 1fr;
-        height: calc(100vh - var(--header-h) - 58px - env(safe-area-inset-bottom));
-        height: calc(100dvh - var(--header-h) - 58px - env(safe-area-inset-bottom));
+        height: calc(100vh - var(--header-h) - var(--mode-bar-h) - 58px - env(safe-area-inset-bottom));
+        height: calc(100dvh - var(--header-h) - var(--mode-bar-h) - 58px - env(safe-area-inset-bottom));
         position: relative;
       }
 
@@ -1599,7 +1602,7 @@
         left: 0;
         right: 0;
         bottom: calc(58px + env(safe-area-inset-bottom));
-        top: var(--header-h);
+        top: calc(var(--header-h) + var(--mode-bar-h));
         z-index: 40;
         transform: translateY(105%);
         transition: transform 0.24s ease;
@@ -1683,7 +1686,7 @@
       .panel-right {
         width: 400px;
         left: auto;
-        top: var(--header-h);
+        top: calc(var(--header-h) + var(--mode-bar-h));
         border-radius: 0;
         border-left: 1px solid var(--border);
         box-shadow: -8px 0 24px rgba(15, 23, 42, 0.16);
@@ -1695,12 +1698,345 @@
         transform: translateX(0);
       }
     }
+
+    /* Mode Bar & PDF Editor Workspace */
+    .mode-bar {
+      position: sticky;
+      top: var(--header-h);
+      height: var(--mode-bar-h);
+      z-index: 28;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 12px;
+    }
+
+    .mode-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-muted);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .mode-tab-btn:hover {
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .mode-tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(13, 51, 191, 0.22);
+    }
+
+    .mode-tab-btn.active .badge {
+      background: rgba(255, 255, 255, 0.24);
+      color: #fff;
+    }
+
+    body.mode-pdf-editor #certifyWorkspace,
+    body.mode-pdf-editor .mobile-bottom-bar,
+    body.mode-pdf-editor #btnResetDefaults,
+    body.mode-pdf-editor #btnGenerate {
+      display: none !important;
+    }
+
+    .pdf-editor-workspace {
+      display: none;
+      grid-template-columns: 1fr 340px;
+      height: calc(100vh - var(--header-h) - var(--mode-bar-h));
+      height: calc(100dvh - var(--header-h) - var(--mode-bar-h));
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    body.mode-pdf-editor #pdfEditorWorkspace {
+      display: grid;
+    }
+
+    .editor-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .editor-toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 9px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .editor-board {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .editor-dropzone {
+      border: 2px dashed #94a3b8;
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .editor-dropzone:hover,
+    .editor-dropzone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .editor-dropzone.is-compact {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .editor-dropzone.is-compact .dropzone-icon {
+      font-size: 20px;
+      margin-bottom: 0;
+    }
+
+    .editor-page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 14px;
+      align-content: start;
+    }
+
+    .editor-page-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    }
+
+    .editor-page-card:hover {
+      border-color: #94a3b8;
+    }
+
+    .editor-page-card.is-selected {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: 0 0 0 2px rgba(13, 51, 191, 0.16);
+    }
+
+    .editor-page-card.is-dragging {
+      opacity: 0.42;
+      transform: scale(0.97);
+    }
+
+    .editor-page-card.is-drag-over {
+      border-color: var(--primary);
+      border-style: dashed;
+      background: #dbeafe;
+    }
+
+    .editor-thumb-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      background: #f1f5f9;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .editor-thumb-box img {
+      max-width: 92%;
+      max-height: 92%;
+      object-fit: contain;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14);
+      background: #fff;
+      transition: transform 0.15s ease;
+      pointer-events: none;
+    }
+
+    .editor-thumb-loading {
+      font-size: 12px;
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+
+    .editor-order-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(15, 23, 42, 0.84);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      z-index: 2;
+    }
+
+    .editor-check-pill {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1.5px solid var(--border-strong);
+      color: transparent;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 800;
+      z-index: 2;
+    }
+
+    .editor-page-card.is-selected .editor-check-pill {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .editor-card-meta {
+      font-size: 12px;
+      line-height: 1.35;
+      min-width: 0;
+    }
+
+    .editor-card-name {
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .editor-card-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .editor-card-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+
+    .editor-card-actions .btn {
+      padding: 5px 2px;
+      font-size: 12.5px;
+    }
+
+    .editor-sidebar {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .editor-result-card {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--success-soft);
+      border: 1px solid #a7f3d0;
+    }
+
+    .editor-result-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #065f46;
+      word-break: break-word;
+    }
+
+    .editor-result-stats {
+      font-size: 12px;
+      color: #047857;
+      margin: 4px 0 10px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+      .pdf-editor-workspace {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: calc(100vh - var(--header-h) - var(--mode-bar-h));
+        min-height: calc(100dvh - var(--header-h) - var(--mode-bar-h));
+        overflow: visible;
+      }
+
+      .editor-main,
+      .editor-board,
+      .editor-sidebar {
+        overflow: visible;
+      }
+
+      .editor-sidebar {
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .editor-sidebar .panel-scroll {
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .editor-board {
+        padding: 12px;
+      }
+
+      .editor-page-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+    }
   </style>
 </head>
 <body>
 
   <!-- Hidden file inputs -->
   <input id="fileInput" type="file" accept=".pdf,image/jpeg,image/png,image/webp" multiple hidden />
+  <input id="editorFileInput" type="file" accept=".pdf,image/jpeg,image/png,image/webp" multiple hidden />
   <input id="sigInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
   <input id="fontInput" type="file" accept=".ttf,.otf,.woff,.woff2" hidden />
 
@@ -1731,8 +2067,14 @@
     </div>
   </header>
 
+  <!-- Mode Switcher Bar -->
+  <nav id="appModeBar" class="mode-bar" aria-label="สลับโหมดการทำงาน">
+    <button id="btnModeCertify" class="mode-tab-btn active" type="button">🔏 รับรองสำเนาถูกต้อง</button>
+    <button id="btnModePdfEditor" class="mode-tab-btn" type="button">📄 แก้ไข PDF <span id="pdfEditorBadge" class="badge">0 หน้า</span></button>
+  </nav>
+
   <!-- Main Workspace -->
-  <main class="workspace">
+  <main id="certifyWorkspace" class="workspace">
 
     <!-- Left Panel: Files & Thumbnails -->
     <aside id="panelLeft" class="panel panel-left">
@@ -2151,6 +2493,109 @@
       </div>
     </aside>
   </main>
+
+  <!-- PDF Editor Workspace -->
+  <section id="pdfEditorWorkspace" class="pdf-editor-workspace" aria-label="เครื่องมือแก้ไข PDF">
+    <div class="editor-main">
+      <div class="editor-toolbar">
+        <button id="btnEditorAddFiles" class="btn btn-primary btn-sm" type="button">+ เพิ่มไฟล์ PDF / รูป</button>
+        <button id="btnEditorImportCertify" class="btn btn-soft btn-sm" type="button" style="display:none;">📥 ดึงจากหน้ารับรองสำเนา</button>
+        <button id="btnEditorSelectAll" class="btn btn-sm" type="button" disabled>เลือกทั้งหมด</button>
+        <button id="btnEditorDeselectAll" class="btn btn-sm" type="button" disabled>ยกเลิกเลือก</button>
+        <button id="btnEditorRotateSelected" class="btn btn-sm" type="button" disabled>↻ หมุนที่เลือก 90°</button>
+        <button id="btnEditorDeleteSelected" class="btn btn-danger-ghost btn-sm" type="button" disabled>🗑️ ลบที่เลือก</button>
+        <button id="btnEditorUndo" class="btn btn-sm" type="button" disabled>↩ ย้อนกลับ</button>
+        <button id="btnEditorClearAll" class="btn btn-danger-ghost btn-sm" type="button" disabled>ล้างกระดาน</button>
+        <span id="editorSelectionBadge" class="badge" style="margin-left:auto;">0 หน้า</span>
+      </div>
+
+      <div class="editor-board">
+        <div id="editorDropzone" class="editor-dropzone" tabindex="0" role="button" aria-label="อัปโหลดไฟล์ PDF หรือรูปภาพเข้าเครื่องมือแก้ไข PDF">
+          <div class="dropzone-icon">🗂️</div>
+          <div class="dropzone-title">ลากหลายไฟล์ PDF หรือรูปภาพมาวางที่นี่เพื่อ รวม / จัดเรียง / ลบ / แยกหน้า / ย่อขนาด</div>
+          <div class="dropzone-hint">คลิกเพื่อเลือกไฟล์ หรือลากสลับลำดับการ์ดหน้าเอกสารได้ตามต้องการ</div>
+        </div>
+
+        <div id="editorPageGrid" class="editor-page-grid"></div>
+      </div>
+    </div>
+
+    <aside class="editor-sidebar">
+      <div class="panel-header">
+        <span>เครื่องมือจัดหน้าและขนาดไฟล์</span>
+      </div>
+      <div class="panel-scroll">
+
+        <!-- 1. Select / Split by Page Range -->
+        <div class="setting-card">
+          <div class="setting-title">✂️ เลือกช่วงหน้าเพื่อแยกหรือลบ</div>
+          <div class="field" style="display:flex;gap:6px;">
+            <input id="inputEditorRange" class="input" type="text" placeholder="เช่น 1, 3-5, 8" style="flex:1;" />
+            <button id="btnEditorApplyRange" class="btn btn-soft btn-sm" type="button">เลือกหน้า</button>
+          </div>
+          <div class="helper-text" style="margin-top:0;">
+            ใส่เลขหน้าตามลำดับบนกระดาน หรือแตะที่การ์ดหน้าโดยตรง (กด Shift+คลิก เพื่อเลือกหลายหน้าติดกัน)
+          </div>
+        </div>
+
+        <!-- 2. Compression & Page Size -->
+        <div class="setting-card">
+          <div class="setting-title">🗜️ ย่อขนาดไฟล์ & ปรับหน้ากระดาษ</div>
+          <div class="field">
+            <label class="field-label" for="selectEditorQuality">ความละเอียดและขนาดไฟล์</label>
+            <select id="selectEditorQuality" class="select">
+              <option value="original">ต้นฉบับ (ไม่บีบอัด — Vector คมชัดสุด)</option>
+              <option value="high">คมชัดสูง (~180 DPI · ลดขนาดปานกลาง)</option>
+              <option value="bank" selected>มาตรฐานส่งธนาคาร (~140 DPI — แนะนำ)</option>
+              <option value="small">ขนาดเล็กพิเศษ (~105 DPI · สำหรับเว็บจำกัด 1–2 MB)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="selectEditorPageSize">ขนาดหน้ากระดาษ</label>
+            <select id="selectEditorPageSize" class="select">
+              <option value="original" selected>คงขนาดเดิมของแต่ละหน้า</option>
+              <option value="a4">ปรับเป็น A4 อัตโนมัติ (แนวตั้ง/แนวนอนตามหน้า)</option>
+              <option value="a4-portrait">บังคับทุกหน้าเป็น A4 แนวตั้งทั้งหมด</option>
+            </select>
+          </div>
+
+          <div id="editorSizeHint" class="helper-text">
+            โหมดมาตรฐานส่งธนาคารช่วยลดขนาดไฟล์ลงมากโดยที่ตัวเลขและตัวอักษรยังอ่านชัดเจน
+          </div>
+        </div>
+
+        <!-- 3. Build & Export -->
+        <div class="setting-card">
+          <div class="setting-title">📤 สร้างไฟล์ PDF ผลลัพธ์</div>
+          <div class="field">
+            <label class="field-label" for="inputEditorOutputName">ชื่อไฟล์ผลลัพธ์</label>
+            <input id="inputEditorOutputName" class="input" type="text" placeholder="เช่น รวมเอกสาร_2569.pdf" />
+          </div>
+
+          <button id="btnEditorBuildAll" class="btn btn-primary" type="button" disabled style="width:100%;">
+            📄 บันทึก / รวมทั้งหมด (0 หน้า)
+          </button>
+          <button id="btnEditorBuildSelected" class="btn btn-soft" type="button" disabled style="width:100%;margin-top:8px;">
+            ✂️ แยกเฉพาะหน้าที่เลือก (0 หน้า)
+          </button>
+
+          <div id="editorResultCard" class="editor-result-card" style="display:none;">
+            <div id="editorResultTitle" class="editor-result-title"></div>
+            <div id="editorResultStats" class="editor-result-stats"></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button id="btnEditorDownload" class="btn btn-success btn-sm" type="button" style="flex:1;">💾 ดาวน์โหลด</button>
+              <button id="btnEditorShare" class="btn btn-soft btn-sm" type="button" style="flex:1;">📤 แชร์ไฟล์</button>
+            </div>
+            <button id="btnEditorSendToCertify" class="btn btn-primary btn-sm" type="button" style="width:100%;margin-top:6px;">
+              🔏 ส่งไปรับรองสำเนาต่อ
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </section>
 
   <!-- Mobile Bottom Bar -->
   <nav class="mobile-bottom-bar" aria-label="เมนูมือถือ">
@@ -2769,6 +3214,15 @@
       let deferredInstallPrompt = null;
       let sigSaveChain = Promise.resolve(true);
 
+      // PDF Editor mode state
+      let currentAppMode = 'certify';
+      const editorSources = new Map();
+      let editorPages = [];
+      let editorUndoStack = [];
+      let editorLastOutput = null;
+      let editorLastSelectedIndex = -1;
+      let editorDragIndex = -1;
+
       /**
        * Uploaded files array.
        * Each item: {
@@ -3039,6 +3493,37 @@
         btnUnlockPin: $('btnUnlockPin'),
         btnLockForgotPin: $('btnLockForgotPin'),
         btnLockSignOutWipe: $('btnLockSignOutWipe'),
+
+        // Mode Switcher & PDF Editor
+        editorFileInput: $('editorFileInput'),
+        btnModeCertify: $('btnModeCertify'),
+        btnModePdfEditor: $('btnModePdfEditor'),
+        pdfEditorBadge: $('pdfEditorBadge'),
+        btnEditorAddFiles: $('btnEditorAddFiles'),
+        btnEditorImportCertify: $('btnEditorImportCertify'),
+        btnEditorSelectAll: $('btnEditorSelectAll'),
+        btnEditorDeselectAll: $('btnEditorDeselectAll'),
+        btnEditorRotateSelected: $('btnEditorRotateSelected'),
+        btnEditorDeleteSelected: $('btnEditorDeleteSelected'),
+        btnEditorUndo: $('btnEditorUndo'),
+        btnEditorClearAll: $('btnEditorClearAll'),
+        editorSelectionBadge: $('editorSelectionBadge'),
+        editorDropzone: $('editorDropzone'),
+        editorPageGrid: $('editorPageGrid'),
+        inputEditorRange: $('inputEditorRange'),
+        btnEditorApplyRange: $('btnEditorApplyRange'),
+        selectEditorQuality: $('selectEditorQuality'),
+        selectEditorPageSize: $('selectEditorPageSize'),
+        editorSizeHint: $('editorSizeHint'),
+        inputEditorOutputName: $('inputEditorOutputName'),
+        btnEditorBuildAll: $('btnEditorBuildAll'),
+        btnEditorBuildSelected: $('btnEditorBuildSelected'),
+        editorResultCard: $('editorResultCard'),
+        editorResultTitle: $('editorResultTitle'),
+        editorResultStats: $('editorResultStats'),
+        btnEditorDownload: $('btnEditorDownload'),
+        btnEditorShare: $('btnEditorShare'),
+        btnEditorSendToCertify: $('btnEditorSendToCertify'),
 
         toast: $('toast')
       };
@@ -4158,6 +4643,9 @@
         if (els.sigPreviewImg) els.sigPreviewImg.removeAttribute('src');
         if (els.savedSigGrid) els.savedSigGrid.innerHTML = '';
         if (els.savedSigSection) els.savedSigSection.style.display = 'none';
+        if (typeof clearEditorBoardState === 'function') {
+          clearEditorBoardState(true);
+        }
         renderFileList();
         renderThumbnails();
         renderTemplateSelect();
@@ -5317,6 +5805,9 @@
       function renderFileList() {
         els.fileCountLabel.textContent = String(files.length);
         els.mobileFileCount.textContent = String(files.length);
+        if (els.btnEditorImportCertify) {
+          els.btnEditorImportCertify.style.display = files.length > 0 ? 'inline-flex' : 'none';
+        }
         els.fileList.innerHTML = '';
 
         for (const f of files) {
@@ -5817,6 +6308,768 @@
       }
 
       // =========================================================================
+      // 10B. PDF Editor Engine (Merge, Organize, Rotate, Delete, Extract, Resize)
+      // =========================================================================
+      function formatByteSize(bytes) {
+        const b = Math.max(0, Number(bytes) || 0);
+        if (b < 1024 * 1024) {
+          return `${Math.max(1, Math.round(b / 1024))} KB`;
+        }
+        return `${(b / (1024 * 1024)).toFixed(2)} MB`;
+      }
+
+      function setAppMode(mode) {
+        currentAppMode = mode === 'pdf-editor' ? 'pdf-editor' : 'certify';
+        document.body.classList.toggle('mode-pdf-editor', currentAppMode === 'pdf-editor');
+        if (els.btnModeCertify) els.btnModeCertify.classList.toggle('active', currentAppMode === 'certify');
+        if (els.btnModePdfEditor) els.btnModePdfEditor.classList.toggle('active', currentAppMode === 'pdf-editor');
+        closeMobileSheets();
+        if (currentAppMode === 'pdf-editor') {
+          if (els.btnEditorImportCertify) {
+            els.btnEditorImportCertify.style.display = files.length > 0 ? 'inline-flex' : 'none';
+          }
+          renderEditorBoard();
+        }
+      }
+
+      function updateEditorSizeHint() {
+        if (!els.editorSizeHint) return;
+        const q = els.selectEditorQuality?.value || 'bank';
+        const p = els.selectEditorPageSize?.value || 'original';
+        const qMsg = {
+          original: p === 'original'
+            ? 'คงความละเอียด Vector ต้นฉบับ 100% (ตัวอักษรคมชัดสุด ไม่บีบอัดเพิ่ม)'
+            : 'ใช้ความละเอียดสูง (~210 DPI) เพื่อจัดขนาดหน้ากระดาษให้พอดี',
+          high: 'คมชัดสูง (~180 DPI) เหมาะสำหรับเอกสารที่ต้องการพิมพ์หรือขยายดูละเอียด',
+          bank: 'มาตรฐานส่งธนาคาร (~140 DPI) ลดขนาดไฟล์ลงมากโดยที่ตัวเลขยังอ่านชัดเจน',
+          small: 'ขนาดเล็กพิเศษ (~105 DPI) เหมาะสำหรับอัปโหลดเว็บที่จำกัดขนาด 1–2 MB'
+        };
+        const pMsg = p === 'original'
+          ? ''
+          : (p === 'a4'
+            ? ' · ปรับขนาดทุกหน้าเป็น A4 (เลือกแนวตั้ง/แนวนอนอัตโนมัติ)'
+            : ' · บังคับทุกหน้าเป็น A4 แนวตั้ง');
+        els.editorSizeHint.textContent = `${qMsg[q] || qMsg.bank}${pMsg}`;
+      }
+
+      function invalidateEditorOutput() {
+        editorLastOutput = null;
+        if (els.editorResultCard) {
+          els.editorResultCard.style.display = 'none';
+        }
+      }
+
+      function pushEditorUndo() {
+        const snapshot = editorPages.map(p => ({ ...p }));
+        editorUndoStack.push(snapshot);
+        if (editorUndoStack.length > 25) {
+          editorUndoStack.shift();
+        }
+      }
+
+      function clearEditorBoardState(silent = false) {
+        editorSources.forEach((src) => {
+          if (src.objUrl) {
+            try { URL.revokeObjectURL(src.objUrl); } catch (e) {}
+          }
+        });
+        editorSources.clear();
+        editorPages = [];
+        editorUndoStack = [];
+        editorLastSelectedIndex = -1;
+        editorDragIndex = -1;
+        invalidateEditorOutput();
+        if (els.inputEditorRange) els.inputEditorRange.value = '';
+        if (!silent) {
+          renderEditorBoard();
+        }
+      }
+
+      function parsePageRangeString(rangeText, maxPage) {
+        const result = new Set();
+        const limit = Math.max(0, Number(maxPage) || 0);
+        if (!rangeText || limit <= 0) return result;
+        const tokens = String(rangeText).split(/[,\s;]+/).map(s => s.trim()).filter(Boolean);
+        for (const tok of tokens) {
+          const dashMatch = tok.match(/^(\d+)-(\d+)$/);
+          if (dashMatch) {
+            let a = Number(dashMatch[1]);
+            let b = Number(dashMatch[2]);
+            if (a > b) [a, b] = [b, a];
+            const start = Math.max(1, a);
+            const end = Math.min(limit, b);
+            for (let n = start; n <= end; n++) {
+              result.add(n);
+            }
+          } else if (/^\d+$/.test(tok)) {
+            const num = Number(tok);
+            if (num >= 1 && num <= limit) {
+              result.add(num);
+            }
+          }
+        }
+        return result;
+      }
+
+      async function renderEditorThumbForPage(item) {
+        if (!item || item.thumbDataUrl || item._thumbLoading) return;
+        const src = editorSources.get(item.sourceId);
+        if (!src) return;
+        item._thumbLoading = true;
+        try {
+          const c = document.createElement('canvas');
+          if (src.kind === 'pdf') {
+            const page = await src.pdfDocProxy.getPage(item.pageNum);
+            const vp1 = page.getViewport({ scale: 1 });
+            item.widthPt = vp1.width;
+            item.heightPt = vp1.height;
+            const scale = Math.min(0.65, 250 / Math.max(1, vp1.width));
+            const vp = page.getViewport({ scale });
+            c.width = Math.max(1, Math.round(vp.width));
+            c.height = Math.max(1, Math.round(vp.height));
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, c.width, c.height);
+            await page.render({ canvasContext: ctx, viewport: vp }).promise;
+          } else if (src.imageElement) {
+            const img = src.imageElement;
+            const natW = img.naturalWidth || img.width;
+            const natH = img.naturalHeight || img.height;
+            const ratio = Math.min(1, 260 / Math.max(1, Math.max(natW, natH)));
+            c.width = Math.max(1, Math.round(natW * ratio));
+            c.height = Math.max(1, Math.round(natH * ratio));
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, c.width, c.height);
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+          }
+          item.thumbDataUrl = c.toDataURL('image/jpeg', 0.72);
+          c.width = 0;
+          c.height = 0;
+
+          const cardImg = els.editorPageGrid?.querySelector(`img[data-page-id="${item.id}"]`);
+          if (cardImg) {
+            cardImg.src = item.thumbDataUrl;
+            const ph = cardImg.parentElement?.querySelector('.editor-thumb-loading');
+            if (ph) ph.style.display = 'none';
+            cardImg.style.display = 'block';
+          }
+        } catch (err) {
+          console.warn('Editor thumb render note:', err);
+        } finally {
+          item._thumbLoading = false;
+        }
+      }
+
+      async function generateMissingEditorThumbs() {
+        for (const item of editorPages) {
+          if (!item.thumbDataUrl && !item._thumbLoading) {
+            await renderEditorThumbForPage(item);
+            await new Promise(r => setTimeout(r, 8));
+          }
+        }
+      }
+
+      async function addSourceFilesToEditor(fileListInput) {
+        const incoming = Array.from(fileListInput || []);
+        if (incoming.length === 0) return;
+
+        let addedPages = 0;
+        for (const f of incoming) {
+          const lower = f.name.toLowerCase();
+          const isPdf = f.type === 'application/pdf' || lower.endsWith('.pdf');
+          const isImg = f.type.startsWith('image/') || /\.(jpe?g|png|webp)$/i.test(lower);
+
+          if (!isPdf && !isImg) {
+            showToast(`ไม่รองรับไฟล์ ${f.name} (รองรับเฉพาะ PDF, JPG, PNG)`);
+            continue;
+          }
+
+          try {
+            const buffer = await f.arrayBuffer();
+            const rawBytes = new Uint8Array(buffer);
+            const srcId = `edsrc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+            if (isPdf) {
+              const result = await openPdfDocumentWithPrompt(rawBytes, f.name);
+              if (!result) continue;
+
+              const srcObj = {
+                id: srcId,
+                name: f.name,
+                kind: 'pdf',
+                mimeType: 'application/pdf',
+                rawBytes,
+                byteLength: rawBytes.byteLength,
+                isPasswordProtected: result.isPasswordProtected,
+                pdfDocProxy: result.pdfProxy,
+                imageElement: null,
+                objUrl: null,
+                pageCount: result.pdfProxy.numPages
+              };
+              editorSources.set(srcId, srcObj);
+
+              for (let p = 1; p <= srcObj.pageCount; p++) {
+                editorPages.push({
+                  id: `edpg_${srcId}_${p}_${Math.random().toString(36).slice(2, 5)}`,
+                  sourceId: srcId,
+                  sourceName: f.name,
+                  pageNum: p,
+                  rotationDelta: 0,
+                  selected: false,
+                  thumbDataUrl: null,
+                  widthPt: 595,
+                  heightPt: 842
+                });
+                addedPages++;
+              }
+            } else {
+              const mime = f.type || (/\.png$/i.test(lower) ? 'image/png' : 'image/jpeg');
+              const blob = new Blob([rawBytes], { type: mime });
+              const objUrl = URL.createObjectURL(blob);
+              const imgEl = await loadImageFromSrc(objUrl);
+              const natW = imgEl.naturalWidth || imgEl.width;
+              const natH = imgEl.naturalHeight || imgEl.height;
+              const ptW = Math.min(842, natW * 0.75);
+              const ptH = ptW * (natH / Math.max(1, natW));
+
+              const srcObj = {
+                id: srcId,
+                name: f.name,
+                kind: 'image',
+                mimeType: mime,
+                rawBytes,
+                byteLength: rawBytes.byteLength,
+                isPasswordProtected: false,
+                pdfDocProxy: null,
+                imageElement: imgEl,
+                objUrl,
+                pageCount: 1
+              };
+              editorSources.set(srcId, srcObj);
+
+              editorPages.push({
+                id: `edpg_${srcId}_1_${Math.random().toString(36).slice(2, 5)}`,
+                sourceId: srcId,
+                sourceName: f.name,
+                pageNum: 1,
+                rotationDelta: 0,
+                selected: false,
+                thumbDataUrl: null,
+                widthPt: ptW,
+                heightPt: ptH
+              });
+              addedPages++;
+            }
+          } catch (err) {
+            console.error(err);
+            showToast(`เปิดไฟล์ ${f.name} ไม่สำเร็จ: ${err.message || 'ไฟล์อาจเสียหาย'}`);
+          }
+        }
+
+        if (addedPages > 0) {
+          invalidateEditorOutput();
+          if (els.inputEditorOutputName && !els.inputEditorOutputName.value.trim()) {
+            const firstSrc = editorSources.values().next().value;
+            const base = firstSrc ? firstSrc.name.replace(/\.[^.]+$/, '') : 'เอกสาร';
+            els.inputEditorOutputName.value = editorSources.size > 1
+              ? `รวมเอกสาร_${editorSources.size}ไฟล์.pdf`
+              : `${base}_แก้ไขแล้ว.pdf`;
+          }
+          renderEditorBoard();
+          showToast(`เพิ่ม ${addedPages} หน้าเข้ากระดานแก้ไข PDF แล้ว`);
+          generateMissingEditorThumbs();
+        }
+      }
+
+      async function importFilesFromCertifyToEditor() {
+        if (files.length === 0) return;
+        pushEditorUndo();
+        let addedPages = 0;
+
+        for (const f of files) {
+          const srcId = `edimp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          const rawCopy = f.rawBytes.slice();
+          let objUrl = null;
+          let imgEl = f.imageElement || null;
+          if (f.kind === 'image' && rawCopy.byteLength > 0) {
+            const blob = new Blob([rawCopy], { type: f.mimeType || 'image/jpeg' });
+            objUrl = URL.createObjectURL(blob);
+            imgEl = await loadImageFromSrc(objUrl);
+          }
+
+          const srcObj = {
+            id: srcId,
+            name: f.name,
+            kind: f.kind,
+            mimeType: f.mimeType,
+            rawBytes: rawCopy,
+            byteLength: rawCopy.byteLength,
+            isPasswordProtected: f.isPasswordProtected,
+            pdfDocProxy: f.pdfDocProxy,
+            imageElement: imgEl,
+            objUrl,
+            pageCount: f.pageCount
+          };
+          editorSources.set(srcId, srcObj);
+
+          for (let p = 1; p <= f.pageCount; p++) {
+            if (f.excludedPages && f.excludedPages.has(p)) continue;
+            const cached = f.pageCache && f.pageCache.get(p);
+            let thumbUrl = null;
+            if (cached && cached.canvas) {
+              try {
+                thumbUrl = cached.canvas.toDataURL('image/jpeg', 0.65);
+              } catch (e) {}
+            }
+            editorPages.push({
+              id: `edpg_${srcId}_${p}_${Math.random().toString(36).slice(2, 5)}`,
+              sourceId: srcId,
+              sourceName: f.name,
+              pageNum: p,
+              rotationDelta: 0,
+              selected: false,
+              thumbDataUrl: thumbUrl,
+              widthPt: cached ? cached.widthPt : 595,
+              heightPt: cached ? cached.heightPt : 842
+            });
+            addedPages++;
+          }
+        }
+
+        if (addedPages > 0) {
+          invalidateEditorOutput();
+          renderEditorBoard();
+          showToast(`ดึง ${addedPages} หน้าจากหน้ารับรองสำเนาเข้ามาเรียบร้อย 📥`);
+          generateMissingEditorThumbs();
+        }
+      }
+
+      function moveEditorPage(fromIdx, toIdx) {
+        if (fromIdx < 0 || toIdx < 0 || fromIdx >= editorPages.length || toIdx >= editorPages.length || fromIdx === toIdx) {
+          return;
+        }
+        pushEditorUndo();
+        const [moved] = editorPages.splice(fromIdx, 1);
+        editorPages.splice(toIdx, 0, moved);
+        editorLastSelectedIndex = toIdx;
+        invalidateEditorOutput();
+        renderEditorBoard();
+      }
+
+      function renderEditorBoard() {
+        const total = editorPages.length;
+        const selectedPages = editorPages.filter(p => p.selected);
+        const selCount = selectedPages.length;
+
+        if (els.pdfEditorBadge) els.pdfEditorBadge.textContent = `${total} หน้า`;
+        if (els.editorSelectionBadge) {
+          els.editorSelectionBadge.textContent = selCount > 0 ? `เลือก ${selCount} / ${total} หน้า` : `${total} หน้า`;
+        }
+        if (els.btnEditorImportCertify) {
+          els.btnEditorImportCertify.style.display = files.length > 0 ? 'inline-flex' : 'none';
+        }
+        if (els.editorDropzone) {
+          els.editorDropzone.classList.toggle('is-compact', total > 0);
+        }
+
+        if (els.btnEditorSelectAll) els.btnEditorSelectAll.disabled = total === 0;
+        if (els.btnEditorDeselectAll) els.btnEditorDeselectAll.disabled = selCount === 0;
+        if (els.btnEditorRotateSelected) els.btnEditorRotateSelected.disabled = selCount === 0;
+        if (els.btnEditorDeleteSelected) els.btnEditorDeleteSelected.disabled = selCount === 0;
+        if (els.btnEditorUndo) els.btnEditorUndo.disabled = editorUndoStack.length === 0;
+        if (els.btnEditorClearAll) els.btnEditorClearAll.disabled = total === 0;
+
+        if (els.btnEditorBuildAll) {
+          els.btnEditorBuildAll.disabled = total === 0;
+          els.btnEditorBuildAll.textContent = `📄 บันทึก / รวมทั้งหมด (${total} หน้า)`;
+        }
+        if (els.btnEditorBuildSelected) {
+          els.btnEditorBuildSelected.disabled = selCount === 0;
+          els.btnEditorBuildSelected.textContent = `✂️ แยกเฉพาะหน้าที่เลือก (${selCount} หน้า)`;
+        }
+
+        if (!els.editorPageGrid) return;
+        els.editorPageGrid.innerHTML = '';
+
+        editorPages.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = `editor-page-card ${item.selected ? 'is-selected' : ''}`;
+          card.draggable = true;
+
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            if (e.shiftKey && editorLastSelectedIndex >= 0 && editorLastSelectedIndex < editorPages.length) {
+              const start = Math.min(editorLastSelectedIndex, idx);
+              const end = Math.max(editorLastSelectedIndex, idx);
+              const targetVal = !item.selected;
+              for (let k = start; k <= end; k++) {
+                editorPages[k].selected = targetVal;
+              }
+            } else {
+              item.selected = !item.selected;
+            }
+            editorLastSelectedIndex = idx;
+            renderEditorBoard();
+          });
+
+          card.addEventListener('dragstart', (e) => {
+            editorDragIndex = idx;
+            card.classList.add('is-dragging');
+            if (e.dataTransfer) {
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', String(idx));
+            }
+          });
+          card.addEventListener('dragend', () => {
+            editorDragIndex = -1;
+            card.classList.remove('is-dragging');
+            els.editorPageGrid.querySelectorAll('.is-drag-over').forEach(el => el.classList.remove('is-drag-over'));
+          });
+          card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (editorDragIndex >= 0 && editorDragIndex !== idx) {
+              card.classList.add('is-drag-over');
+            }
+          });
+          card.addEventListener('dragleave', () => {
+            card.classList.remove('is-drag-over');
+          });
+          card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            card.classList.remove('is-drag-over');
+            if (editorDragIndex >= 0 && editorDragIndex !== idx) {
+              moveEditorPage(editorDragIndex, idx);
+            }
+          });
+
+          const thumbBox = document.createElement('div');
+          thumbBox.className = 'editor-thumb-box';
+
+          const orderBadge = document.createElement('span');
+          orderBadge.className = 'editor-order-badge';
+          orderBadge.textContent = `#${idx + 1}`;
+          thumbBox.appendChild(orderBadge);
+
+          const checkPill = document.createElement('span');
+          checkPill.className = 'editor-check-pill';
+          checkPill.textContent = '✓';
+          thumbBox.appendChild(checkPill);
+
+          const img = document.createElement('img');
+          img.alt = `หน้า ${idx + 1}`;
+          img.dataset.pageId = item.id;
+          const rot = ((item.rotationDelta % 360) + 360) % 360;
+          const scaleFactor = rot % 180 !== 0 ? 0.78 : 1;
+          img.style.transform = `rotate(${rot}deg) scale(${scaleFactor})`;
+          if (item.thumbDataUrl) {
+            img.src = item.thumbDataUrl;
+          } else {
+            img.style.display = 'none';
+            const loading = document.createElement('span');
+            loading.className = 'editor-thumb-loading';
+            loading.textContent = `หน้า ${item.pageNum}...`;
+            thumbBox.appendChild(loading);
+          }
+          thumbBox.appendChild(img);
+
+          const meta = document.createElement('div');
+          meta.className = 'editor-card-meta';
+          const nameEl = document.createElement('div');
+          nameEl.className = 'editor-card-name';
+          nameEl.title = item.sourceName;
+          nameEl.textContent = item.sourceName;
+
+          const subEl = document.createElement('div');
+          subEl.className = 'editor-card-sub';
+          const rotNote = rot > 0 ? ` · หมุน ${rot}°` : '';
+          subEl.textContent = `หน้าเดิมที่ ${item.pageNum}${rotNote}`;
+
+          meta.appendChild(nameEl);
+          meta.appendChild(subEl);
+
+          const actions = document.createElement('div');
+          actions.className = 'editor-card-actions';
+
+          const btnLeft = document.createElement('button');
+          btnLeft.type = 'button';
+          btnLeft.className = 'btn btn-xs';
+          btnLeft.title = 'ย้ายไปก่อนหน้า';
+          btnLeft.textContent = '◀';
+          btnLeft.disabled = idx === 0;
+          btnLeft.addEventListener('click', (e) => {
+            e.stopPropagation();
+            moveEditorPage(idx, idx - 1);
+          });
+
+          const btnRight = document.createElement('button');
+          btnRight.type = 'button';
+          btnRight.className = 'btn btn-xs';
+          btnRight.title = 'ย้ายไปถัดไป';
+          btnRight.textContent = '▶';
+          btnRight.disabled = idx === editorPages.length - 1;
+          btnRight.addEventListener('click', (e) => {
+            e.stopPropagation();
+            moveEditorPage(idx, idx + 1);
+          });
+
+          const btnRot = document.createElement('button');
+          btnRot.type = 'button';
+          btnRot.className = 'btn btn-xs';
+          btnRot.title = 'หมุน 90°';
+          btnRot.textContent = '↻';
+          btnRot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pushEditorUndo();
+            item.rotationDelta = (item.rotationDelta + 90) % 360;
+            invalidateEditorOutput();
+            renderEditorBoard();
+          });
+
+          const btnDel = document.createElement('button');
+          btnDel.type = 'button';
+          btnDel.className = 'btn btn-danger-ghost btn-xs';
+          btnDel.title = 'ลบหน้านี้ออก';
+          btnDel.textContent = '🗑️';
+          btnDel.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pushEditorUndo();
+            editorPages.splice(idx, 1);
+            invalidateEditorOutput();
+            renderEditorBoard();
+          });
+
+          actions.appendChild(btnLeft);
+          actions.appendChild(btnRight);
+          actions.appendChild(btnRot);
+          actions.appendChild(btnDel);
+
+          card.appendChild(thumbBox);
+          card.appendChild(meta);
+          card.appendChild(actions);
+          els.editorPageGrid.appendChild(card);
+        });
+      }
+
+      async function buildEditedPdf(targetPages, isExtractMode = false) {
+        if (!Array.isArray(targetPages) || targetPages.length === 0) return;
+
+        els.progressModal.classList.add('open');
+        els.progFill.style.width = '0%';
+        els.progPercent.textContent = '0%';
+        els.progDesc.textContent = 'กำลังเตรียมหน้าเอกสาร...';
+
+        try {
+          const quality = els.selectEditorQuality?.value || 'bank';
+          const pageSize = els.selectEditorPageSize?.value || 'original';
+          const QUALITY_MAP = {
+            original: { dpi: 210, maxPx: 2500, jpegQuality: 0.90 },
+            high:     { dpi: 180, maxPx: 2100, jpegQuality: 0.85 },
+            bank:     { dpi: 140, maxPx: 1650, jpegQuality: 0.76 },
+            small:    { dpi: 105, maxPx: 1250, jpegQuality: 0.62 }
+          };
+          const qCfg = QUALITY_MAP[quality] || QUALITY_MAP.bank;
+
+          const computeTargetBox = (visW, visH) => {
+            let targetW = visW;
+            let targetH = visH;
+            if (pageSize === 'a4-portrait') {
+              targetW = 595.28;
+              targetH = 841.89;
+            } else if (pageSize === 'a4') {
+              const isLand = visW > visH;
+              targetW = isLand ? 841.89 : 595.28;
+              targetH = isLand ? 595.28 : 841.89;
+            }
+            const fitScale = Math.min(targetW / Math.max(1, visW), targetH / Math.max(1, visH));
+            const drawW = visW * fitScale;
+            const drawH = visH * fitScale;
+            return {
+              targetW,
+              targetH,
+              drawX: (targetW - drawW) / 2,
+              drawY: (targetH - drawH) / 2,
+              drawW,
+              drawH
+            };
+          };
+
+          const usedCounts = new Map();
+          for (const item of targetPages) {
+            usedCounts.set(item.sourceId, (usedCounts.get(item.sourceId) || 0) + 1);
+          }
+          let estInputBytes = 0;
+          for (const [srcId, count] of usedCounts.entries()) {
+            const src = editorSources.get(srcId);
+            if (src) {
+              estInputBytes += Math.round((count / Math.max(1, src.pageCount)) * src.byteLength);
+            }
+          }
+
+          const { PDFDocument, degrees } = PDFLib;
+          const outPdf = await PDFDocument.create();
+          const srcPdfLibCache = new Map();
+
+          for (let i = 0; i < targetPages.length; i++) {
+            const item = targetPages[i];
+            const src = editorSources.get(item.sourceId);
+            if (!src) continue;
+
+            if (quality === 'original' && pageSize === 'original' && src.kind === 'pdf' && !src.isPasswordProtected) {
+              let srcDoc = srcPdfLibCache.get(src.id);
+              if (!srcDoc) {
+                srcDoc = await PDFDocument.load(src.rawBytes.slice());
+                srcPdfLibCache.set(src.id, srcDoc);
+              }
+              const [copiedPage] = await outPdf.copyPages(srcDoc, [item.pageNum - 1]);
+              if (item.rotationDelta !== 0) {
+                const origRot = ((copiedPage.getRotation().angle % 360) + 360) % 360;
+                copiedPage.setRotation(degrees((origRot + item.rotationDelta) % 360));
+              }
+              outPdf.addPage(copiedPage);
+            } else if (
+              quality === 'original' &&
+              pageSize === 'original' &&
+              src.kind === 'image' &&
+              item.rotationDelta === 0 &&
+              (src.mimeType === 'image/jpeg' || src.mimeType === 'image/png')
+            ) {
+              const embedded = src.mimeType === 'image/png'
+                ? await outPdf.embedPng(src.rawBytes)
+                : await outPdf.embedJpg(src.rawBytes);
+              const natW = src.imageElement.naturalWidth || src.imageElement.width;
+              const natH = src.imageElement.naturalHeight || src.imageElement.height;
+              const ptW = Math.min(842, natW * 0.75);
+              const ptH = ptW * (natH / Math.max(1, natW));
+              const outPage = outPdf.addPage([ptW, ptH]);
+              outPage.drawImage(embedded, { x: 0, y: 0, width: ptW, height: ptH });
+            } else if (src.kind === 'pdf') {
+              const page = await src.pdfDocProxy.getPage(item.pageNum);
+              const totalRot = (((page.rotate || 0) + item.rotationDelta) % 360 + 360) % 360;
+              const vp1 = page.getViewport({ scale: 1, rotation: totalRot });
+              const maxSidePt = Math.max(vp1.width, vp1.height);
+              const renderScale = Math.min(qCfg.dpi / 72, qCfg.maxPx / Math.max(1, maxSidePt));
+              const vp = page.getViewport({ scale: renderScale, rotation: totalRot });
+
+              const pageCanvas = document.createElement('canvas');
+              pageCanvas.width = Math.max(1, Math.round(vp.width));
+              pageCanvas.height = Math.max(1, Math.round(vp.height));
+              const ctx = pageCanvas.getContext('2d');
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+              await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+              const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', qCfg.jpegQuality));
+              const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
+              const embeddedJpg = await outPdf.embedJpg(jpegBytes);
+              pageCanvas.width = 0;
+              pageCanvas.height = 0;
+
+              const box = computeTargetBox(vp1.width, vp1.height);
+              const outPage = outPdf.addPage([box.targetW, box.targetH]);
+              outPage.drawImage(embeddedJpg, {
+                x: box.drawX,
+                y: box.drawY,
+                width: box.drawW,
+                height: box.drawH
+              });
+            } else if (src.kind === 'image' && src.imageElement) {
+              const img = src.imageElement;
+              const natW = img.naturalWidth || img.width;
+              const natH = img.naturalHeight || img.height;
+              const rot = ((item.rotationDelta % 360) + 360) % 360;
+              const swapped = rot % 180 !== 0;
+              const rotNatW = swapped ? natH : natW;
+              const rotNatH = swapped ? natW : natH;
+              const visPtW = Math.min(842, rotNatW * 0.75);
+              const visPtH = visPtW * (rotNatH / Math.max(1, rotNatW));
+
+              const scale = Math.min(1, qCfg.maxPx / Math.max(1, Math.max(natW, natH)));
+              const rawW = Math.max(1, Math.round(natW * scale));
+              const rawH = Math.max(1, Math.round(natH * scale));
+              const cw = swapped ? rawH : rawW;
+              const ch = swapped ? rawW : rawH;
+
+              const pageCanvas = document.createElement('canvas');
+              pageCanvas.width = cw;
+              pageCanvas.height = ch;
+              const ctx = pageCanvas.getContext('2d');
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, cw, ch);
+              ctx.save();
+              ctx.translate(cw / 2, ch / 2);
+              ctx.rotate((rot * Math.PI) / 180);
+              ctx.drawImage(img, -rawW / 2, -rawH / 2, rawW, rawH);
+              ctx.restore();
+
+              const jpegBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', qCfg.jpegQuality));
+              const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
+              const embeddedJpg = await outPdf.embedJpg(jpegBytes);
+              pageCanvas.width = 0;
+              pageCanvas.height = 0;
+
+              const box = computeTargetBox(visPtW, visPtH);
+              const outPage = outPdf.addPage([box.targetW, box.targetH]);
+              outPage.drawImage(embeddedJpg, {
+                x: box.drawX,
+                y: box.drawY,
+                width: box.drawW,
+                height: box.drawH
+              });
+            }
+
+            const pct = Math.round(((i + 1) / targetPages.length) * 100);
+            els.progDesc.textContent = `กำลังสร้างหน้า ${i + 1}/${targetPages.length}: ${src.name}`;
+            els.progFill.style.width = `${pct}%`;
+            els.progPercent.textContent = `${pct}%`;
+            await new Promise(r => setTimeout(r, 8));
+          }
+
+          const outBytes = await outPdf.save();
+          const dateTag = new Date().toISOString().slice(0, 10);
+          let rawName = sanitizeFileNamePart(els.inputEditorOutputName?.value || '');
+          if (!rawName) {
+            rawName = isExtractMode
+              ? `TrueCopy_แยกหน้า_${dateTag}`
+              : `TrueCopy_รวมเอกสาร_${dateTag}`;
+          }
+          if (!/\.pdf$/i.test(rawName)) {
+            rawName = `${rawName}.pdf`;
+          }
+          if (isExtractMode && els.inputEditorOutputName?.value.trim() && !/แยก/.test(rawName)) {
+            rawName = rawName.replace(/\.pdf$/i, '_แยกหน้า.pdf');
+          }
+
+          editorLastOutput = {
+            bytes: outBytes,
+            name: rawName,
+            pageCount: targetPages.length,
+            estInputBytes
+          };
+
+          if (els.editorResultTitle) els.editorResultTitle.textContent = rawName;
+          if (els.editorResultStats) {
+            const outSizeStr = formatByteSize(outBytes.byteLength);
+            let statsMsg = `${targetPages.length} หน้า · ขนาด ${outSizeStr}`;
+            if (estInputBytes > 0 && outBytes.byteLength < estInputBytes) {
+              const savedPct = Math.round(((estInputBytes - outBytes.byteLength) / estInputBytes) * 100);
+              statsMsg = `${targetPages.length} หน้า · ${formatByteSize(estInputBytes)} → ${outSizeStr} (ลดลง ${savedPct}%)`;
+            }
+            els.editorResultStats.textContent = statsMsg;
+          }
+          if (els.editorResultCard) els.editorResultCard.style.display = 'block';
+          showToast(`สร้างไฟล์ ${rawName} เรียบร้อย 🎉`, 3200);
+        } catch (err) {
+          console.error(err);
+          showToast(`เกิดข้อผิดพลาดระหว่างสร้าง PDF: ${err.message || err}`);
+        } finally {
+          els.progressModal.classList.remove('open');
+        }
+      }
+
+      // =========================================================================
       // 11. UI Sync & Event Wiring
       // =========================================================================
       function syncControlsFromSettings() {
@@ -6037,7 +7290,9 @@
         }
 
         // Upload triggers
-        els.btnAddFilesHeader.addEventListener('click', () => triggerProtectedFilePicker(els.fileInput));
+        els.btnAddFilesHeader.addEventListener('click', () => {
+          triggerProtectedFilePicker(currentAppMode === 'pdf-editor' ? els.editorFileInput : els.fileInput);
+        });
         els.btnUploadEmpty.addEventListener('click', () => triggerProtectedFilePicker(els.fileInput));
         els.dropzone.addEventListener('click', () => triggerProtectedFilePicker(els.fileInput));
         els.dropzone.addEventListener('keydown', (e) => {
@@ -6071,10 +7326,16 @@
         });
         window.addEventListener('dragover', (e) => e.preventDefault());
         window.addEventListener('drop', (e) => {
-          if (e.target !== els.dropzone && !els.dropzone.contains(e.target)) {
+          const inCertDrop = e.target === els.dropzone || els.dropzone.contains(e.target);
+          const inEdDrop = els.editorDropzone && (e.target === els.editorDropzone || els.editorDropzone.contains(e.target));
+          if (!inCertDrop && !inEdDrop) {
             e.preventDefault();
             if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-              handleIncomingFiles(e.dataTransfer.files);
+              if (currentAppMode === 'pdf-editor') {
+                addSourceFilesToEditor(e.dataTransfer.files);
+              } else {
+                handleIncomingFiles(e.dataTransfer.files);
+              }
             }
           }
         });
@@ -7070,6 +8331,172 @@
           }
         });
 
+        // Mode Switcher & PDF Editor events
+        els.btnModeCertify.addEventListener('click', () => setAppMode('certify'));
+        els.btnModePdfEditor.addEventListener('click', () => setAppMode('pdf-editor'));
+
+        els.btnEditorAddFiles.addEventListener('click', () => triggerProtectedFilePicker(els.editorFileInput));
+        els.editorDropzone.addEventListener('click', () => triggerProtectedFilePicker(els.editorFileInput));
+        els.editorDropzone.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            triggerProtectedFilePicker(els.editorFileInput);
+          }
+        });
+        els.editorFileInput.addEventListener('change', (e) => {
+          setTimeout(() => { filePickerActive = false; }, 600);
+          addSourceFilesToEditor(e.target.files);
+          e.target.value = '';
+        });
+
+        ['dragenter', 'dragover'].forEach((ev) => {
+          els.editorDropzone.addEventListener(ev, (e) => {
+            e.preventDefault();
+            els.editorDropzone.classList.add('dragover');
+          });
+        });
+        ['dragleave', 'drop'].forEach((ev) => {
+          els.editorDropzone.addEventListener(ev, (e) => {
+            e.preventDefault();
+            els.editorDropzone.classList.remove('dragover');
+          });
+        });
+        els.editorDropzone.addEventListener('drop', (e) => {
+          addSourceFilesToEditor(e.dataTransfer.files);
+        });
+
+        els.btnEditorImportCertify.addEventListener('click', importFilesFromCertifyToEditor);
+
+        els.btnEditorSelectAll.addEventListener('click', () => {
+          editorPages.forEach((p) => { p.selected = true; });
+          renderEditorBoard();
+        });
+        els.btnEditorDeselectAll.addEventListener('click', () => {
+          editorPages.forEach((p) => { p.selected = false; });
+          editorLastSelectedIndex = -1;
+          renderEditorBoard();
+        });
+        els.btnEditorRotateSelected.addEventListener('click', () => {
+          const sel = editorPages.filter(p => p.selected);
+          if (sel.length === 0) return;
+          pushEditorUndo();
+          sel.forEach((p) => { p.rotationDelta = (p.rotationDelta + 90) % 360; });
+          invalidateEditorOutput();
+          renderEditorBoard();
+          showToast(`หมุน ${sel.length} หน้าเรียบร้อย`);
+        });
+        els.btnEditorDeleteSelected.addEventListener('click', () => {
+          const selCount = editorPages.filter(p => p.selected).length;
+          if (selCount === 0) return;
+          pushEditorUndo();
+          editorPages = editorPages.filter(p => !p.selected);
+          editorLastSelectedIndex = -1;
+          invalidateEditorOutput();
+          renderEditorBoard();
+          showToast(`ลบ ${selCount} หน้าแล้ว (กด "↩ ย้อนกลับ" ได้)`);
+        });
+        els.btnEditorUndo.addEventListener('click', () => {
+          if (editorUndoStack.length === 0) return;
+          editorPages = editorUndoStack.pop();
+          editorLastSelectedIndex = -1;
+          invalidateEditorOutput();
+          renderEditorBoard();
+          showToast('ย้อนกลับการแก้ไขล่าสุดแล้ว');
+        });
+        els.btnEditorClearAll.addEventListener('click', () => {
+          if (editorPages.length === 0) return;
+          if (confirm('ต้องการล้างหน้าเอกสารทั้งหมดบนกระดานแก้ไข PDF หรือไม่?')) {
+            clearEditorBoardState(false);
+            showToast('ล้างกระดานแก้ไข PDF แล้ว');
+          }
+        });
+
+        const applyEditorRangeSelection = () => {
+          if (editorPages.length === 0) {
+            showToast('กรุณาเพิ่มไฟล์เข้ากระดานก่อนเลือกหน้า');
+            return;
+          }
+          const picked = parsePageRangeString(els.inputEditorRange.value, editorPages.length);
+          if (picked.size === 0) {
+            showToast(`รูปแบบช่วงหน้าไม่ถูกต้อง กรุณากรอกเลขหน้า 1–${editorPages.length} เช่น 1, 3-5`);
+            return;
+          }
+          editorPages.forEach((p, idx) => {
+            p.selected = picked.has(idx + 1);
+          });
+          editorLastSelectedIndex = -1;
+          renderEditorBoard();
+          showToast(`เลือกแล้ว ${picked.size} หน้า`);
+        };
+        els.btnEditorApplyRange.addEventListener('click', applyEditorRangeSelection);
+        els.inputEditorRange.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            applyEditorRangeSelection();
+          }
+        });
+
+        els.selectEditorQuality.addEventListener('change', () => {
+          invalidateEditorOutput();
+          updateEditorSizeHint();
+        });
+        els.selectEditorPageSize.addEventListener('change', () => {
+          invalidateEditorOutput();
+          updateEditorSizeHint();
+        });
+
+        els.btnEditorBuildAll.addEventListener('click', () => {
+          buildEditedPdf(editorPages, false);
+        });
+        els.btnEditorBuildSelected.addEventListener('click', () => {
+          const sel = editorPages.filter(p => p.selected);
+          if (sel.length === 0) return;
+          buildEditedPdf(sel, true);
+        });
+
+        els.btnEditorDownload.addEventListener('click', () => {
+          if (!editorLastOutput) return;
+          const blob = new Blob([editorLastOutput.bytes], { type: 'application/pdf' });
+          triggerBlobDownload(blob, editorLastOutput.name);
+        });
+        els.btnEditorShare.addEventListener('click', async () => {
+          if (!editorLastOutput) return;
+          const fileObj = new File([editorLastOutput.bytes], editorLastOutput.name, { type: 'application/pdf' });
+          const canNativeShare =
+            typeof navigator.share === 'function' &&
+            typeof navigator.canShare === 'function' &&
+            navigator.canShare({ files: [fileObj] });
+          if (canNativeShare) {
+            filePickerActive = true;
+            try {
+              await navigator.share({
+                files: [fileObj],
+                title: editorLastOutput.name,
+                text: `ไฟล์ PDF: ${editorLastOutput.name}`
+              });
+              return;
+            } catch (err) {
+              if (err && err.name === 'AbortError') return;
+              console.warn('Editor Web Share failed, falling back to download:', err);
+            } finally {
+              setTimeout(() => { filePickerActive = false; }, 1200);
+            }
+          }
+          const blob = new Blob([editorLastOutput.bytes], { type: 'application/pdf' });
+          triggerBlobDownload(blob, editorLastOutput.name);
+          const subject = encodeURIComponent(editorLastOutput.name);
+          const body = encodeURIComponent(`แนบไฟล์ PDF: ${editorLastOutput.name}`);
+          els.btnOpenEmailClient.href = `mailto:?subject=${subject}&body=${body}`;
+          els.shareFallbackModal.classList.add('open');
+        });
+        els.btnEditorSendToCertify.addEventListener('click', async () => {
+          if (!editorLastOutput) return;
+          const fileObj = new File([editorLastOutput.bytes], editorLastOutput.name, { type: 'application/pdf' });
+          await handleIncomingFiles([fileObj]);
+          setAppMode('certify');
+          showToast('ส่งไฟล์ไปยังหน้ารับรองสำเนาเรียบร้อย 🔏');
+        });
+
         // Mobile tabs
         els.tabMobileFiles.addEventListener('click', () => openMobileSheet('left'));
         els.tabMobilePreview.addEventListener('click', () => closeMobileSheets());
@@ -7102,6 +8529,8 @@
         initPwaSupport();
         syncSecurityUi();
         syncAuthUi();
+        updateEditorSizeHint();
+        renderEditorBoard();
 
         if (location.protocol !== 'file:') {
           // Owner Sign-In & PIN Gate: keep workspace hidden until verified
